@@ -1,0 +1,57 @@
+# SERVER \uC124\uC815
+server:
+  port: 9091
+  servlet:
+    context-path: /api
+  error:
+    path: /error
+    whitelabel:
+      enabled: false
+  shutdown: graceful
+  tomcat:
+    accesslog:
+      enabled: true
+      max-days: 14
+      pattern: '%{yyyy-MM-dd HH:mm:ss}t\t%s\t%r\t%{User-Agent}i\t%{Referer}i\t%a\t%b'
+      rotate: true
+    basedir: .
+
+# SPRING \uC124\uC815
+spring:
+  web:
+    locale: ko_KR #spring.mvc.locale is deprecated
+    resources:
+      add-mappings: false
+  messages:
+    basename: message/messages
+  mvc:
+    throw-exception-if-no-handler-found: true
+  main:
+    allow-bean-definition-overriding: true
+  profiles:
+    active: local
+    group:
+      local: profiles-local
+           , logging-type-console
+           , logging-level-local
+      dev: profiles-dev
+         , logging-type-file
+         , logging-level-dev
+
+---
+# LOCAL \uC124\uC815
+spring.config.activate.on-profile: "profiles-local"
+spring:
+  config:
+    import:
+      classpath:config/datasource/datasource-local.yml,
+      classpath:config/environment/environment-local.yml
+
+---
+# DEV \uC124\uC815
+spring.config.activate.on-profile: "profiles-dev"
+spring:
+  config:
+    import:
+      classpath:config/datasource/datasource-dev.yml,
+      classpath:config/environment/environment-local.yml

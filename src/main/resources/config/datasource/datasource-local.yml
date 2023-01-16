@@ -1,0 +1,23 @@
+# Main(PostgreSQL) Datasource 및 JPA 설정
+main:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    jdbc-url: jdbc:postgresql://127.0.0.1:5432/sample
+    username: sample
+    # password: password1!
+    password: ENC(bB5wTjtunSQ/8nBal2ZzFL6R1osXTkozxSsgxcvNS5uE6RlLtnn30dRILoUUWoM5)
+    poolName: postgresDbConnectionPool
+    maximum-pool-size: 5
+    minimum-idle: 5
+    idle-timeout: 10000
+    max-life-time: 580000
+    validation-query: SELECT 1
+    connection-test-query: SELECT 1
+  jpa:
+    generate-ddl: false # 데이터베이스 테이블을 자동으로 생성
+    show-sql: false # 콘솔에 실행되는 테이블 생성 DDL을 출력
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate-show-sql: true
+    hibernate-format-sql: true
+    hibernate-highlight-sql: true
+    hibernate-use-sql-comments: true

@@ -35,3 +35,14 @@ out/
 
 ### VS Code ###
 .vscode/
+
+### Log ##
+/logs/
+
+### docker-compose ##
+/src/main/resources/docker/compose/config/
+/src/main/resources/docker/compose/data/
+/src/main/resources/docker/compose/settings/
+
+### QueryDSL Generated File ###
+/src/main/generated/

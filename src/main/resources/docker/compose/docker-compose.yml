@@ -1,0 +1,14 @@
+version: "3"
+services:
+  # PostgreSQL 설정
+  postgresql:
+    image: postgres:15.0
+    restart: always
+    container_name: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password1!
+    volumes:
+      - ./data/postgres/:/var/lib/postgresql/data
