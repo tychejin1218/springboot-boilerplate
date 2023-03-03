@@ -14,4 +14,5 @@ public class MainJpaProperties {
   private String hibernateFormatSql;
   private String hibernateHighlightSql;
   private String hibernateUseSqlComments;
+  private String hibernatePhysicalNamingStrategy;
 }

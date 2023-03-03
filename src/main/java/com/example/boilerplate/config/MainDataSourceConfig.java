@@ -16,7 +16,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -29,7 +28,6 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EnableJpaRepositories(
     basePackages = Constants.BASE_PACKAGE + ".*.domain.repository",
-    //basePackages = "com.example.boilerplate.sample.domain.repository",
     entityManagerFactoryRef = "mainEntityManagerFactory",
     transactionManagerRef = "mainPlatformTransactionManager"
 )
@@ -55,7 +53,6 @@ public class MainDataSourceConfig implements DataSourceConfig {
         = new LocalContainerEntityManagerFactoryBean();
     entityManagerFactory.setDataSource(dataSource);
     entityManagerFactory.setPackagesToScan(Constants.BASE_PACKAGE + ".*.domain.entity");
-//    entityManagerFactory.setPackagesToScan("com.example.boilerplate.sample.domain.entity");
     entityManagerFactory.setJpaVendorAdapter(this.jpaVendorAdapter());
     entityManagerFactory.setJpaProperties(this.jpaProperties());
     entityManagerFactory.setPersistenceUnitName("mainEntityManager");
@@ -80,6 +77,9 @@ public class MainDataSourceConfig implements DataSourceConfig {
         "hibernate.highlight_sql", mainJpaProperties.getHibernateUseSqlComments());
     jpaProperties.setProperty(
         "hibernate.use_sql_comments", mainJpaProperties.getHibernateUseSqlComments());
+    jpaProperties.setProperty(
+        "hibernate.physical_naming_strategy",
+        mainJpaProperties.getHibernatePhysicalNamingStrategy());
     return jpaProperties;
   }
 

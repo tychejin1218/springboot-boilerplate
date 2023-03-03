@@ -21,3 +21,4 @@ main:
     hibernate-format-sql: true
     hibernate-highlight-sql: true
     hibernate-use-sql-comments: true
+    hibernate-physical-naming-strategy: com.example.boilerplate.config.MainJpaNamingStrategy
