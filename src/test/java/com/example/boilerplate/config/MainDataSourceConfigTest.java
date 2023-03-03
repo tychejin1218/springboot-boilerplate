@@ -5,7 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import com.example.boilerplate.common.constants.Constants;
 import com.example.boilerplate.properties.MainDataSourceProperties;
 import com.zaxxer.hikari.HikariDataSource;
-import jakarta.annotation.Resource;
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;

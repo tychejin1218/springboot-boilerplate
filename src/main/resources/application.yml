@@ -1,4 +1,4 @@
-# SERVER \uC124\uC815
+# SERVER 설정
 server:
   port: 9091
   servlet:
@@ -16,7 +16,7 @@ server:
       rotate: true
     basedir: .
 
-# SPRING \uC124\uC815
+# SPRING 설정
 spring:
   web:
     locale: ko_KR #spring.mvc.locale is deprecated
@@ -39,7 +39,7 @@ spring:
          , logging-level-dev
 
 ---
-# LOCAL \uC124\uC815
+# LOCAL 설정
 spring.config.activate.on-profile: "profiles-local"
 spring:
   config:
@@ -48,7 +48,7 @@ spring:
       classpath:config/environment/environment-local.yml
 
 ---
-# DEV \uC124\uC815
+# DEV 설정
 spring.config.activate.on-profile: "profiles-dev"
 spring:
   config:

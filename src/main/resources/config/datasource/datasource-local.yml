@@ -5,7 +5,7 @@ main:
     jdbc-url: jdbc:postgresql://127.0.0.1:5432/sample
     username: sample
     # password: password1!
-    password: ENC(bB5wTjtunSQ/8nBal2ZzFL6R1osXTkozxSsgxcvNS5uE6RlLtnn30dRILoUUWoM5)
+    password: ENC(Mc7GDTyzk57XXU7hf+OTYl8n20zzViY8BIclFDIUN8vmuBGVNcRFVNOXlO3MONlH)
     poolName: postgresDbConnectionPool
     maximum-pool-size: 5
     minimum-idle: 5

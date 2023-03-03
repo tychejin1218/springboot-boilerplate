@@ -1,8 +1,8 @@
 INSERT
   INTO MEMBER (NAME, EMAIL)
-VALUES ('test01', 'test01@daekyo.com'),
-       ('test02', 'test02@google.co.kr'),
-       ('test03', 'test03@daekyo.com');
+VALUES ('admin01', 'admin01@naver.com'),
+       ('test02', 'test02@gmail.com'),
+       ('test03', 'test03@naver.com');
 
 INSERT
   INTO TODO (MEMBER_ID, TITLE, DESCRIPTION, COMPLETED)

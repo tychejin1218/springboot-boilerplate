@@ -28,7 +28,8 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 @EnableTransactionManagement
 @EnableJpaRepositories(
-    basePackages = Constants.BASE_PACKAGE + "*.domain.repository",
+    basePackages = Constants.BASE_PACKAGE + ".*.domain.repository",
+    //basePackages = "com.example.boilerplate.sample.domain.repository",
     entityManagerFactoryRef = "mainEntityManagerFactory",
     transactionManagerRef = "mainPlatformTransactionManager"
 )
@@ -53,7 +54,8 @@ public class MainDataSourceConfig implements DataSourceConfig {
     LocalContainerEntityManagerFactoryBean entityManagerFactory
         = new LocalContainerEntityManagerFactoryBean();
     entityManagerFactory.setDataSource(dataSource);
-    entityManagerFactory.setPackagesToScan(Constants.BASE_PACKAGE + "*.domain.entity");
+    entityManagerFactory.setPackagesToScan(Constants.BASE_PACKAGE + ".*.domain.entity");
+//    entityManagerFactory.setPackagesToScan("com.example.boilerplate.sample.domain.entity");
     entityManagerFactory.setJpaVendorAdapter(this.jpaVendorAdapter());
     entityManagerFactory.setJpaProperties(this.jpaProperties());
     entityManagerFactory.setPersistenceUnitName("mainEntityManager");
