@@ -37,4 +37,6 @@ public interface MemberRepository extends
       String email,
       Pageable pageable
   );
+
+
 }
