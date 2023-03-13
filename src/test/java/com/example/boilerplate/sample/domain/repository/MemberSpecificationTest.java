@@ -89,51 +89,6 @@ class MemberSpecificationTest {
   }
 
   /**
-   * Member 목록 설정
-   */
-  @Disabled
-  void setUpMembers() {
-
-    Long memberId;
-    String name;
-    String email;
-
-    String title;
-    String description;
-    Boolean completed;
-
-    for (int a = 1; a <= 10; a++) {
-
-      if(a % 3 == 0){
-        name = "admin" + a;
-      } else {
-        name = "test" + a;
-      }
-
-      if (a % 2 == 0) {
-        email = name + "@naver.com";
-      } else {
-        email = name + "@gmail.com";
-      }
-      memberId = insertMember(name, email);
-
-      for (int b = 1; b <= 5; b++) {
-        title = "Title Test" + b;
-        description = "Description Test" + b;
-        if (b % 2 == 0) {
-          completed = true;
-        } else {
-          completed = false;
-        }
-        insertTodo(memberId, title, description, completed);
-      }
-    }
-
-    entityManager.flush();
-    entityManager.clear();
-  }
-
-  /**
    * Member 저장
    */
   @Disabled
@@ -167,5 +122,45 @@ class MemberSpecificationTest {
             .completed(completed)
             .build()
     ).getId();
+  }
+
+  /**
+   * Member 목록 설정
+   */
+  @Disabled
+  void setUpMembers() {
+
+    Long memberId;
+    String name;
+    String email;
+
+    String title;
+    String description;
+    Boolean completed;
+
+    for (int a = 1; a <= 100; a++) {
+
+      name = "test" + String.format("%02d", a);
+      if (a % 2 == 0) {
+        email = name + "@naver.com";
+      } else {
+        email = name + "@gmail.com";
+      }
+      memberId = insertMember(name, email);
+
+      for (int b = 1; b <= 5; b++) {
+        title = "Title Test" + String.format("%02d", b);
+        description = "Description Test" + String.format("%02d", b);
+        if (b % 2 == 0) {
+          completed = true;
+        } else {
+          completed = false;
+        }
+        insertTodo(memberId, title, description, completed);
+      }
+    }
+
+    entityManager.flush();
+    entityManager.clear();
   }
 }

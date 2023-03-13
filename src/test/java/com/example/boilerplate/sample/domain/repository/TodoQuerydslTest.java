@@ -81,45 +81,6 @@ class TodoQuerydslTest {
   }
 
   /**
-   * To-Do 목록을 설정
-   */
-  @Disabled
-  void setUpTodos() {
-
-    Long memberId01 = insertMember("test01", "test01@naver.com");
-    Long memberId02 = insertMember("test02", "test02@gmail.com");
-    Long memberId03 = insertMember("test03", "test03@naver.com");
-
-    Long memberId;
-    String title;
-    String description;
-    Boolean completed;
-
-    for (int a = 1; a <= 100; a++) {
-
-      if (a % 3 == 0) {
-        memberId = memberId03;
-      } else if (a % 2 == 0) {
-        memberId = memberId02;
-      } else {
-        memberId = memberId01;
-      }
-
-      title = "Title Test" + a;
-      description = "Description Test" + a;
-      if (a % 2 == 0) {
-        completed = true;
-      } else {
-        completed = false;
-      }
-      insertTodo(memberId, title, description, completed);
-    }
-
-    entityManager.flush();
-    entityManager.clear();
-  }
-
-  /**
    * Member를 저장
    */
   @Disabled
@@ -153,5 +114,44 @@ class TodoQuerydslTest {
             .completed(completed)
             .build()
     );
+  }
+
+  /**
+   * To-Do 목록을 설정
+   */
+  @Disabled
+  void setUpTodos() {
+
+    Long memberId01 = insertMember("test01", "test01@naver.com");
+    Long memberId02 = insertMember("test02", "test02@gmail.com");
+    Long memberId03 = insertMember("test03", "test03@naver.com");
+
+    Long memberId;
+    String title;
+    String description;
+    Boolean completed;
+
+    for (int a = 1; a <= 100; a++) {
+
+      if (a % 3 == 0) {
+        memberId = memberId03;
+      } else if (a % 2 == 0) {
+        memberId = memberId02;
+      } else {
+        memberId = memberId01;
+      }
+
+      title = "Title Test" + String.format("%02d", a);
+      description = "Description Test" + String.format("%02d", a);
+      if (a % 2 == 0) {
+        completed = true;
+      } else {
+        completed = false;
+      }
+      insertTodo(memberId, title, description, completed);
+    }
+
+    entityManager.flush();
+    entityManager.clear();
   }
 }

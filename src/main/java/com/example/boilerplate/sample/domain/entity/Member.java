@@ -2,6 +2,7 @@ package com.example.boilerplate.sample.domain.entity;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,6 +15,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.DynamicUpdate;
 
 @Getter
 @Setter
@@ -21,6 +23,7 @@ import lombok.ToString;
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
+@DynamicUpdate
 @Entity
 @Table(name = "member")
 public class Member {
@@ -28,6 +31,8 @@ public class Member {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
+
+  private String password;
 
   private String name;
 
