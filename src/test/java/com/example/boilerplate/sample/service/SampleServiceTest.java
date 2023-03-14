@@ -2,6 +2,7 @@ package com.example.boilerplate.sample.service;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -222,43 +223,33 @@ class SampleServiceTest {
   }
 
   @Transactional
-  @DisplayName("updateMember_Member 수정")
+  @DisplayName("updateTodoDynamic_To-Do 수정")
   @Test
-  void testUpdateMember() {
+  void testUpdateTodoDynamic() {
 
     // Given
-    Member member = memberRepository.save(
-        Member.builder()
-            //.password("1234")
-            .name("test01")
-            .email("test01@gmail.com")
-            .build());
-    memberRepository.save(member);
-
-    entityManager.flush();
-    entityManager.clear();
-
-    MemberDto.Request memberRequest =
-        MemberDto.Request.builder()
-            .id(member.getId())
-            .name("test02")
-            .email("test02@naver.com")
-            .build();
+    Todo todo = getTodoAfterInsertTodo();
+    Long todoId = todo.getId();
+    TodoDto.Response todoDetail01 = sampleService.getTodo(todoId);
 
     // When
-    MemberDto.Response memberResponse = sampleService.updateMemberWithDynamicUpdate(memberRequest);
-    log.debug("memberResponse:[{}]", memberResponse);
-
+    sampleService.updateTodoCompleted(
+        TodoDto.Request.builder()
+            .id(todoId)
+            .completed(true)
+            .build());
     entityManager.flush();
     entityManager.clear();
+    TodoDto.Response todoDetail02 = sampleService.getTodo(todoId);
 
     // Then
-    MemberDto.Response memberDetail = sampleService.getMember(member.getId());
-    log.debug("memberDetail:[{}]", memberDetail);
+    log.debug("todoDetail01:[{}]", todoDetail01);
+    log.debug("todoDetail02:[{}]", todoDetail02);
     assertAll(
-        () -> assertEquals(memberRequest.getId(), memberDetail.getId()),
-        () -> assertEquals(member.getName(), memberDetail.getName()),
-        () -> assertEquals(memberRequest.getEmail(), memberDetail.getEmail())
+        () -> assertEquals(todoDetail01.getId(), todoDetail02.getId()),
+        () -> assertEquals(todoDetail01.getTitle(), todoDetail02.getTitle()),
+        () -> assertEquals(todoDetail01.getDescription(), todoDetail02.getDescription()),
+        () -> assertNotEquals(todoDetail01.getCompleted(), todoDetail02.getCompleted())
     );
   }
 

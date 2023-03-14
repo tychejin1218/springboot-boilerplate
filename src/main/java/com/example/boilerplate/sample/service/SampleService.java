@@ -4,9 +4,11 @@ import com.example.boilerplate.common.exception.ApiException;
 import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.sample.domain.entity.Member;
 import com.example.boilerplate.sample.domain.entity.Todo;
+import com.example.boilerplate.sample.domain.entity.TodoDynamic;
 import com.example.boilerplate.sample.domain.mapstruct.MemberMapStruct;
 import com.example.boilerplate.sample.domain.mapstruct.TodoMapStruct;
 import com.example.boilerplate.sample.domain.repository.MemberRepository;
+import com.example.boilerplate.sample.domain.repository.TodoDynamicRepository;
 import com.example.boilerplate.sample.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
@@ -23,7 +25,9 @@ public class SampleService {
   private final MemberRepository memberRepository;
   private final MemberMapStruct memberMapStruct;
   private final TodoRepository todoRepository;
+  private final TodoDynamicRepository todoDynamicRepository;
   private final TodoMapStruct todoMapStruct;
+
 
   /**
    * Member 목록 조회
@@ -92,14 +96,10 @@ public class SampleService {
   }
 
   /**
-   * Member 수정 - @DynamicUpdate
+   * To-Do 수정 - @DynamicUpdate - completed만 수정
    */
-  public MemberDto.Response updateMemberWithDynamicUpdate(MemberDto.Request memberRequest) {
-    return memberMapStruct.toDto(
-        memberRepository.save(
-            Member.builder()
-                .id(memberRequest.getId())
-                .email(memberRequest.getEmail())
-                .build()));
+  public void updateTodoCompleted(TodoDto.Request todoRequest) {
+    TodoDynamic todoDynamic = todoDynamicRepository.findById(todoRequest.getId()).get();
+    todoDynamic.updateCompleted(todoRequest.getCompleted());
   }
 }

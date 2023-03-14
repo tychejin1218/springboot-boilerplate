@@ -1,30 +1,29 @@
 /*
-CREATE DATABASE sample;
+create database sample;
 
-CREATE USER sample PASSWORD 'password1!' SUPERUSER CREATEDB;
+create user sample password 'password1!' superuser createdb;
 */
 
-DROP TABLE IF EXISTS TODO;
+drop table if exists sample.todo;
 
-DROP TABLE IF EXISTS MEMBER;
+drop table if exists sample.member;
 
-CREATE TABLE MEMBER (
-    ID INT GENERATED ALWAYS AS IDENTITY,
-    PASSWORD VARCHAR(20) NOT NULL,
-    NAME VARCHAR(100),
-    EMAIL VARCHAR(100),
-    PRIMARY KEY(ID)
+create table sample.member (
+    id int generated always as identity,
+    name varchar(100),
+    email varchar(100),
+    primary key(id)
 );
 
-CREATE TABLE TODO (
-    ID INT GENERATED ALWAYS AS IDENTITY,
-    MEMBER_ID INT NOT NULL,
-    TITLE VARCHAR(255),
-    DESCRIPTION VARCHAR(255),
-    COMPLETED BOOLEAN,
-    PRIMARY KEY(ID),
-    CONSTRAINT FK_TODO
-        FOREIGN KEY(MEMBER_ID)
-            REFERENCES MEMBER(ID)
-            ON DELETE SET NULL
+create table sample.todo (
+    id int generated always as identity,
+    member_id int not null,
+    title varchar(255),
+    description varchar(255),
+    completed boolean,
+    primary key(id),
+    constraint fk_todo
+        foreign key(member_id)
+            references sample.member(id)
+            on delete set null
 );

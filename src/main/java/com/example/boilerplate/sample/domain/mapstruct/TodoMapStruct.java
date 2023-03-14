@@ -1,6 +1,7 @@
 package com.example.boilerplate.sample.domain.mapstruct;
 
 import com.example.boilerplate.sample.domain.entity.Todo;
+import com.example.boilerplate.sample.domain.entity.TodoDynamic;
 import com.example.boilerplate.sample.dto.TodoDto;
 import com.example.boilerplate.sample.dto.TodoDto.Response;
 import java.util.List;
