@@ -37,4 +37,13 @@ public interface MemberRepository extends
       String email,
       Pageable pageable
   );
+
+  /**
+   * Query Method을 사용할 때 페이징(Pageable)을 추가하여 Member 목록 조회
+   */
+  Page<Member> findAllByNameContainsAndEmailContains(
+      String name,
+      String email,
+      Pageable pageable
+  );
 }

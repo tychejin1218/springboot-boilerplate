@@ -1,5 +1,6 @@
 package com.example.boilerplate.sample.dto;
 
+import com.example.boilerplate.common.dto.PageDto;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -8,19 +9,19 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 public class MemberDto {
 
   @Getter
   @Setter
-  @Builder
+  @SuperBuilder
   @AllArgsConstructor
   @NoArgsConstructor
-  @ToString
-  public static class Request {
+  @ToString(callSuper = true)
+  public static class Request extends PageDto {
 
     private Long id;
-    private String password;
     private String name;
     private String email;
   }

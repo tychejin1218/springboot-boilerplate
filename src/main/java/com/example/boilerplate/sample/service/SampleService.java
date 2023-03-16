@@ -12,9 +12,15 @@ import com.example.boilerplate.sample.domain.repository.TodoDynamicRepository;
 import com.example.boilerplate.sample.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
+import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -28,21 +34,16 @@ public class SampleService {
   private final TodoDynamicRepository todoDynamicRepository;
   private final TodoMapStruct todoMapStruct;
 
-
   /**
    * Member 목록 조회
    */
-  public List<MemberDto.Response> getMembers(MemberDto.Request memberRequest) {
-
-    log.info("memberRequest:[{}]", memberRequest);
-
-    List<Member> members =
-        memberRepository.findAllByNameContainingIgnoreCaseAndEmailContainingIgnoreCaseOrderByIdDesc(
+  public Page<MemberDto.Response> getMembers(MemberDto.Request memberRequest, Pageable pageable) {
+    Page<Member> memberPage =
+        memberRepository.findAllByNameContainsAndEmailContains(
             memberRequest.getName(),
-            memberRequest.getEmail()
-        );
-
-    return memberMapStruct.membersToMemberResponses(members);
+            memberRequest.getEmail(),
+            pageable);
+    return memberPage.map(member -> memberMapStruct.toDto(member));
   }
 
   /**

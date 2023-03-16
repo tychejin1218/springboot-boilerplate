@@ -14,6 +14,7 @@ import com.example.boilerplate.sample.domain.mapstruct.MemberMapStruct;
 import com.example.boilerplate.sample.domain.repository.MemberRepository;
 import com.example.boilerplate.sample.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
+import com.example.boilerplate.sample.dto.MemberDto.Response;
 import com.example.boilerplate.sample.dto.TodoDto;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -22,7 +23,13 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -58,9 +65,10 @@ class SampleServiceTest {
         .name("test")
         .email("gmail.com")
         .build();
+    PageRequest pageRequest = PageRequest.of(0, 5, Sort.by(Order.desc("id")));
 
     // When
-    List<MemberDto.Response> memberResponses = sampleService.getMembers(memberRequest);
+    Page<MemberDto.Response> memberResponses = sampleService.getMembers(memberRequest, pageRequest);
 
     // Then
     log.debug("memberResponses:[{}]", memberResponses);
