@@ -36,12 +36,7 @@ public class SampleController {
         .status(HttpStatus.OK)
         .body(BaseResponse.builder()
             .statusCode(ApiStatus.OK.getCode())
-            .data(sampleService.getMembers(
-                memberRequest,
-                PageRequest.of(
-                    memberRequest.getPage(),
-                    memberRequest.getSize(),
-                    Sort.by(Order.desc(memberRequest.getSort())))))
+            .data(sampleService.getMembers(memberRequest))
             .build());
   }
 }

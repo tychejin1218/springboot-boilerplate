@@ -16,6 +16,7 @@ import com.example.boilerplate.sample.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.MemberDto.Response;
 import com.example.boilerplate.sample.dto.TodoDto;
+import java.util.Arrays;
 import java.util.List;
 import javax.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
@@ -61,14 +62,17 @@ class SampleServiceTest {
 
     // Given
     setUpMembers();
+    List<String> sorts = Arrays.asList("email,desc", "name,asc");
     MemberDto.Request memberRequest = MemberDto.Request.builder()
         .name("test")
         .email("gmail.com")
+        .page(1)
+        .size(10)
+        .sorts(sorts)
         .build();
-    PageRequest pageRequest = PageRequest.of(0, 5, Sort.by(Order.desc("id")));
 
     // When
-    Page<MemberDto.Response> memberResponses = sampleService.getMembers(memberRequest, pageRequest);
+    Page<MemberDto.Response> memberResponses = sampleService.getMembers(memberRequest);
 
     // Then
     log.debug("memberResponses:[{}]", memberResponses);

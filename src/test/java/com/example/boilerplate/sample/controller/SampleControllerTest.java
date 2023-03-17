@@ -13,6 +13,9 @@ import com.example.boilerplate.sample.domain.repository.MemberRepository;
 import com.example.boilerplate.sample.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import javax.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
@@ -57,12 +60,13 @@ class SampleControllerTest {
     // Given
     setUpMembers();
     String url = "/api/sample/members";
+    List<String> sorts = Arrays.asList("email,desc", "name,asc");
     MemberDto.Request memberRequest = MemberDto.Request.builder()
         .name("test")
-        .email("gmail.com")
-        .page(0)
-        .size(5)
-        .sort("id.desc")
+        .email("test")
+        .page(1)
+        .size(10)
+        .sorts(sorts)
         .build();
 
     // When
@@ -132,13 +136,13 @@ class SampleControllerTest {
     String description;
     Boolean completed;
 
-    for (int a = 1; a <= 100; a++) {
+    for (int a = 1; a <= 10; a++) {
 
       name = "test" + String.format("%02d", a);
       if (a % 2 == 0) {
-        email = name + "@naver.com";
+        email = "test@naver.com";
       } else {
-        email = name + "@gmail.com";
+        email = "test@gmail.com";
       }
       memberId = insertMember(name, email);
 

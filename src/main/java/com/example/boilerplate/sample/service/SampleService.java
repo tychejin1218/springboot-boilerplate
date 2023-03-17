@@ -37,12 +37,12 @@ public class SampleService {
   /**
    * Member 목록 조회
    */
-  public Page<MemberDto.Response> getMembers(MemberDto.Request memberRequest, Pageable pageable) {
+  public Page<MemberDto.Response> getMembers(MemberDto.Request memberRequest) {
     Page<Member> memberPage =
         memberRepository.findAllByNameContainsAndEmailContains(
             memberRequest.getName(),
             memberRequest.getEmail(),
-            pageable);
+            memberRequest.pageRequest());
     return memberPage.map(member -> memberMapStruct.toDto(member));
   }
 
