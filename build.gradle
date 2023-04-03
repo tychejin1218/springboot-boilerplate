@@ -1,7 +1,9 @@
 plugins {
-    id 'java'
     id 'org.springframework.boot' version '2.7.9'
     id 'io.spring.dependency-management' version '1.0.15.RELEASE'
+    id 'java'
+    id 'checkstyle'
+    id 'pmd'
 }
 
 group = 'com.example'
@@ -80,4 +82,37 @@ test {
 
 clean {
     delete file('src/main/generated')
+}
+
+// Checkstyle 설정
+checkstyle {
+    configFile = file("${rootDir}/config/checkstyle/google-checkstyle.xml")
+    configProperties = ["suppressionFile": project(':').file('config/checkstyle/checkstyle-suppressions.xml')]
+    ignoreFailures = false
+    maxWarnings = 0
+    reportsDir = file("${buildDir}/checkstyle-output")
+    toolVersion = '10.9.3'
+}
+
+checkstyleMain {
+    reports {
+        xml.outputLocation = file("${checkstyle.reportsDir}/checkstyle-report.xml")
+    }
+}
+
+// PMD 설정
+pmd {
+    ruleSetFiles = files("${rootDir}/config/pmd/custom-ruleset.xml")
+    ruleSets = []
+    consoleOutput = true
+    ignoreFailures = false
+    reportsDir = file("${buildDir}/pmd-output")
+    toolVersion = '6.55.0'
+}
+
+pmdMain {
+    reports {
+        xml.outputLocation = file("${pmd.reportsDir}/pmd-report.xml")
+        xml.required = true
+    }
 }

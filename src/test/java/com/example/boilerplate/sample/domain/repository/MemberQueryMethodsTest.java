@@ -19,6 +19,9 @@ import org.springframework.data.domain.Sort.Order;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+@SuppressWarnings({
+    "PMD.AvoidDuplicateLiterals"
+})
 @Slf4j
 @SpringBootTest
 @ActiveProfiles("local")

@@ -1,7 +1,6 @@
 package com.example.boilerplate.sample.dto;
 
 import com.example.boilerplate.common.dto.PageDto;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,8 +34,6 @@ public class MemberDto {
   public static class Response {
 
     private Long id;
-    @JsonIgnore
-    private String password;
     private String name;
     private String email;
 

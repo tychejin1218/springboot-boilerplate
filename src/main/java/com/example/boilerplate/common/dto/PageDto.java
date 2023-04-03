@@ -26,9 +26,9 @@ public class PageDto {
   }
 
   public void setSize(int size) {
-    int DEFAULT_SIZE = 10;
-    int MAX_SIZE = 100;
-    this.size = size > MAX_SIZE ? DEFAULT_SIZE : size;
+    int defaultSize = 10;
+    int maxSize = 100;
+    this.size = size > maxSize ? defaultSize : size;
   }
 
   public void setSorts(List<String> sorts) {

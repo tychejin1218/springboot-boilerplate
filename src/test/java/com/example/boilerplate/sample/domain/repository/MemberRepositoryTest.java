@@ -18,6 +18,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+@SuppressWarnings({
+    "PMD.AvoidDuplicateLiterals"
+})
 @Slf4j
 @SpringBootTest
 @ActiveProfiles("local")

@@ -14,7 +14,6 @@ import com.example.boilerplate.sample.domain.mapstruct.MemberMapStruct;
 import com.example.boilerplate.sample.domain.repository.MemberRepository;
 import com.example.boilerplate.sample.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
-import com.example.boilerplate.sample.dto.MemberDto.Response;
 import com.example.boilerplate.sample.dto.TodoDto;
 import java.util.Arrays;
 import java.util.List;
@@ -24,16 +23,14 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+@SuppressWarnings({
+    "PMD.AvoidDuplicateLiterals"
+})
 @Slf4j
 @SpringBootTest
 @ActiveProfiles("local")
@@ -249,6 +246,7 @@ class SampleServiceTest {
     Todo todo = getTodoAfterInsertTodo();
     Long todoId = todo.getId();
     TodoDto.Response todoDetail01 = sampleService.getTodo(todoId);
+    log.debug("todoDetail01:[{}]", todoDetail01);
 
     // When
     sampleService.updateTodoCompleted(
@@ -259,10 +257,9 @@ class SampleServiceTest {
     entityManager.flush();
     entityManager.clear();
     TodoDto.Response todoDetail02 = sampleService.getTodo(todoId);
+    log.debug("todoDetail02:[{}]", todoDetail02);
 
     // Then
-    log.debug("todoDetail01:[{}]", todoDetail01);
-    log.debug("todoDetail02:[{}]", todoDetail02);
     assertAll(
         () -> assertEquals(todoDetail01.getId(), todoDetail02.getId()),
         () -> assertEquals(todoDetail01.getTitle(), todoDetail02.getTitle()),

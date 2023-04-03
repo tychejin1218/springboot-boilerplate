@@ -34,7 +34,7 @@ public class TodoDynamic {
 
   private Boolean completed;
 
-  public void updateCompleted(Boolean completed){
+  public void updateCompleted(Boolean completed) {
     this.completed = completed;
   }
 }

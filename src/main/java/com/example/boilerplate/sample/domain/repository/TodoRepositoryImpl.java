@@ -23,7 +23,6 @@ public class TodoRepositoryImpl implements TodoRepositoryCustom {
   public List<Todo> getTodos(Todo todo) {
 
     QTodo qtodo = QTodo.todo;
-    QMember qmember = QMember.member;
 
     // 1. BooleanBuilder를 사용한 동적 쿼리 설정
     BooleanBuilder builder = new BooleanBuilder();
@@ -75,6 +74,8 @@ public class TodoRepositoryImpl implements TodoRepositoryCustom {
         .orderBy(qtodo.id.desc())
         .fetch();*/
 
+    QMember qmember = QMember.member;
+
     // 2_3. 생성자 사용
     return jpaQueryFactory
         .select(
@@ -98,7 +99,7 @@ public class TodoRepositoryImpl implements TodoRepositoryCustom {
   public Page<Todo> getTodos(Todo todo, Pageable pageable) {
 
     QTodo qtodo = QTodo.todo;
-    QMember qmember = QMember.member;
+
 
     // 1. where 설정
     BooleanBuilder builder = new BooleanBuilder();
@@ -112,6 +113,8 @@ public class TodoRepositoryImpl implements TodoRepositoryCustom {
     if (todo.getCompleted() != null) {
       builder.and(qtodo.completed.eq(todo.getCompleted()));
     }
+
+    QMember qmember = QMember.member;
 
     // 2. list 조회
     List<Todo> content = jpaQueryFactory

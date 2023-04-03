@@ -37,7 +37,7 @@ class TodoRepositoryN1Test {
   void testFindAll() {
 
     // Given
-    setUp();
+    setUpMembers();
 
     // When
     List<Todo> todos = todoRepository.findAll();
@@ -57,7 +57,7 @@ class TodoRepositoryN1Test {
    * Member, To-Do 목록을 설정
    */
   @Disabled
-  void setUp() {
+  void setUpMembers() {
 
     for (int a = 0; a < 10; a++) {
 

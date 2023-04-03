@@ -6,9 +6,6 @@ import com.example.boilerplate.sample.service.SampleService;
 import com.example.boilerplate.web.reponse.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.domain.Sort.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -61,7 +58,7 @@ public class SampleController {
    * Member 저장
    */
   @PostMapping(
-      value = "/api/sample/member",
+      value = "/api/sample/insert/member",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity insertMember(

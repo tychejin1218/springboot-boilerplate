@@ -13,7 +13,6 @@ import com.example.boilerplate.sample.domain.repository.MemberRepository;
 import com.example.boilerplate.sample.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.persistence.EntityManager;
@@ -31,6 +30,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+@SuppressWarnings({
+    "PMD.AvoidDuplicateLiterals"
+})
 @Slf4j
 @AutoConfigureMockMvc
 @SpringBootTest
