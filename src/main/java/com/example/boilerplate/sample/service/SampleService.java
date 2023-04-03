@@ -47,6 +47,15 @@ public class SampleService {
   }
 
   /**
+   * Member 상세 조회
+   */
+  public MemberDto.Response getMember(MemberDto.Request memberRequest) {
+    Member member = memberRepository.findById(memberRequest.getId())
+        .orElseThrow(() -> new ApiException(ApiStatus.NOT_FOUND, "존재하지 않는 Member 정보입니다."));
+    return memberMapStruct.toDto(member);
+  }
+
+  /**
    * To-Do 목록 조회
    */
   public List<TodoDto.Response> getTodos(TodoDto.Request todoRequest) {
@@ -62,15 +71,6 @@ public class SampleService {
             );
 
     return todoMapStruct.todosToTodoResponses(todos);
-  }
-
-  /**
-   * Member 상세 조회
-   */
-  public MemberDto.Response getMember(Long id) {
-    Member member = memberRepository.findById(id)
-        .orElseThrow(() -> new ApiException(ApiStatus.NOT_FOUND, "존재하지 않는 Member 정보입니다."));
-    return memberMapStruct.toDto(member);
   }
 
   /**

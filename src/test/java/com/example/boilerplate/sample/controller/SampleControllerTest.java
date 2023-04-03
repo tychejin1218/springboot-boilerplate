@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -83,6 +84,67 @@ class SampleControllerTest {
         .andExpect(jsonPath("$.statusCode").value(ApiStatus.OK.getCode()))
         .andExpect(jsonPath("$.message").value(ApiStatus.OK.getMessage()))
         .andExpect(jsonPath("$.data").isNotEmpty())
+        .andDo(print());
+  }
+
+  @Transactional
+  @DisplayName("getMember_Member 상세 조회_응답 코드:200")
+  @Test
+  void testGetMember() throws Exception {
+
+    // Given
+    Member member = getMemberAfterInsertTodos();
+    String url = "/api/sample/member";
+    MemberDto.Request memberRequest = MemberDto.Request.builder()
+        .id(member.getId())
+        .build();
+
+    // When
+    ResultActions resultActions = mockMvc.perform(
+        post(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(memberRequest))
+    );
+
+    // Then
+    resultActions
+        .andExpect(status().isOk())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.statusCode").value(ApiStatus.OK.getCode()))
+        .andExpect(jsonPath("$.message").value(ApiStatus.OK.getMessage()))
+        .andExpect(jsonPath("$.data").isNotEmpty())
+        .andDo(print());
+  }
+
+  @Transactional
+  @DisplayName("getMember_Member가 존재하지 않는 경우_status.code:804")
+  @Test
+  void testGetMemberNotFound() throws Exception {
+
+    // Given
+    Member member = getMemberAfterInsertTodos();
+    String url = "/api/sample/member";
+    MemberDto.Request memberRequest = MemberDto.Request.builder()
+        .id(member.getId() + 1)
+        .build();
+
+    // When
+    ResultActions resultActions = mockMvc.perform(
+        post(url)
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(memberRequest))
+    );
+
+    // Then
+    resultActions
+        .andExpect(status().isBadRequest())
+        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+        .andExpect(jsonPath("$.statusCode").value(
+            ApiStatus.NOT_FOUND.getCode()))
+        .andExpect(jsonPath("$.message").value(
+            "존재하지 않는 Member 정보입니다."))
+        .andExpect(jsonPath("method").value(HttpMethod.POST.toString()))
+        .andExpect(jsonPath("timestamp").isNotEmpty())
         .andDo(print());
   }
 

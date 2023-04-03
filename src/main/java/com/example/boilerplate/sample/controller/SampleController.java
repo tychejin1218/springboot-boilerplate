@@ -39,4 +39,38 @@ public class SampleController {
             .data(sampleService.getMembers(memberRequest))
             .build());
   }
+
+  /**
+   * Member 상세 조회
+   */
+  @PostMapping(
+      value = "/api/sample/member",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity getMember(
+      @RequestBody MemberDto.Request memberRequest) {
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(BaseResponse.builder()
+            .statusCode(ApiStatus.OK.getCode())
+            .data(sampleService.getMember(memberRequest))
+            .build());
+  }
+
+  /**
+   * Member 저장
+   */
+  @PostMapping(
+      value = "/api/sample/member",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity insertMember(
+      @RequestBody MemberDto.Request memberRequest) {
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(BaseResponse.builder()
+            .statusCode(ApiStatus.OK.getCode())
+            .data(sampleService.getMember(memberRequest))
+            .build());
+  }
 }

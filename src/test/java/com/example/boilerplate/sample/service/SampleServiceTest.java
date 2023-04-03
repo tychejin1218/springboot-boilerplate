@@ -80,27 +80,6 @@ class SampleServiceTest {
   }
 
   @Transactional
-  @DisplayName("getTodos_To-Do 목록 조회")
-  @Test
-  void testGetTodos() {
-
-    // Given
-    setUpTodos();
-    TodoDto.Request todoRequest = TodoDto.Request.builder()
-        .title("Title Test")
-        .description("Description Test")
-        .completed(true)
-        .build();
-
-    // When
-    List<TodoDto.Response> todoResponses = sampleService.getTodos(todoRequest);
-
-    // Then
-    log.debug("todoResponses:[{}]", todoResponses);
-    assertTrue(!todoResponses.isEmpty());
-  }
-
-  @Transactional
   @DisplayName("getMember_Member 상세 조회")
   @Test
   void testGetMember() {
@@ -109,7 +88,10 @@ class SampleServiceTest {
     Member member = getMemberAfterInsertTodos();
 
     // When
-    MemberDto.Response memberResponse = sampleService.getMember(member.getId());
+    MemberDto.Response memberResponse = sampleService.getMember(
+        MemberDto.Request.builder()
+            .id(member.getId())
+            .build());
 
     // Then
     log.debug("memberResponse:[{}]", memberResponse);
@@ -131,7 +113,10 @@ class SampleServiceTest {
 
     // When
     ApiException apiException =
-        assertThrows(ApiException.class, () -> sampleService.getMember(member.getId()));
+        assertThrows(ApiException.class, () -> sampleService.getMember(
+            MemberDto.Request.builder()
+                .id(member.getId())
+                .build()));
 
     // Then
     log.debug("apiException:[{}]", apiException);
@@ -139,6 +124,27 @@ class SampleServiceTest {
         () -> assertEquals(ApiStatus.NOT_FOUND.getCode(), apiException.getStatus().getCode()),
         () -> assertEquals("존재하지 않는 Member 정보입니다.", apiException.getMessage())
     );
+  }
+
+  @Transactional
+  @DisplayName("getTodos_To-Do 목록 조회")
+  @Test
+  void testGetTodos() {
+
+    // Given
+    setUpTodos();
+    TodoDto.Request todoRequest = TodoDto.Request.builder()
+        .title("Title Test")
+        .description("Description Test")
+        .completed(true)
+        .build();
+
+    // When
+    List<TodoDto.Response> todoResponses = sampleService.getTodos(todoRequest);
+
+    // Then
+    log.debug("todoResponses:[{}]", todoResponses);
+    assertTrue(!todoResponses.isEmpty());
   }
 
   @Transactional
