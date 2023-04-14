@@ -12,6 +12,7 @@ import javax.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -34,8 +35,9 @@ class MemberRepositoryTest {
   private TodoRepository todoRepository;
 
   @Autowired
-  EntityManager entityManager;
+  private EntityManager entityManager;
 
+  @Order(1)
   @Transactional
   @DisplayName("findAll_Member 목록 조회")
   @Test
@@ -43,6 +45,8 @@ class MemberRepositoryTest {
 
     // Given
     setUpMembers();
+    entityManager.flush();
+    entityManager.clear();
 
     // When
     List<Member> members = memberRepository.findAll();
@@ -52,6 +56,7 @@ class MemberRepositoryTest {
     assertFalse(members.isEmpty());
   }
 
+  @Order(2)
   @Transactional
   @DisplayName("findById_Member 상세 조회")
   @Test
@@ -59,6 +64,8 @@ class MemberRepositoryTest {
 
     // Given
     Long memberId = getMemberIdAfterInsertTodos();
+    entityManager.flush();
+    entityManager.clear();
     log.debug("memberId:[{}]", memberId);
 
     // When
@@ -69,6 +76,7 @@ class MemberRepositoryTest {
     assertTrue(opMember.isPresent());
   }
 
+  @Order(3)
   @Transactional
   @DisplayName("save_Member 저장")
   @Test
@@ -97,6 +105,7 @@ class MemberRepositoryTest {
     }
   }
 
+  @Order(4)
   @Transactional
   @DisplayName("save_Member 수정")
   @Test
@@ -104,6 +113,8 @@ class MemberRepositoryTest {
 
     // Given
     Member insertMember = getMemberAfterInsertMember();
+    entityManager.flush();
+    entityManager.clear();
 
     Member requestMember = Member.builder()
         .id(insertMember.getId())
@@ -128,6 +139,7 @@ class MemberRepositoryTest {
     }
   }
 
+  @Order(5)
   @Transactional
   @DisplayName("deleteById_Member 삭제")
   @Test
@@ -135,6 +147,8 @@ class MemberRepositoryTest {
 
     // Given
     Member insertMember = getMemberAfterInsertMember();
+    entityManager.flush();
+    entityManager.clear();
 
     // When
     memberRepository.deleteById(insertMember.getId());
@@ -144,57 +158,15 @@ class MemberRepositoryTest {
   }
 
   /**
-   * Member 저장
-   */
-  @Disabled
-  Long insertMember(
-      String name,
-      String email) {
-    return memberRepository.save(
-        Member.builder()
-            .name(name)
-            .email(email)
-            .build()
-    ).getId();
-  }
-
-  /**
-   * To-Do 저장
-   */
-  @Disabled
-  Long insertTodo(
-      Long memberId,
-      String title,
-      String description,
-      Boolean completed) {
-    return todoRepository.save(
-        Todo.builder()
-            .member(Member.builder()
-                .id(memberId)
-                .build())
-            .title(title)
-            .description(description)
-            .completed(completed)
-            .build()
-    ).getId();
-  }
-
-  /**
    * Member 한개를 저장한 후 Member를 반환
    */
   @Disabled
   Member getMemberAfterInsertMember() {
-
-    Member member = memberRepository.save(
+    return memberRepository.save(
         Member.builder()
-            .name("test01")
-            .email("test01@gmail.com")
+            .name("test")
+            .email("test@gmail.com")
             .build());
-
-    entityManager.flush();
-    entityManager.clear();
-
-    return member;
   }
 
   /**
@@ -203,7 +175,13 @@ class MemberRepositoryTest {
   @Disabled
   Long getMemberIdAfterInsertTodos() {
 
-    Long memberId = insertMember("test01", "test01@gmail.com");
+    Long memberId = memberRepository.save(
+        Member.builder()
+            .name("test")
+            .email("test@gmail.com")
+            .build()
+    ).getId();
+
     String title;
     String description;
     Boolean completed;
@@ -217,18 +195,22 @@ class MemberRepositoryTest {
       } else {
         completed = false;
       }
-      insertTodo(memberId, title, description, completed);
-    }
 
-    entityManager.flush();
-    entityManager.clear();
+      todoRepository.save(
+          Todo.builder()
+              .member(Member.builder()
+                  .id(memberId)
+                  .build())
+              .title(title)
+              .description(description)
+              .completed(completed)
+              .build()
+      );
+    }
 
     return memberId;
   }
 
-  /**
-   * Member 목록 설정
-   */
   @Disabled
   void setUpMembers() {
 
@@ -240,7 +222,7 @@ class MemberRepositoryTest {
     String description;
     Boolean completed;
 
-    for (int a = 1; a <= 100; a++) {
+    for (int a = 1; a <= 10; a++) {
 
       name = "test" + String.format("%02d", a);
       if (a % 2 == 0) {
@@ -248,7 +230,13 @@ class MemberRepositoryTest {
       } else {
         email = name + "@gmail.com";
       }
-      memberId = insertMember(name, email);
+
+      memberId = memberRepository.save(
+          Member.builder()
+              .name(name)
+              .email(email)
+              .build()
+      ).getId();
 
       for (int b = 1; b <= 5; b++) {
         title = "Title Test" + String.format("%02d", b);
@@ -258,11 +246,18 @@ class MemberRepositoryTest {
         } else {
           completed = false;
         }
-        insertTodo(memberId, title, description, completed);
+
+        todoRepository.save(
+            Todo.builder()
+                .member(Member.builder()
+                    .id(memberId)
+                    .build())
+                .title(title)
+                .description(description)
+                .completed(completed)
+                .build()
+        );
       }
     }
-
-    entityManager.flush();
-    entityManager.clear();
   }
 }

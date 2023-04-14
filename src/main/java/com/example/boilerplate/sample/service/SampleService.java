@@ -13,8 +13,10 @@ import com.example.boilerplate.sample.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
@@ -51,6 +53,38 @@ public class SampleService {
   }
 
   /**
+   * Member 저장
+   */
+  public MemberDto.Response insertMember(MemberDto.Request memberRequest) {
+    return memberMapStruct.toDto(memberRepository.save(memberMapStruct.toEntity(memberRequest)));
+  }
+
+  /**
+   * Member 수정
+   */
+  public MemberDto.Response updateMember(MemberDto.Request memberRequest) {
+
+    Member member = Member.builder().build();
+
+    Optional<Member> opMember = memberRepository.findById(memberRequest.getId());
+    if (opMember.isPresent()) {
+      member = opMember.get();
+
+      if (StringUtils.isNotBlank(memberRequest.getName())) {
+        member.setName(memberRequest.getName());
+      }
+
+      if (StringUtils.isNotBlank(memberRequest.getEmail())) {
+        member.setEmail(memberRequest.getEmail());
+      }
+
+      memberRepository.save(member);
+    }
+
+    return memberMapStruct.toDto(member);
+  }
+
+  /**
    * To-Do 목록 조회
    */
   public List<TodoDto.Response> getTodos(TodoDto.Request todoRequest) {
@@ -71,17 +105,10 @@ public class SampleService {
   /**
    * To-Do 상세 조회
    */
-  public TodoDto.Response getTodo(Long id) {
-    Todo todo = todoRepository.findById(id)
+  public TodoDto.Response getTodo(TodoDto.Request todoRequest) {
+    Todo todo = todoRepository.findById(todoRequest.getId())
         .orElseThrow(() -> new ApiException(ApiStatus.NOT_FOUND, "존재하지 않는 To-Do 정보입니다."));
     return todoMapStruct.toDto(todo);
-  }
-
-  /**
-   * Member 저장
-   */
-  public MemberDto.Response insertMember(MemberDto.Request memberRequest) {
-    return memberMapStruct.toDto(memberRepository.save(memberMapStruct.toEntity(memberRequest)));
   }
 
   /**
@@ -89,6 +116,35 @@ public class SampleService {
    */
   public TodoDto.Response insertTodo(TodoDto.Request todoRequest) {
     return todoMapStruct.toDto(todoRepository.save(todoMapStruct.toEntity(todoRequest)));
+  }
+
+  /**
+   * To-Do 수정
+   */
+  public TodoDto.Response updateTodo(TodoDto.Request todoRequest) {
+
+    Todo todo = Todo.builder().build();
+
+    Optional<Todo> opTodo = todoRepository.findById(todoRequest.getId());
+    if (opTodo.isPresent()) {
+      todo = opTodo.get();
+
+      if (StringUtils.isNotBlank(todoRequest.getTitle())) {
+        todo.setTitle(todoRequest.getTitle());
+      }
+
+      if (StringUtils.isNotBlank(todoRequest.getDescription())) {
+        todo.setDescription(todoRequest.getDescription());
+      }
+
+      if (todoRequest.getCompleted() != null) {
+        todo.setCompleted(todoRequest.getCompleted());
+      }
+
+      todoRepository.save(todo);
+    }
+
+    return todoMapStruct.toDto(todo);
   }
 
   /**

@@ -2,6 +2,7 @@ package com.example.boilerplate.sample.controller;
 
 import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.sample.dto.MemberDto;
+import com.example.boilerplate.sample.dto.TodoDto;
 import com.example.boilerplate.sample.service.SampleService;
 import com.example.boilerplate.web.reponse.BaseResponse;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +68,92 @@ public class SampleController {
         .status(HttpStatus.OK)
         .body(BaseResponse.builder()
             .statusCode(ApiStatus.OK.getCode())
-            .data(sampleService.getMember(memberRequest))
+            .data(sampleService.insertMember(memberRequest))
+            .build());
+  }
+
+  /**
+   * Member 수정
+   */
+  @PostMapping(
+      value = "/api/sample/update/member",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity updateMember(
+      @RequestBody MemberDto.Request memberRequest) {
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(BaseResponse.builder()
+            .statusCode(ApiStatus.OK.getCode())
+            .data(sampleService.updateMember(memberRequest))
+            .build());
+  }
+
+  /**
+   * To-Do 목록 조회
+   */
+  @PostMapping(
+      value = "/api/sample/todos",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity getTodos(
+      @RequestBody TodoDto.Request todoRequest) {
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(BaseResponse.builder()
+            .statusCode(ApiStatus.OK.getCode())
+            .data(sampleService.getTodos(todoRequest))
+            .build());
+  }
+
+  /**
+   * To-Do 상세 조회
+   */
+  @PostMapping(
+      value = "/api/sample/todo",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity getTodo(
+      @RequestBody TodoDto.Request todoRequest) {
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(BaseResponse.builder()
+            .statusCode(ApiStatus.OK.getCode())
+            .data(sampleService.getTodo(todoRequest))
+            .build());
+  }
+
+  /**
+   * To-Do 저장
+   */
+  @PostMapping(
+      value = "/api/sample/insert/todo",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity insertTodo(
+      @RequestBody TodoDto.Request todoRequest) {
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(BaseResponse.builder()
+            .statusCode(ApiStatus.OK.getCode())
+            .data(sampleService.insertTodo(todoRequest))
+            .build());
+  }
+
+  /**
+   * To-Do 수정
+   */
+  @PostMapping(
+      value = "/api/sample/update/todo",
+      consumes = MediaType.APPLICATION_JSON_VALUE,
+      produces = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity updateTodo(
+      @RequestBody TodoDto.Request todoRequest) {
+    return ResponseEntity
+        .status(HttpStatus.OK)
+        .body(BaseResponse.builder()
+            .statusCode(ApiStatus.OK.getCode())
+            .data(sampleService.updateTodo(todoRequest))
             .build());
   }
 }

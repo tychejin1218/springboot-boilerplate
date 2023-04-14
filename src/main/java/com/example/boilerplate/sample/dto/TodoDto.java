@@ -1,5 +1,6 @@
 package com.example.boilerplate.sample.dto;
 
+import com.example.boilerplate.common.dto.PageDto;
 import javax.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,16 +8,17 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.experimental.SuperBuilder;
 
 public class TodoDto {
 
   @Getter
   @Setter
-  @Builder
+  @SuperBuilder
   @AllArgsConstructor
   @NoArgsConstructor
-  @ToString
-  public static class Request {
+  @ToString(callSuper = true)
+  public static class Request extends PageDto {
 
     private Long id;
     private Long memberId;

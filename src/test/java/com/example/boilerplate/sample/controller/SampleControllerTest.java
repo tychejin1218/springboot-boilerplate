@@ -12,6 +12,7 @@ import com.example.boilerplate.sample.domain.entity.Todo;
 import com.example.boilerplate.sample.domain.repository.MemberRepository;
 import com.example.boilerplate.sample.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
+import com.example.boilerplate.sample.dto.TodoDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Arrays;
 import java.util.List;
@@ -19,6 +20,7 @@ import javax.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -55,99 +57,336 @@ class SampleControllerTest {
   @Autowired
   EntityManager entityManager;
 
-  @Transactional
-  @DisplayName("getMembers_Member 목록 조회_응답 코드:200")
-  @Test
-  void testGetMembers() throws Exception {
+  @DisplayName("Member CRUD 테스트")
+  @Nested
+  class TestMember {
 
-    // Given
-    setUpMembers();
-    String url = "/api/sample/members";
-    List<String> sorts = Arrays.asList("email,desc", "name,asc");
-    MemberDto.Request memberRequest = MemberDto.Request.builder()
-        .name("test")
-        .email("test")
-        .page(1)
-        .size(10)
-        .sorts(sorts)
-        .build();
+    @Transactional
+    @DisplayName("getMembers_Member 목록 조회_statusCode:200")
+    @Test
+    void testGetMembers() throws Exception {
 
-    // When
-    ResultActions resultActions = mockMvc.perform(
-        post(url)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(memberRequest))
-    );
+      // Given
+      setUpMembers();
+      String url = "/api/sample/members";
+      List<String> sorts = Arrays.asList("email,desc", "name,asc");
+      MemberDto.Request memberRequest = MemberDto.Request.builder()
+          .name("test")
+          .email("test")
+          .page(1)
+          .size(10)
+          .sorts(sorts)
+          .build();
 
-    // Then
-    resultActions
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.statusCode").value(ApiStatus.OK.getCode()))
-        .andExpect(jsonPath("$.message").value(ApiStatus.OK.getMessage()))
-        .andExpect(jsonPath("$.data").isNotEmpty())
-        .andDo(print());
+      // When
+      ResultActions resultActions = mockMvc.perform(
+          post(url)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(memberRequest))
+      );
+
+      // Then
+      resultActions
+          .andExpect(status().isOk())
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$.statusCode").value(ApiStatus.OK.getCode()))
+          .andExpect(jsonPath("$.message").value(ApiStatus.OK.getMessage()))
+          .andExpect(jsonPath("$.data").isNotEmpty())
+          .andDo(print());
+    }
+
+    @Transactional
+    @DisplayName("getMember_Member 상세 조회_statusCode:200")
+    @Test
+    void testGetMember() throws Exception {
+
+      // Given
+      Member member = getMemberAfterInsertTodos();
+      String url = "/api/sample/member";
+      MemberDto.Request memberRequest = MemberDto.Request.builder()
+          .id(member.getId())
+          .build();
+
+      // When
+      ResultActions resultActions = mockMvc.perform(
+          post(url)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(memberRequest))
+      );
+
+      // Then
+      resultActions
+          .andExpect(status().isOk())
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$.statusCode").value(ApiStatus.OK.getCode()))
+          .andExpect(jsonPath("$.message").value(ApiStatus.OK.getMessage()))
+          .andExpect(jsonPath("$.data").isNotEmpty())
+          .andDo(print());
+    }
+
+    @Transactional
+    @DisplayName("getMember_Member가 존재하지 않는 경우_statusCode:804")
+    @Test
+    void testGetMemberNotFound() throws Exception {
+
+      // Given
+      Member member = getMemberAfterInsertTodos();
+      String url = "/api/sample/member";
+      MemberDto.Request memberRequest = MemberDto.Request.builder()
+          .id(member.getId() + 1)
+          .build();
+
+      // When
+      ResultActions resultActions = mockMvc.perform(
+          post(url)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(memberRequest))
+      );
+
+      // Then
+      resultActions
+          .andExpect(status().isBadRequest())
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$.statusCode").value(
+              ApiStatus.NOT_FOUND.getCode()))
+          .andExpect(jsonPath("$.message").value(
+              "존재하지 않는 Member 정보입니다."))
+          .andExpect(jsonPath("method").value(HttpMethod.POST.toString()))
+          .andExpect(jsonPath("timestamp").isNotEmpty())
+          .andDo(print());
+    }
+
+    @Transactional
+    @DisplayName("insertMember_Member 저장_statusCode:200")
+    @Test
+    void testInsertMember() throws Exception {
+
+      // Given
+      String url = "/api/sample/insert/member";
+      MemberDto.Request memberRequest = MemberDto.Request.builder()
+          .name("test")
+          .email("test@gmail.co.kr")
+          .build();
+
+      // When
+      ResultActions resultActions = mockMvc.perform(
+          post(url)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(memberRequest))
+      );
+
+      // Then
+      resultActions
+          .andExpect(status().isOk())
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$.statusCode").value(ApiStatus.OK.getCode()))
+          .andExpect(jsonPath("$.message").value(ApiStatus.OK.getMessage()))
+          .andExpect(jsonPath("$.data").isNotEmpty())
+          .andDo(print());
+    }
+
+    @Transactional
+    @DisplayName("updateMember_Member 수정_statusCode:200")
+    @Test
+    void testUpdateMember() throws Exception {
+
+      // Given
+      Member member = getMemberAfterInsertTodos();
+      String url = "/api/sample/update/member";
+      MemberDto.Request memberRequest = MemberDto.Request.builder()
+          .id(member.getId())
+          .name("admin")
+          .email("admin@gmail.co.kr")
+          .build();
+
+      // When
+      ResultActions resultActions = mockMvc.perform(
+          post(url)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(memberRequest))
+      );
+
+      // Then
+      resultActions
+          .andExpect(status().isOk())
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$.statusCode").value(ApiStatus.OK.getCode()))
+          .andExpect(jsonPath("$.message").value(ApiStatus.OK.getMessage()))
+          .andExpect(jsonPath("$.data").isNotEmpty())
+          .andDo(print());
+    }
   }
 
-  @Transactional
-  @DisplayName("getMember_Member 상세 조회_응답 코드:200")
-  @Test
-  void testGetMember() throws Exception {
 
-    // Given
-    Member member = getMemberAfterInsertTodos();
-    String url = "/api/sample/member";
-    MemberDto.Request memberRequest = MemberDto.Request.builder()
-        .id(member.getId())
-        .build();
+  @DisplayName("To-Do CRUD 테스트")
+  @Nested
+  class TestTodo {
 
-    // When
-    ResultActions resultActions = mockMvc.perform(
-        post(url)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(memberRequest))
-    );
+    @Transactional
+    @DisplayName("getTodos_To-Do 목록 조회_statusCode:200")
+    @Test
+    void testGetTodos() throws Exception {
 
-    // Then
-    resultActions
-        .andExpect(status().isOk())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.statusCode").value(ApiStatus.OK.getCode()))
-        .andExpect(jsonPath("$.message").value(ApiStatus.OK.getMessage()))
-        .andExpect(jsonPath("$.data").isNotEmpty())
-        .andDo(print());
-  }
+      // Given
+      setUpTodos();
+      String url = "/api/sample/todos";
+      List<String> sorts = Arrays.asList("id,desc");
+      TodoDto.Request todoRequest = TodoDto.Request.builder()
+          .title("test")
+          .description("test")
+          .completed(true)
+          .page(1)
+          .size(10)
+          .sorts(sorts)
+          .build();
 
-  @Transactional
-  @DisplayName("getMember_Member가 존재하지 않는 경우_status.code:804")
-  @Test
-  void testGetMemberNotFound() throws Exception {
+      // When
+      ResultActions resultActions = mockMvc.perform(
+          post(url)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(todoRequest))
+      );
 
-    // Given
-    Member member = getMemberAfterInsertTodos();
-    String url = "/api/sample/member";
-    MemberDto.Request memberRequest = MemberDto.Request.builder()
-        .id(member.getId() + 1)
-        .build();
+      // Then
+      resultActions
+          .andExpect(status().isOk())
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$.statusCode").value(ApiStatus.OK.getCode()))
+          .andExpect(jsonPath("$.message").value(ApiStatus.OK.getMessage()))
+          .andExpect(jsonPath("$.data").isNotEmpty())
+          .andDo(print());
+    }
 
-    // When
-    ResultActions resultActions = mockMvc.perform(
-        post(url)
-            .contentType(MediaType.APPLICATION_JSON)
-            .content(objectMapper.writeValueAsString(memberRequest))
-    );
+    @Transactional
+    @DisplayName("getTodo_To-Do 상세 조회_statusCode:200")
+    @Test
+    void testGetTodo() throws Exception {
 
-    // Then
-    resultActions
-        .andExpect(status().isBadRequest())
-        .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-        .andExpect(jsonPath("$.statusCode").value(
-            ApiStatus.NOT_FOUND.getCode()))
-        .andExpect(jsonPath("$.message").value(
-            "존재하지 않는 Member 정보입니다."))
-        .andExpect(jsonPath("method").value(HttpMethod.POST.toString()))
-        .andExpect(jsonPath("timestamp").isNotEmpty())
-        .andDo(print());
+      // Given
+      Todo todo = getTodoAfterInsertTodo();
+      Long todoId = todo.getId();
+      String url = "/api/sample/todo";
+      TodoDto.Request todoRequest = TodoDto.Request.builder()
+          .id(todoId)
+          .build();
+
+      // When
+      ResultActions resultActions = mockMvc.perform(
+          post(url)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(todoRequest))
+      );
+
+      // Then
+      resultActions
+          .andExpect(status().isOk())
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$.statusCode").value(ApiStatus.OK.getCode()))
+          .andExpect(jsonPath("$.message").value(ApiStatus.OK.getMessage()))
+          .andExpect(jsonPath("$.data").isNotEmpty())
+          .andDo(print());
+    }
+
+    @Transactional
+    @DisplayName("getTodo_To-Do가 존재하지 않는 경우_statusCode:804")
+    @Test
+    void testGetTodoNotFound() throws Exception {
+
+      // Given
+      Todo todo = getTodoAfterInsertTodo();
+      Long todoId = todo.getId();
+      String url = "/api/sample/todo";
+      TodoDto.Request todoRequest = TodoDto.Request.builder()
+          .id(todoId + 1)
+          .build();
+
+      // When
+      ResultActions resultActions = mockMvc.perform(
+          post(url)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(todoRequest))
+      );
+
+      // Then
+      resultActions
+          .andExpect(status().isBadRequest())
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$.statusCode").value(
+              ApiStatus.NOT_FOUND.getCode()))
+          .andExpect(jsonPath("$.message").value(
+              "존재하지 않는 To-Do 정보입니다."))
+          .andExpect(jsonPath("method").value(HttpMethod.POST.toString()))
+          .andExpect(jsonPath("timestamp").isNotEmpty())
+          .andDo(print());
+    }
+
+    @Transactional
+    @DisplayName("insertTodo_To-Do 저장_statusCode:200")
+    @Test
+    void testInsertTodo() throws Exception {
+
+      // Given
+      Long memberId = insertMember("test", "test@gmail.co.kr");
+      entityManager.flush();
+      entityManager.clear();
+
+      String url = "/api/sample/insert/todo";
+      TodoDto.Request todoRequest = TodoDto.Request.builder()
+          .title("Title Test")
+          .memberId(memberId)
+          .description("Description Test")
+          .completed(false)
+          .build();
+
+      // When
+      ResultActions resultActions = mockMvc.perform(
+          post(url)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(todoRequest))
+      );
+
+      // Then
+      resultActions
+          .andExpect(status().isOk())
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$.statusCode").value(ApiStatus.OK.getCode()))
+          .andExpect(jsonPath("$.message").value(ApiStatus.OK.getMessage()))
+          .andExpect(jsonPath("$.data").isNotEmpty())
+          .andDo(print());
+    }
+
+    @Transactional
+    @DisplayName("updateTodo_To-Do 수정_statusCode:200")
+    @Test
+    void testUpdateTodo() throws Exception {
+
+      // Given
+      Todo todo = getTodoAfterInsertTodo();
+
+      String url = "/api/sample/update/todo";
+      TodoDto.Request todoRequest = TodoDto.Request.builder()
+          .id(todo.getId())
+          .title("Title Test Update")
+          .description("Description Test Update")
+          .completed(true)
+          .build();
+
+      // When
+      ResultActions resultActions = mockMvc.perform(
+          post(url)
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(objectMapper.writeValueAsString(todoRequest))
+      );
+
+      // Then
+      resultActions
+          .andExpect(status().isOk())
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath("$.statusCode").value(ApiStatus.OK.getCode()))
+          .andExpect(jsonPath("$.message").value(ApiStatus.OK.getMessage()))
+          .andExpect(jsonPath("$.data").isNotEmpty())
+          .andDo(print());
+    }
   }
 
   /**
@@ -297,5 +536,31 @@ class SampleControllerTest {
     entityManager.clear();
 
     return member;
+  }
+
+  /**
+   * Member, To-Do를 1개씩 저장한 후 Todo를 반환
+   */
+  @Disabled
+  Todo getTodoAfterInsertTodo() {
+
+    Member member = memberRepository.save(
+        Member.builder()
+            .name("test")
+            .email("test@gmail.com")
+            .build());
+
+    Todo todo = todoRepository.save(
+        Todo.builder()
+            .member(member)
+            .title("Title Test Insert")
+            .description("Description Test Insert")
+            .completed(false)
+            .build());
+
+    entityManager.flush();
+    entityManager.clear();
+
+    return todo;
   }
 }
