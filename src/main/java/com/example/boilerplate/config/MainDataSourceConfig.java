@@ -1,23 +1,26 @@
 package com.example.boilerplate.config;
 
 import com.example.boilerplate.common.constants.Constants;
-import com.example.boilerplate.properties.MainDataSourceProperties;
-import com.example.boilerplate.properties.MainJpaProperties;
-import com.zaxxer.hikari.HikariConfig;
+import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zaxxer.hikari.HikariDataSource;
-import java.util.Properties;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
+import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.jdbc.DataSourceBuilder;
+import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.orm.jpa.JpaTransactionManager;
-import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -28,75 +31,74 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @EnableJpaRepositories(
     basePackages = Constants.BASE_PACKAGE + ".*.domain.repository",
-    entityManagerFactoryRef = "mainEntityManagerFactory",
-    transactionManagerRef = "mainPlatformTransactionManager"
+    entityManagerFactoryRef = Constants.MAIN_DATASOURCE + "EntityManagerFactory",
+    transactionManagerRef = Constants.MAIN_DATASOURCE + "PlatformTransactionManager"
 )
 @Configuration
 public class MainDataSourceConfig implements DataSourceConfig {
 
-  private final MainDataSourceProperties mainDataSourceProperties;
-  private final MainJpaProperties mainJpaProperties;
-
+  @Profile("main_db_single")
   @Primary
   @Bean(Constants.MAIN_DATASOURCE)
+  @ConfigurationProperties(prefix = Constants.MAIN_DATASOURCE_PROPERTY_PREFIX + ".single")
   public DataSource dataSource() {
-    HikariConfig hikariConfig = hikariConfig(mainDataSourceProperties);
-    hikariConfig.setInitializationFailTimeout(-1);
-    return new HikariDataSource(hikariConfig);
+    return DataSourceBuilder.create().type(HikariDataSource.class).build();
   }
 
   @Primary
-  @Bean("mainEntityManagerFactory")
+  @Bean(Constants.MAIN_JPA + "JpaProperties")
+  @ConfigurationProperties(prefix = Constants.MAIN_JPA_PREFIX)
+  public JpaProperties jpaProperties() {
+    return new JpaProperties();
+  }
+
+  @Primary
+  @Bean(Constants.MAIN_DATASOURCE + "EntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-      @Qualifier(Constants.MAIN_DATASOURCE) DataSource dataSource) {
-    LocalContainerEntityManagerFactoryBean entityManagerFactory
-        = new LocalContainerEntityManagerFactoryBean();
-    entityManagerFactory.setDataSource(dataSource);
-    entityManagerFactory.setPackagesToScan(Constants.BASE_PACKAGE + ".*.domain.entity");
-    entityManagerFactory.setJpaVendorAdapter(this.jpaVendorAdapter());
-    entityManagerFactory.setJpaProperties(this.jpaProperties());
-    entityManagerFactory.setPersistenceUnitName("mainEntityManager");
-    return entityManagerFactory;
+      @Qualifier(Constants.MAIN_DATASOURCE) DataSource dataSource,
+      @Qualifier(Constants.MAIN_JPA + "JpaProperties") JpaProperties jpaProperties) {
+    return this.entityManagerFactoryBuilder(jpaProperties)
+        .dataSource(dataSource)
+        .packages(Constants.BASE_PACKAGE + ".*.domain.entity")
+        .properties(jpaProperties.getProperties())
+        .persistenceUnit(Constants.MAIN_DATASOURCE + "EntityManager")
+        .build();
   }
 
-  private JpaVendorAdapter jpaVendorAdapter() {
-    HibernateJpaVendorAdapter hibernateJpaVendorAdapter = new HibernateJpaVendorAdapter();
-    hibernateJpaVendorAdapter.setGenerateDdl(mainJpaProperties.getGenerateDdl());
-    hibernateJpaVendorAdapter.setShowSql(mainJpaProperties.getShowSql());
-    hibernateJpaVendorAdapter.setDatabasePlatform(mainJpaProperties.getDatabasePlatform());
-    return hibernateJpaVendorAdapter;
-  }
-
-  private Properties jpaProperties() {
-    Properties jpaProperties = new Properties();
-    jpaProperties.setProperty(
-        "hibernate.show_sql", mainJpaProperties.getHibernateShowSql());
-    jpaProperties.setProperty(
-        "hibernate.format_sql", mainJpaProperties.getHibernateFormatSql());
-    jpaProperties.setProperty(
-        "hibernate.highlight_sql", mainJpaProperties.getHibernateUseSqlComments());
-    jpaProperties.setProperty(
-        "hibernate.use_sql_comments", mainJpaProperties.getHibernateUseSqlComments());
-    jpaProperties.setProperty(
-        "hibernate.physical_naming_strategy",
-        mainJpaProperties.getHibernatePhysicalNamingStrategy());
-    return jpaProperties;
+  private EntityManagerFactoryBuilder entityManagerFactoryBuilder(JpaProperties jpaProperties) {
+    HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
+    jpaVendorAdapter.setGenerateDdl(jpaProperties.isGenerateDdl());
+    jpaVendorAdapter.setShowSql(jpaProperties.isShowSql());
+    jpaVendorAdapter.setDatabasePlatform(jpaProperties.getDatabasePlatform());
+    return new EntityManagerFactoryBuilder(jpaVendorAdapter, jpaProperties.getProperties(), null);
   }
 
   @Primary
-  @Bean("mainPlatformTransactionManager")
+  @Bean(Constants.MAIN_DATASOURCE + "PlatformTransactionManager")
   public PlatformTransactionManager platformTransactionManager(
-      @Qualifier("mainEntityManagerFactory")
-          LocalContainerEntityManagerFactoryBean entityManagerFactory
+      @Qualifier(Constants.MAIN_DATASOURCE + "EntityManagerFactory")
+      LocalContainerEntityManagerFactoryBean entityManagerFactory
   ) {
     JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
     jpaTransactionManager.setEntityManagerFactory(entityManagerFactory.getObject());
     return jpaTransactionManager;
   }
 
-  @Bean(name = "mainJdbcTemplate")
+  @Bean(name = Constants.MAIN_DATASOURCE + "JdbcTemplate")
   public JdbcTemplate jdbcTemplate(
       @Qualifier(Constants.MAIN_DATASOURCE) DataSource dataSource) {
     return new JdbcTemplate(dataSource);
+  }
+
+  @Configuration
+  class MainJpaQuerydslConfig {
+
+    @PersistenceContext(unitName = Constants.MAIN_DATASOURCE + "EntityManager")
+    private EntityManager mainEntityManager;
+
+    @Bean
+    public JPAQueryFactory mainJpaQueryFactory() {
+      return new JPAQueryFactory(mainEntityManager);
+    }
   }
 }

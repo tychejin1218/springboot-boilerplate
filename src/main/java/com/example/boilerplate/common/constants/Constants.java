@@ -63,4 +63,9 @@ public final class Constants {
 
   // DataSource
   public static final String MAIN_DATASOURCE = "mainDataSource";
+  public static final String MAIN_JPA = "mainJpa";
+
+  // PREFIX
+  public static final String MAIN_DATASOURCE_PROPERTY_PREFIX = "main.datasource";
+  public static final String MAIN_JPA_PREFIX = "main.jpa";
 }

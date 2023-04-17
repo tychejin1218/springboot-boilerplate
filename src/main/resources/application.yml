@@ -34,6 +34,7 @@ spring:
       local: profiles-local
            , logging-type-console
            , logging-level-local
+           , main_db_single
       dev: profiles-dev
          , logging-type-file
          , logging-level-dev
