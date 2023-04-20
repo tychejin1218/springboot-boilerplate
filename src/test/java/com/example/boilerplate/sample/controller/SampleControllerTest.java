@@ -68,7 +68,7 @@ class SampleControllerTest {
 
       // Given
       setUpMembers();
-      String url = "/api/sample/members";
+      String url = "/sample/members";
       List<String> sorts = Arrays.asList("email,desc", "name,asc");
       MemberDto.Request memberRequest = MemberDto.Request.builder()
           .name("test")
@@ -102,7 +102,7 @@ class SampleControllerTest {
 
       // Given
       Member member = getMemberAfterInsertTodos();
-      String url = "/api/sample/member";
+      String url = "/sample/member";
       MemberDto.Request memberRequest = MemberDto.Request.builder()
           .id(member.getId())
           .build();
@@ -131,7 +131,7 @@ class SampleControllerTest {
 
       // Given
       Member member = getMemberAfterInsertTodos();
-      String url = "/api/sample/member";
+      String url = "/sample/member";
       MemberDto.Request memberRequest = MemberDto.Request.builder()
           .id(member.getId() + 1)
           .build();
@@ -162,7 +162,7 @@ class SampleControllerTest {
     void testInsertMember() throws Exception {
 
       // Given
-      String url = "/api/sample/insert/member";
+      String url = "/sample/insert/member";
       MemberDto.Request memberRequest = MemberDto.Request.builder()
           .name("test")
           .email("test@gmail.co.kr")
@@ -192,7 +192,7 @@ class SampleControllerTest {
 
       // Given
       Member member = getMemberAfterInsertTodos();
-      String url = "/api/sample/update/member";
+      String url = "/sample/update/member";
       MemberDto.Request memberRequest = MemberDto.Request.builder()
           .id(member.getId())
           .name("admin")
@@ -229,7 +229,7 @@ class SampleControllerTest {
 
       // Given
       setUpTodos();
-      String url = "/api/sample/todos";
+      String url = "/sample/todos";
       List<String> sorts = Arrays.asList("id,desc");
       TodoDto.Request todoRequest = TodoDto.Request.builder()
           .title("test")
@@ -265,7 +265,7 @@ class SampleControllerTest {
       // Given
       Todo todo = getTodoAfterInsertTodo();
       Long todoId = todo.getId();
-      String url = "/api/sample/todo";
+      String url = "/sample/todo";
       TodoDto.Request todoRequest = TodoDto.Request.builder()
           .id(todoId)
           .build();
@@ -295,7 +295,7 @@ class SampleControllerTest {
       // Given
       Todo todo = getTodoAfterInsertTodo();
       Long todoId = todo.getId();
-      String url = "/api/sample/todo";
+      String url = "/sample/todo";
       TodoDto.Request todoRequest = TodoDto.Request.builder()
           .id(todoId + 1)
           .build();
@@ -330,7 +330,7 @@ class SampleControllerTest {
       entityManager.flush();
       entityManager.clear();
 
-      String url = "/api/sample/insert/todo";
+      String url = "/sample/insert/todo";
       TodoDto.Request todoRequest = TodoDto.Request.builder()
           .title("Title Test")
           .memberId(memberId)
@@ -363,7 +363,7 @@ class SampleControllerTest {
       // Given
       Todo todo = getTodoAfterInsertTodo();
 
-      String url = "/api/sample/update/todo";
+      String url = "/sample/update/todo";
       TodoDto.Request todoRequest = TodoDto.Request.builder()
           .id(todo.getId())
           .title("Title Test Update")

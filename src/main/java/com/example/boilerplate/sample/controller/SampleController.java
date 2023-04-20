@@ -25,7 +25,7 @@ public class SampleController {
    * Member 목록 조회
    */
   @PostMapping(
-      value = "/api/sample/members",
+      value = "/sample/members",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity getMembers(
@@ -42,7 +42,7 @@ public class SampleController {
    * Member 상세 조회
    */
   @PostMapping(
-      value = "/api/sample/member",
+      value = "/sample/member",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity getMember(
@@ -59,7 +59,7 @@ public class SampleController {
    * Member 저장
    */
   @PostMapping(
-      value = "/api/sample/insert/member",
+      value = "/sample/insert/member",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity insertMember(
@@ -76,7 +76,7 @@ public class SampleController {
    * Member 수정
    */
   @PostMapping(
-      value = "/api/sample/update/member",
+      value = "/sample/update/member",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity updateMember(
@@ -93,7 +93,7 @@ public class SampleController {
    * To-Do 목록 조회
    */
   @PostMapping(
-      value = "/api/sample/todos",
+      value = "/sample/todos",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity getTodos(
@@ -110,7 +110,7 @@ public class SampleController {
    * To-Do 상세 조회
    */
   @PostMapping(
-      value = "/api/sample/todo",
+      value = "/sample/todo",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity getTodo(
@@ -127,7 +127,7 @@ public class SampleController {
    * To-Do 저장
    */
   @PostMapping(
-      value = "/api/sample/insert/todo",
+      value = "/sample/insert/todo",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity insertTodo(
@@ -144,7 +144,7 @@ public class SampleController {
    * To-Do 수정
    */
   @PostMapping(
-      value = "/api/sample/update/todo",
+      value = "/sample/update/todo",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity updateTodo(
