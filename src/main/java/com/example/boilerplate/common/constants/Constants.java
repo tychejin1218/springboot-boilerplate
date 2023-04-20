@@ -63,6 +63,11 @@ public final class Constants {
 
   // DataSource
   public static final String MAIN_DATASOURCE = "mainDataSource";
+  public static final String MAIN_WRITER_DATASOURCE = "mainWriterDatasource";
+  public static final String MAIN_READER_DATASOURCE = "mainReaderDatasource";
+  public static final String MAIN_ROUTING_DATASOURCE = "mainRoutingDatasource";
+  public static final String MAIN_WRITER_KEY = "mainWriterKey";
+  public static final String MAIN_READER_KEY = "mainReaderKey";
   public static final String MAIN_JPA = "mainJpa";
 
   // PREFIX

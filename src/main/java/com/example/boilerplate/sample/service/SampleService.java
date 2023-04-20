@@ -19,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -34,6 +35,7 @@ public class SampleService {
   /**
    * Member 목록 조회
    */
+  @Transactional(readOnly = true)
   public Page<MemberDto.Response> getMembers(MemberDto.Request memberRequest) {
     Page<Member> memberPage =
         memberRepository.findAllByNameContainsAndEmailContains(
@@ -46,6 +48,7 @@ public class SampleService {
   /**
    * Member 상세 조회
    */
+  @Transactional(readOnly = true)
   public MemberDto.Response getMember(MemberDto.Request memberRequest) {
     Member member = memberRepository.findById(memberRequest.getId())
         .orElseThrow(() -> new ApiException(ApiStatus.NOT_FOUND, "존재하지 않는 Member 정보입니다."));
@@ -55,6 +58,7 @@ public class SampleService {
   /**
    * Member 저장
    */
+  @Transactional(readOnly = true)
   public MemberDto.Response insertMember(MemberDto.Request memberRequest) {
     return memberMapStruct.toDto(memberRepository.save(memberMapStruct.toEntity(memberRequest)));
   }
@@ -62,6 +66,7 @@ public class SampleService {
   /**
    * Member 수정
    */
+  @Transactional
   public MemberDto.Response updateMember(MemberDto.Request memberRequest) {
 
     Member member = Member.builder().build();
@@ -87,6 +92,7 @@ public class SampleService {
   /**
    * To-Do 목록 조회
    */
+  @Transactional(readOnly = true)
   public List<TodoDto.Response> getTodos(TodoDto.Request todoRequest) {
 
     log.info("todoRequest:[{}]", todoRequest);
@@ -105,6 +111,7 @@ public class SampleService {
   /**
    * To-Do 상세 조회
    */
+  @Transactional(readOnly = true)
   public TodoDto.Response getTodo(TodoDto.Request todoRequest) {
     Todo todo = todoRepository.findById(todoRequest.getId())
         .orElseThrow(() -> new ApiException(ApiStatus.NOT_FOUND, "존재하지 않는 To-Do 정보입니다."));
@@ -114,6 +121,7 @@ public class SampleService {
   /**
    * To-Do 저장
    */
+  @Transactional
   public TodoDto.Response insertTodo(TodoDto.Request todoRequest) {
     return todoMapStruct.toDto(todoRepository.save(todoMapStruct.toEntity(todoRequest)));
   }
@@ -121,6 +129,7 @@ public class SampleService {
   /**
    * To-Do 수정
    */
+  @Transactional
   public TodoDto.Response updateTodo(TodoDto.Request todoRequest) {
 
     Todo todo = Todo.builder().build();
@@ -150,6 +159,7 @@ public class SampleService {
   /**
    * To-Do 수정 - @DynamicUpdate - completed만 수정
    */
+  @Transactional
   public void updateTodoCompleted(TodoDto.Request todoRequest) {
     TodoDynamic todoDynamic = todoDynamicRepository.findById(todoRequest.getId()).get();
     todoDynamic.updateCompleted(todoRequest.getCompleted());

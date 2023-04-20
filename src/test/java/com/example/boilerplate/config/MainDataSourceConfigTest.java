@@ -40,7 +40,7 @@ class MainDataSourceConfigTest {
       // Then
       log.debug("hikariDataSource : [{}]", hikariDataSource);
       assertEquals(hikariDataSource.getDriverClassName(), driverClassName);
-      assertEquals(hikariDataSource.getJdbcUrl(),jdbcUrl);
+      assertEquals(hikariDataSource.getJdbcUrl(), jdbcUrl);
       assertEquals(hikariDataSource.isReadOnly(), readOnly);
       assertEquals(hikariDataSource.getUsername(), username);
     }

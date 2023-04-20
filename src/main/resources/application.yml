@@ -29,15 +29,16 @@ spring:
   main:
     allow-bean-definition-overriding: true
   profiles:
-    active: local
+    active: dev
     group:
       local: profiles-local
            , logging-type-console
            , logging-level-local
            , main_db_single
       dev: profiles-dev
-         , logging-type-file
+         , logging-type-console
          , logging-level-dev
+         , main_db_replication
 
 ---
 # LOCAL 설정
@@ -55,4 +56,4 @@ spring:
   config:
     import:
       classpath:config/datasource/datasource-dev.yml,
-      classpath:config/environment/environment-local.yml
+      classpath:config/environment/environment-dev.yml

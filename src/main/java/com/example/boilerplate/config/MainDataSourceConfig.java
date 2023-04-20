@@ -3,6 +3,8 @@ package com.example.boilerplate.config;
 import com.example.boilerplate.common.constants.Constants;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zaxxer.hikari.HikariDataSource;
+import java.util.HashMap;
+import java.util.Map;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
@@ -20,6 +22,7 @@ import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -43,6 +46,49 @@ public class MainDataSourceConfig implements DataSourceConfig {
   @ConfigurationProperties(prefix = Constants.MAIN_DATASOURCE_PROPERTY_PREFIX + ".single")
   public DataSource dataSource() {
     return DataSourceBuilder.create().type(HikariDataSource.class).build();
+  }
+
+  @Profile("main_db_replication")
+  @Configuration
+  class ReplicationConfig {
+
+    @Bean(Constants.MAIN_WRITER_DATASOURCE)
+    @ConfigurationProperties(prefix = Constants.MAIN_DATASOURCE_PROPERTY_PREFIX + ".writer")
+    public DataSource writerDataSource() {
+      return DataSourceBuilder.create().type(HikariDataSource.class).build();
+    }
+
+    @Primary
+    @Bean(Constants.MAIN_READER_DATASOURCE)
+    @ConfigurationProperties(prefix = Constants.MAIN_DATASOURCE_PROPERTY_PREFIX + ".reader")
+    public DataSource readerDataSource() {
+      return DataSourceBuilder.create().type(HikariDataSource.class).build();
+    }
+
+    @Primary
+    @Bean(Constants.MAIN_ROUTING_DATASOURCE)
+    public DataSource routingDataSource(
+        @Qualifier(Constants.MAIN_WRITER_DATASOURCE) DataSource writerDataSource,
+        @Qualifier(Constants.MAIN_READER_DATASOURCE) DataSource readerDataSource) {
+
+      MainRoutingDataSource mainRoutingDataSource = new MainRoutingDataSource();
+
+      Map<Object, Object> dataSourceMap = new HashMap<>();
+      dataSourceMap.put(Constants.MAIN_WRITER_KEY, writerDataSource);
+      dataSourceMap.put(Constants.MAIN_READER_KEY, readerDataSource);
+
+      mainRoutingDataSource.setTargetDataSources(dataSourceMap);
+      mainRoutingDataSource.setDefaultTargetDataSource(writerDataSource);
+
+      return mainRoutingDataSource;
+    }
+
+    @Primary
+    @Bean(Constants.MAIN_DATASOURCE)
+    public DataSource dataSourceReplication(
+        @Qualifier(Constants.MAIN_ROUTING_DATASOURCE) DataSource routingDataSource) {
+      return new LazyConnectionDataSourceProxy(routingDataSource);
+    }
   }
 
   @Primary
