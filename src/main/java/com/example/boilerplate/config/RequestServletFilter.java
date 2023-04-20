@@ -17,7 +17,6 @@ public class RequestServletFilter implements Filter {
       ServletRequest request,
       ServletResponse response,
       FilterChain chain) throws IOException, ServletException {
-
     chain.doFilter(new RequestServletWrapper((HttpServletRequest) request), response);
   }
 }
