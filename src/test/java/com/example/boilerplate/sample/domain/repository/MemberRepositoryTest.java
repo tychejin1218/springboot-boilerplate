@@ -8,7 +8,7 @@ import com.example.boilerplate.sample.domain.entity.Member;
 import com.example.boilerplate.sample.domain.entity.Todo;
 import java.util.List;
 import java.util.Optional;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;

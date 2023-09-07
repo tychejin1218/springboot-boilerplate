@@ -4,6 +4,6 @@
 
 - #### 개발 환경
     - ##### IDE(IntelliJ IDEA 2022.3.1)
-    - ##### JDK 11
-    - ##### Spring Boot 2.7.9
-    - ##### Gradle 7.5.1
+    - ##### JDK 17
+    - ##### Spring Boot 3.1.3
+    - ##### Gradle 8.2.1

@@ -2,7 +2,7 @@ package com.example.boilerplate.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import javax.annotation.Resource;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.jasypt.encryption.StringEncryptor;
 import org.junit.jupiter.api.DisplayName;

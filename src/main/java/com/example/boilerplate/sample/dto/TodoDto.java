@@ -1,7 +1,7 @@
 package com.example.boilerplate.sample.dto;
 
 import com.example.boilerplate.common.dto.PageDto;
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

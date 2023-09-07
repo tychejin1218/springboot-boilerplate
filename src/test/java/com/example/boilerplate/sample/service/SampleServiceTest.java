@@ -16,7 +16,7 @@ import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
 import java.util.Arrays;
 import java.util.List;
-import javax.persistence.EntityManager;
+import jakarta.persistence.EntityManager;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
