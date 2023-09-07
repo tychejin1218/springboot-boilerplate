@@ -13,7 +13,7 @@ import org.springframework.util.StreamUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Slf4j
-@Component("AioInterceptor")
+@Component("SampleInterceptor")
 public class SampleInterceptor implements HandlerInterceptor {
 
   @Override

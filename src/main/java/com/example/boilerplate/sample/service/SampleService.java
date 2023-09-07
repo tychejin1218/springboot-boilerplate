@@ -58,7 +58,7 @@ public class SampleService {
   /**
    * Member 저장
    */
-  @Transactional(readOnly = true)
+  @Transactional
   public MemberDto.Response insertMember(MemberDto.Request memberRequest) {
     return memberMapStruct.toDto(memberRepository.save(memberMapStruct.toEntity(memberRequest)));
   }

@@ -1,0 +1,42 @@
+### To-Do 목록 조회
+POST http://localhost:9091/api/sample/todos
+Content-Type: application/json
+
+{
+  "title": "test",
+  "description": "test",
+  "completed": true,
+  "page": 1,
+  "size": 10,
+  "sorts": ["id,desc"]
+}
+
+### To-Do 상세 조회
+POST http://localhost:9091/api/sample/todo
+Content-Type: application/json
+
+{
+  "id": 35571
+}
+
+### To-Do 저장
+POST http://localhost:9091/api/sample/insert/todo
+Content-Type: application/json
+
+{
+  "memberId": 6063,
+  "title": "Title Test Insert",
+  "description": "Description Test Insert",
+  "completed": false
+}
+
+### To-Do 수정
+POST http://localhost:9091/api/sample/update/todo
+Content-Type: application/json
+
+{
+  "id": 35575,
+  "title": "Title Test Update",
+  "description": "Description Test Update",
+  "completed": true
+}
