@@ -2,6 +2,7 @@ package com.example.boilerplate.sample.domain.repository;
 
 import com.example.boilerplate.sample.domain.entity.Member;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -11,6 +12,11 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 public interface MemberRepository extends
     JpaRepository<Member, Long>,
     JpaSpecificationExecutor<Member> {
+
+  /**
+   * Query Method을 사용하여 Member를 조회
+   */
+  Optional<Member> findByEmail(String email);
 
   /**
    * Query Method을 사용하여 Member 목록 조회

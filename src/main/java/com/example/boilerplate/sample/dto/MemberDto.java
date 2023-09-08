@@ -21,6 +21,7 @@ public class MemberDto {
   public static class Request extends PageDto {
 
     private Long id;
+    private String password;
     private String name;
     private String email;
   }
@@ -34,6 +35,7 @@ public class MemberDto {
   public static class Response {
 
     private Long id;
+    private String password;
     private String name;
     private String email;
 

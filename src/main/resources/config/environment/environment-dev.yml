@@ -3,3 +3,8 @@ jasypt:
   encryptor:
     bean: jasyptStringEncryptor
     password: gYnK0KZ/3UonUIRzdEHIWiy87fie0dZcIUrDH1KNK1zq24Dg2K18FftH/m1TCVoC
+
+# JWT 설정
+jwt:
+  header: Authorization
+  secret-key: c3ByaW5nYm9vdC5ib2lsZXJwbGF0ZS5qd3Quc2VjcmV0

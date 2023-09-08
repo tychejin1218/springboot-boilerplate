@@ -20,6 +20,7 @@ public enum ApiStatus {
   DUPLICATED_REQUEST("803", "중복된 요청입니다."),
   NOT_FOUND("804", "존재하지 않는 정보입니다."),
   UNAUTHORIZED("805", "유효하지 않은 권한입니다."),
+  ALREADY_EXISTS_EMAIL("806", "이미 존재하는 이메일입니다."),
 
   // Exception Handler 에러 코드
   INTERNAL_SERVER_ERROR("900", "내부 오류가 발생했습니다. 확인 후 다시 시도해주세요."),
