@@ -17,7 +17,7 @@ public class SignDto {
   @ToString
   public static class Request {
 
-    private String username;
+    private String email;
     private String password;
   }
 

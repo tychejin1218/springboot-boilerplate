@@ -38,7 +38,7 @@ public class SignService {
 
   public SignDto.Response signIn(SignDto.Request signRequest) {
 
-    Member member = memberRepository.findByEmail(signRequest.getUsername())
+    Member member = memberRepository.findByEmail(signRequest.getEmail())
         .orElseThrow(() -> new ApiException(ApiStatus.INVALID_REQUEST));
 
     if (!passwordEncoder.matches(signRequest.getPassword(), member.getPassword())) {

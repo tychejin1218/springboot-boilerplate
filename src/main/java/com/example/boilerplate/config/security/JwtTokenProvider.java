@@ -5,7 +5,6 @@ import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -20,8 +19,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -37,6 +34,13 @@ public class JwtTokenProvider {
 
   private final long tokenValidTime = 1000L * 60 * 1;
 
+  /**
+   * JWT 토큰 생성
+   *
+   * @param subject 회원을 식별할 수 있는 유일한 값(Email)
+   * @param roles   회원 권한(ROLE_ADMIN, ROLE_USER)
+   * @return 생성된 JWT 토큰
+   */
   public String createToken(String subject, List<String> roles) {
 
     Map<String, Object> headerMap = new HashMap<>();
@@ -46,21 +50,30 @@ public class JwtTokenProvider {
     Map<String, Object> claims = new HashMap<>();
     claims.put("roles", roles);
 
-    Date expireTime = new Date();
-    expireTime.setTime(expireTime.getTime() + tokenValidTime);
-
     return Jwts.builder()
         .setHeader(headerMap)
         .setClaims(claims)
         .setSubject(subject)
-        .setExpiration(expireTime)
+        .setExpiration(new Date(System.currentTimeMillis() + tokenValidTime))
         .signWith(SignatureAlgorithm.HS256, secretKey).compact();
   }
 
-  public String getToken(HttpServletRequest request) {
+  /**
+   * Request의 Header에서 JWT 토큰 추출 - Authorization: JWT 토큰
+   *
+   * @param request HttpServletRequest
+   * @return 추출된 JWT 토큰
+   */
+  public String getResolveToken(HttpServletRequest request) {
     return request.getHeader(header);
   }
 
+  /**
+   * JWT 토큰의 유효성 및 만료일 확인
+   *
+   * @param token JWT 토큰
+   * @return 토큰이 유효한지 여부
+   */
   public boolean validateToken(String token) {
     try {
       Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
@@ -70,6 +83,12 @@ public class JwtTokenProvider {
     }
   }
 
+  /**
+   * JWT 토큰으로부터 인증 정보 추출
+   *
+   * @param token JWT 토큰
+   * @return 추출된 인증 정보
+   */
   public Authentication getAuthentication(String token) {
 
     Claims claims = Jwts
@@ -79,9 +98,10 @@ public class JwtTokenProvider {
         .parseClaimsJws(token)
         .getBody();
 
+    List<String> roles = (List<String>) claims.get("roles");
     Collection<? extends GrantedAuthority> authorities =
-        Arrays.stream(claims.get(header).toString().split(","))
-            .map(role -> new SimpleGrantedAuthority(role))
+        roles.stream()
+            .map(SimpleGrantedAuthority::new)
             .collect(Collectors.toList());
 
     User principal = new User(claims.getSubject(), "", authorities);

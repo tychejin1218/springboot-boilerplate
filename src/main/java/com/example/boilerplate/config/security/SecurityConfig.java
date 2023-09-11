@@ -27,7 +27,7 @@ public class SecurityConfig {
    *
    * @param http HttpSecurity
    * @return SecurityFilterChain
-   * @throws Exception 예외 발생 시
+   * @throws Exception
    */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -45,11 +45,22 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
         )
         .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-            UsernamePasswordAuthenticationFilter.class);
+            UsernamePasswordAuthenticationFilter.class)
+        .exceptionHandling(
+            exceptionHandling ->
+                exceptionHandling.accessDeniedHandler(new JwtAccessDeniedHandler()))
+        .exceptionHandling(
+            exceptionHandling ->
+                exceptionHandling.authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
     return http.build();
   }
 
+  /**
+   * PasswordEncoder 빈을 생성
+   *
+   * @return PasswordEncoder
+   */
   @Bean
   public PasswordEncoder passwordEncoder() {
     return new BCryptPasswordEncoder();
