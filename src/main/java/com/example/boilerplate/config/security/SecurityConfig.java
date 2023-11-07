@@ -27,7 +27,7 @@ public class SecurityConfig {
    *
    * @param http HttpSecurity
    * @return SecurityFilterChain
-   * @throws Exception
+   * @throws Exception exception
    */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -42,6 +42,8 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorizeHttpRequests -> authorizeHttpRequests
                 .requestMatchers("/sign/signin", "/sign/signup").permitAll()
+                .requestMatchers("/admin").hasRole("ADMIN")
+                .requestMatchers("/user").hasRole("USER")
                 .anyRequest().authenticated()
         )
         .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
