@@ -1,6 +1,5 @@
 package com.example.boilerplate.sign.controller;
 
-import com.example.boilerplate.common.dto.CustomUser;
 import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sign.dto.SignDto;
@@ -12,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,8 +51,8 @@ public class SignController {
   }
 
   @GetMapping(value = "/admin", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity amdin(@AuthenticationPrincipal CustomUser customUser) {
-    log.debug("customUser : {}", customUser);
+  public ResponseEntity amdin(@AuthenticationPrincipal User user) {
+    log.debug("user : {}", user);
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(BaseResponse.builder()
@@ -62,8 +62,8 @@ public class SignController {
   }
 
   @GetMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity user(@AuthenticationPrincipal CustomUser customUser) {
-    log.debug("customUser : {}", customUser);
+  public ResponseEntity user(@AuthenticationPrincipal User user) {
+    log.debug("user : {}", user);
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(BaseResponse.builder()

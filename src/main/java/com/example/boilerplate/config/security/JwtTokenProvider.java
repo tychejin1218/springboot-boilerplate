@@ -1,5 +1,6 @@
 package com.example.boilerplate.config.security;
 
+import com.example.boilerplate.common.dto.CustomUser;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -19,12 +20,16 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @RequiredArgsConstructor
 @Component
 public class JwtTokenProvider {
+
+  private final UserDetailsService userDetailsService;
 
   @Value("${jwt.header}")
   private String header;
@@ -87,25 +92,21 @@ public class JwtTokenProvider {
    * JWT 토큰으로부터 인증 정보 추출
    *
    * @param token JWT 토큰
-   * @return 추출된 인증 정보
+   * @return Authentication 추출된 인증 정보
    */
   public Authentication getAuthentication(String token) {
+    UserDetails userDetails = userDetailsService.loadUserByUsername(getSubject(token));
+    log.debug("userDetails : {}", userDetails);
+    return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
+  }
 
-    Claims claims = Jwts
-        .parserBuilder()
-        .setSigningKey(secretKey)
-        .build()
-        .parseClaimsJws(token)
-        .getBody();
-
-    List<String> roles = (List<String>) claims.get("roles");
-    Collection<? extends GrantedAuthority> authorities =
-        roles.stream()
-            .map(SimpleGrantedAuthority::new)
-            .collect(Collectors.toList());
-
-    User principal = new User(claims.getSubject(), "", authorities);
-
-    return new UsernamePasswordAuthenticationToken(principal, token, authorities);
+  /**
+   * JWT 토큰으로부터 subject 추출
+   *
+   * @param token JWT 토큰
+   * @return String 추출된 subject
+   */
+  public String getSubject(String token) {
+    return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
   }
 }

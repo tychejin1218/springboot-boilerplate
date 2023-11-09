@@ -1,5 +1,6 @@
 package com.example.boilerplate.config.security;
 
+import com.example.boilerplate.common.dto.CustomUser;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -9,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 @Slf4j
@@ -41,8 +41,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       SecurityContextHolder.getContext().setAuthentication(auth);
 
       Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-      UserDetails userDetails = (UserDetails) principal;
-      log.info("username:{}, password:{}", userDetails.getUsername(), userDetails.getPassword());
+      CustomUser customUser = (CustomUser) principal;
+      log.debug("customUser : {}", customUser);
     }
 
     filterChain.doFilter(request, response);
