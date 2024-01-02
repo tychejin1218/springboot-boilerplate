@@ -34,6 +34,9 @@ public class SampleService {
 
   /**
    * Member 목록 조회
+   *
+   * @param memberRequest MemberDto.Request
+   * @return Page&lt;MemberDto.Response&gt;
    */
   @Transactional(readOnly = true)
   public Page<MemberDto.Response> getMembers(MemberDto.Request memberRequest) {
@@ -47,6 +50,9 @@ public class SampleService {
 
   /**
    * Member 상세 조회
+   *
+   * @param memberRequest MemberDto.Request
+   * @return MemberDto.Response
    */
   @Transactional(readOnly = true)
   public MemberDto.Response getMember(MemberDto.Request memberRequest) {
@@ -57,6 +63,9 @@ public class SampleService {
 
   /**
    * Member 저장
+   *
+   * @param memberRequest MemberDto.Request
+   * @return MemberDto.Response
    */
   @Transactional
   public MemberDto.Response insertMember(MemberDto.Request memberRequest) {
@@ -65,6 +74,9 @@ public class SampleService {
 
   /**
    * Member 수정
+   *
+   * @param memberRequest MemberDto.Request
+   * @return MemberDto.Response
    */
   @Transactional
   public MemberDto.Response updateMember(MemberDto.Request memberRequest) {
@@ -91,12 +103,12 @@ public class SampleService {
 
   /**
    * To-Do 목록 조회
+   *
+   * @param todoRequest TodoDto.Request
+   * @return List&lt;TodoDto.Response&gt;
    */
   @Transactional(readOnly = true)
   public List<TodoDto.Response> getTodos(TodoDto.Request todoRequest) {
-
-    log.info("todoRequest:[{}]", todoRequest);
-
     List<Todo> todos =
         todoRepository
             .findAllByTitleContainingIgnoreCaseAndDescriptionContainingIgnoreCaseAndCompletedOrderByIdDesc(
@@ -104,12 +116,14 @@ public class SampleService {
                 todoRequest.getDescription(),
                 todoRequest.getCompleted()
             );
-
     return todoMapStruct.todosToTodoResponses(todos);
   }
 
   /**
    * To-Do 상세 조회
+   *
+   * @param todoRequest TodoDto.Request
+   * @return TodoDto.Response
    */
   @Transactional(readOnly = true)
   public TodoDto.Response getTodo(TodoDto.Request todoRequest) {
@@ -120,6 +134,9 @@ public class SampleService {
 
   /**
    * To-Do 저장
+   *
+   * @param todoRequest TodoDto.Request
+   * @return TodoDto.Response
    */
   @Transactional
   public TodoDto.Response insertTodo(TodoDto.Request todoRequest) {
@@ -128,6 +145,9 @@ public class SampleService {
 
   /**
    * To-Do 수정
+   *
+   * @param todoRequest TodoDto.Request
+   * @return TodoDto.Response
    */
   @Transactional
   public TodoDto.Response updateTodo(TodoDto.Request todoRequest) {
@@ -158,6 +178,8 @@ public class SampleService {
 
   /**
    * To-Do 수정 - @DynamicUpdate - completed만 수정
+   *
+   * @param todoRequest TodoDto.Request
    */
   @Transactional
   public void updateTodoCompleted(TodoDto.Request todoRequest) {

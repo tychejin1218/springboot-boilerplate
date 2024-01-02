@@ -20,7 +20,7 @@ public class CustomUser extends User {
   @Serial
   private static final long serialVersionUID = 2766590282782490762L;
 
-  private Member member;
+  private transient Member member;
 
   public CustomUser(Member member) {
     super(member.getName(), member.getPassword(), getAuthorities(member.getRole()));

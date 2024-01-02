@@ -23,6 +23,9 @@ public class SampleController {
 
   /**
    * Member 목록 조회
+   *
+   * @param memberRequest MemberDto.Request
+   * @return ResponseEntity
    */
   @PostMapping(
       value = "/sample/members",
@@ -40,6 +43,9 @@ public class SampleController {
 
   /**
    * Member 상세 조회
+   *
+   * @param memberRequest MemberDto.Request
+   * @return ResponseEntity
    */
   @PostMapping(
       value = "/sample/member",
@@ -57,6 +63,9 @@ public class SampleController {
 
   /**
    * Member 저장
+   *
+   * @param memberRequest MemberDto.Request
+   * @return ResponseEntity
    */
   @PostMapping(
       value = "/sample/insert/member",
@@ -74,6 +83,9 @@ public class SampleController {
 
   /**
    * Member 수정
+   *
+   * @param memberRequest MemberDto.Request
+   * @return ResponseEntity
    */
   @PostMapping(
       value = "/sample/update/member",
@@ -91,6 +103,9 @@ public class SampleController {
 
   /**
    * To-Do 목록 조회
+   *
+   * @param todoRequest TodoDto.Request
+   * @return ResponseEntity
    */
   @PostMapping(
       value = "/sample/todos",
@@ -108,6 +123,9 @@ public class SampleController {
 
   /**
    * To-Do 상세 조회
+   *
+   * @param todoRequest TodoDto.Request
+   * @return ResponseEntity
    */
   @PostMapping(
       value = "/sample/todo",
@@ -125,6 +143,9 @@ public class SampleController {
 
   /**
    * To-Do 저장
+   *
+   * @param todoRequest TodoDto.Request
+   * @return ResponseEntity
    */
   @PostMapping(
       value = "/sample/insert/todo",
@@ -142,6 +163,9 @@ public class SampleController {
 
   /**
    * To-Do 수정
+   *
+   * @param todoRequest TodoDto.Request
+   * @return ResponseEntity
    */
   @PostMapping(
       value = "/sample/update/todo",

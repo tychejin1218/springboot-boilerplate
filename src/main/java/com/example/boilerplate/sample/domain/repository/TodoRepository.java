@@ -13,6 +13,11 @@ public interface TodoRepository extends
 
   /**
    * Query Method을 사용하여 To-Do 목록 조회
+   *
+   * @param title String
+   * @param description String
+   * @param completed Boolean
+   * @return List&lt;Todo&gt;
    */
   @EntityGraph(attributePaths = {ENTITY_GRAPH_MEMBER})
   List<Todo> findAllByTitleContainingIgnoreCaseAndDescriptionContainingIgnoreCaseAndCompletedOrderByIdDesc(

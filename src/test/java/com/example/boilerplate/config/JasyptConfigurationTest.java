@@ -27,10 +27,10 @@ class JasyptConfigurationTest {
     String message = "password1!";
 
     String messageEncrypt = stringEncryptor.encrypt(message);
-    log.info("messageEncrypt:[{}]", messageEncrypt);
+    log.debug("messageEncrypt:[{}]", messageEncrypt);
 
     String messageDecrypt = stringEncryptor.decrypt(messageEncrypt);
-    log.info("messageDecrypt:[{}]", messageDecrypt);
+    log.debug("messageDecrypt:[{}]", messageDecrypt);
 
     assertEquals(message, messageDecrypt, "평문을 암호화한 후 복호화했을 때 최초의 평문과 같음");
   }

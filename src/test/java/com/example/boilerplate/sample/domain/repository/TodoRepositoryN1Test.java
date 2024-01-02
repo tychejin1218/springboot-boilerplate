@@ -45,7 +45,7 @@ class TodoRepositoryN1Test {
       // 해결 방법
       // 1. fetch join -> inner join
       // 2. @EntityGraph -> left outer join
-      log.info("Member의 name을 조회 : {}", todo.getMember().getName());
+      log.debug("Member의 name을 조회 : {}", todo.getMember().getName());
     }
 
     // Then

@@ -24,6 +24,12 @@ public class SignController {
 
   private final SignService securityService;
 
+  /**
+   * 회원가입
+   *
+   * @param memberRequest MemberDto.Request
+   * @return ResponseEntity
+   */
   @PostMapping(
       value = "/sign/signup",
       consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -37,6 +43,12 @@ public class SignController {
             .build());
   }
 
+  /**
+   * 로그인
+   *
+   * @param signRequest SignDto.Request
+   * @return ResponseEntity
+   */
   @PostMapping(
       value = "/sign/signin",
       consumes = MediaType.APPLICATION_JSON_VALUE,
@@ -50,6 +62,12 @@ public class SignController {
             .build());
   }
 
+  /**
+   * 관리자 조회 테스트
+   *
+   * @param user User - 헤더의 'Authorization' 키를 통해 획득된 토큰으로부터 인증 정보 추출
+   * @return ResponseEntity
+   */
   @GetMapping(value = "/admin", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity amdin(@AuthenticationPrincipal User user) {
     log.debug("user : {}", user);
@@ -61,6 +79,12 @@ public class SignController {
             .build());
   }
 
+  /**
+   * 사용자 조회 테스트
+   *
+   * @param user User - 헤더의 'Authorization' 키를 통해 획득된 토큰으로부터 인증 정보 추출
+   * @return ResponseEntity
+   */
   @GetMapping(value = "/user", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity user(@AuthenticationPrincipal User user) {
     log.debug("user : {}", user);

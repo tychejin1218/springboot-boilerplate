@@ -25,6 +25,12 @@ public class SignService {
   private final JwtTokenProvider jwtTokenProvider;
   private final PasswordEncoder passwordEncoder;
 
+  /**
+   * 회원가입
+   *
+   * @param memberRequest MemberDto.Request
+   * @return MemberDto.Response
+   */
   public MemberDto.Response signUp(MemberDto.Request memberRequest) {
     if (memberRepository.findByEmail(memberRequest.getEmail()).isPresent()) {
       throw new ApiException(ApiStatus.ALREADY_EXISTS_EMAIL);
@@ -36,6 +42,12 @@ public class SignService {
     return memberMapStruct.toDto(memberRepository.save(member));
   }
 
+  /**
+   * 로그인
+   *
+   * @param signRequest SignDto.Request
+   * @return SignDto.Response
+   */
   public SignDto.Response signIn(SignDto.Request signRequest) {
 
     Member member = memberRepository.findByEmail(signRequest.getEmail())
