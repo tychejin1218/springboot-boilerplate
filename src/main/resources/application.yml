@@ -49,6 +49,7 @@ spring:
       classpath:config/datasource/datasource-local.yml,
       classpath:config/environment/environment-local.yml
 
+
 ---
 # DEV 설정
 spring.config.activate.on-profile: "profiles-dev"
