@@ -76,7 +76,10 @@ public class JwtTokenProvider {
    */
   public boolean validateToken(String token) {
     try {
-      Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
+      Jws<Claims> claims = Jwts.parserBuilder()
+          .setSigningKey(secretKey)
+          .build()
+          .parseClaimsJws(token);
       return !claims.getBody().getExpiration().before(new Date());
     } catch (Exception e) {
       return false;
@@ -102,6 +105,11 @@ public class JwtTokenProvider {
    * @return String 추출된 subject
    */
   public String getSubject(String token) {
-    return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
+    return Jwts.parserBuilder()
+        .setSigningKey(secretKey)
+        .build()
+        .parseClaimsJws(token)
+        .getBody()
+        .getSubject();
   }
 }
