@@ -1,6 +1,6 @@
 # SERVER 설정
 server:
-  port: 9091
+  port: 9092
   servlet:
     context-path: /api
   error:
@@ -16,6 +16,28 @@ server:
       rotate: true
     basedir: .
 
+---
+# Config 설정
+spring:
+  application:
+    # Config Server에서 참조하는 설정 파일의 애플리케이션 이름을 설정
+    name: datasource
+  config:
+    # 외부 설정 파일 설정 - Config Server 정보를 설정
+    import: "optional:configserver:http://localhost:9091/"
+  cloud:
+    config:
+      # 활성화할 프로파일을 설정(local, dev, qa, prod)
+      profile: cloud
+
+# Actuator 설정
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+---
 # SPRING 설정
 spring:
   web:
@@ -29,7 +51,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   profiles:
-    active: local
+    active: cloud
     group:
       local: profiles-local
            , logging-type-console
@@ -39,6 +61,10 @@ spring:
          , logging-type-console
          , logging-level-dev
          , main_db_replication
+      cloud: profiles-cloud
+         , logging-type-console
+         , logging-level-local
+         , main_db_single
 
 ---
 # LOCAL 설정
@@ -58,3 +84,11 @@ spring:
     import:
       classpath:config/datasource/datasource-dev.yml,
       classpath:config/environment/environment-dev.yml
+
+---
+# CLOUD 설정
+spring.config.activate.on-profile: "profiles-cloud"
+spring:
+  config:
+    import:
+      classpath:config/environment/environment-local.yml

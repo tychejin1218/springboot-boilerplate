@@ -53,6 +53,7 @@
     <property name="LOG_LEVEL_org.hibernate" value="INFO"/>
     <property name="LOG_LEVEL_org.hibernate.SQL" value="DEBUG"/>
     <property name="LOG_LEVEL_org.hibernate.type.descriptor.sql.BasicBinder" value="TRACE"/>
+    <property name="LOG_LEVEL_org.springframework.cloud.config.client" value="DEBUG"/>
   </springProfile>
   <springProfile name="logging-level-dev">
     <property name="LOG_LEVEL_root" value="INFO"/>
@@ -62,6 +63,7 @@
     <property name="LOG_LEVEL_org.hibernate" value="INFO"/>
     <property name="LOG_LEVEL_org.hibernate.SQL" value="DEBUG"/>
     <property name="LOG_LEVEL_org.hibernate.type.descriptor.sql.BasicBinder" value="TRACE"/>
+    <property name="LOG_LEVEL_org.springframework.cloud.config.client" value="DEBUG"/>
   </springProfile>
 
   <!-- 로그 레벨 설정 -->
@@ -100,6 +102,12 @@
   </logger>
   <logger name="org.hibernate.type.descriptor.sql.BasicBinder"
     level="${LOG_LEVEL_org.hibernate.type.descriptor.sql.BasicBinder}"
+    additivity="false">
+    <appender-ref ref="PROFILE-APPENDER"/>
+  </logger>
+  <!-- Config Client -->
+  <logger name="org.springframework.cloud.config.client"
+    level="${LOG_LEVEL_org.springframework.cloud.config.client}"
     additivity="false">
     <appender-ref ref="PROFILE-APPENDER"/>
   </logger>

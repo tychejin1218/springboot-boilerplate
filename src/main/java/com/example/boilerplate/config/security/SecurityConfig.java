@@ -42,6 +42,7 @@ public class SecurityConfig {
         .authorizeHttpRequests(
             authorizeHttpRequests -> authorizeHttpRequests
                 .requestMatchers("/sign/signin", "/sign/signup").permitAll()
+                .requestMatchers("/actuator/refresh" ).permitAll()
                 .requestMatchers("/admin").hasRole("ADMIN")
                 .requestMatchers("/user").hasRole("USER")
                 .anyRequest().authenticated()
