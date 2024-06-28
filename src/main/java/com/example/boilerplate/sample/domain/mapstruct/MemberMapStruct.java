@@ -13,6 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 @Mapper(componentModel = "spring")
 public interface MemberMapStruct {
 
+  @Mapping(target = "role", ignore = true)
   @Mapping(target = "todos", ignore = true)
   @Mapping(source = "password", target = "password", qualifiedByName = "encryptPassword")
   Member toEntity(MemberDto.Request memberRequest);

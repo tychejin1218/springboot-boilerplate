@@ -76,7 +76,7 @@ public class JwtTokenProvider {
    */
   public boolean validateToken(String token) {
     try {
-      Jws<Claims> claims = Jwts.parserBuilder()
+      Jws<Claims> claims = Jwts.parser()
           .setSigningKey(secretKey)
           .build()
           .parseClaimsJws(token);
@@ -105,7 +105,7 @@ public class JwtTokenProvider {
    * @return String 추출된 subject
    */
   public String getSubject(String token) {
-    return Jwts.parserBuilder()
+    return Jwts.parser()
         .setSigningKey(secretKey)
         .build()
         .parseClaimsJws(token)
