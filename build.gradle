@@ -52,7 +52,10 @@ dependencies {
     // Database
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.2'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'org.postgresql:postgresql:42.6.0'
+    // PostgreSQL
+    //implementation 'org.postgresql:postgresql:42.7.3'
+    // MySQL
+    implementation 'com.mysql:mysql-connector-j:8.4.0'
 
     // QueryDSL
     implementation 'com.querydsl:querydsl-core'
