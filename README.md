@@ -1,9 +1,9 @@
-## [Spring Boot] Spring Boot 개발 환경 구축하기
+## [Spring Boot] Spring Boot Backend Boilerplate
 - #### 개요
-    - ##### Spring Boot를 이용하여 개발 환경을 구축
+    - ##### Spring Boot를 이용하여 Backend 개발 환경을 구축
 
 - #### 개발 환경
-    - ##### IDE(IntelliJ IDEA 2022.3.1)
+    - ##### IDE(IntelliJ IDEA 2023.3.4)
     - ##### JDK 17
-    - ##### Spring Boot 3.1.3
-    - ##### Gradle 8.2.1
+    - ##### Spring Boot 3.3.1
+    - ##### Gradle 8.8
