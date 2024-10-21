@@ -61,16 +61,5 @@ public final class Constants {
   public static final String THREE_STR = "3";
   public static final int INDEX_NOT_FOUND = -1;
 
-  // DataSource
-  public static final String MAIN_DATASOURCE = "mainDataSource";
-  public static final String MAIN_WRITER_DATASOURCE = "mainWriterDatasource";
-  public static final String MAIN_READER_DATASOURCE = "mainReaderDatasource";
-  public static final String MAIN_ROUTING_DATASOURCE = "mainRoutingDatasource";
-  public static final String MAIN_WRITER_KEY = "mainWriterKey";
-  public static final String MAIN_READER_KEY = "mainReaderKey";
-  public static final String MAIN_JPA = "mainJpa";
 
-  // PREFIX
-  public static final String MAIN_DATASOURCE_PROPERTY_PREFIX = "main.datasource";
-  public static final String MAIN_JPA_PREFIX = "main.jpa";
 }

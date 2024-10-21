@@ -5,7 +5,6 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import java.util.HashMap;
 import java.util.Map;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
@@ -23,94 +22,163 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
+import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @AllArgsConstructor
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 @EnableTransactionManagement
 @EnableJpaRepositories(
     basePackages = Constants.BASE_PACKAGE + ".*.domain.repository",
-    entityManagerFactoryRef = Constants.MAIN_DATASOURCE + "EntityManagerFactory",
-    transactionManagerRef = Constants.MAIN_DATASOURCE + "PlatformTransactionManager"
+    entityManagerFactoryRef = MainDataSourceConfig.MAIN_DATASOURCE + "EntityManagerFactory",
+    transactionManagerRef = MainDataSourceConfig.MAIN_DATASOURCE + "PlatformTransactionManager"
 )
 @Configuration
 public class MainDataSourceConfig implements DataSourceConfig {
 
+  public static final String MAIN_DATASOURCE = "mainDataSource";
+  private static final String MAIN_WRITER_DATASOURCE = "mainWriterDatasource";
+  private static final String MAIN_READER_DATASOURCE = "mainReaderDatasource";
+  private static final String MAIN_ROUTING_DATASOURCE = "mainRoutingDatasource";
+  private static final String MAIN_JPA = "mainJpa";
+  private static final String MAIN_DATASOURCE_PROPERTY_PREFIX = "main.datasource";
+
+  /**
+   * 단일 데이터베이스 구성을 위한 데이터 소스 빈을 설정
+   *
+   * @return DataSource
+   */
   @Profile("main_db_single")
   @Primary
-  @Bean(Constants.MAIN_DATASOURCE)
-  @ConfigurationProperties(prefix = Constants.MAIN_DATASOURCE_PROPERTY_PREFIX + ".single")
+  @Bean(MAIN_DATASOURCE)
+  @ConfigurationProperties(prefix = MAIN_DATASOURCE_PROPERTY_PREFIX
+      + ".single")
   public DataSource dataSource() {
     return DataSourceBuilder.create().type(HikariDataSource.class).build();
   }
 
+  /**
+   * 데이터베이스 리플리케이션 설정을 위한 내부 클래스
+   */
   @Profile("main_db_replication")
   @Configuration
   class ReplicationConfig {
 
-    @Bean(Constants.MAIN_WRITER_DATASOURCE)
-    @ConfigurationProperties(prefix = Constants.MAIN_DATASOURCE_PROPERTY_PREFIX + ".writer")
+    /**
+     * 쓰기 전용 데이터 소스를 설정
+     *
+     * @return DataSource
+     */
+    @Bean(MAIN_WRITER_DATASOURCE)
+    @ConfigurationProperties(prefix = MAIN_DATASOURCE_PROPERTY_PREFIX
+        + ".writer")
     public DataSource writerDataSource() {
       return DataSourceBuilder.create().type(HikariDataSource.class).build();
     }
 
+    /**
+     * 읽기 전용 데이터 소스를 설정
+     *
+     * @return DataSource
+     */
     @Primary
-    @Bean(Constants.MAIN_READER_DATASOURCE)
-    @ConfigurationProperties(prefix = Constants.MAIN_DATASOURCE_PROPERTY_PREFIX + ".reader")
+    @Bean(MAIN_READER_DATASOURCE)
+    @ConfigurationProperties(prefix = MAIN_DATASOURCE_PROPERTY_PREFIX
+        + ".reader")
     public DataSource readerDataSource() {
       return DataSourceBuilder.create().type(HikariDataSource.class).build();
     }
 
+    /**
+     * 다중 데이터 소스를 설정
+     *
+     * @param writerDataSource 쓰기 전용 데이터 소스
+     * @param readerDataSource 읽기 전용 데이터 소스
+     * @return DataSource
+     */
     @Primary
-    @Bean(Constants.MAIN_ROUTING_DATASOURCE)
+    @Bean(MAIN_ROUTING_DATASOURCE)
     public DataSource routingDataSource(
-        @Qualifier(Constants.MAIN_WRITER_DATASOURCE) DataSource writerDataSource,
-        @Qualifier(Constants.MAIN_READER_DATASOURCE) DataSource readerDataSource) {
+        @Qualifier(MAIN_WRITER_DATASOURCE) DataSource writerDataSource,
+        @Qualifier(MAIN_READER_DATASOURCE) DataSource readerDataSource) {
 
-      MainRoutingDataSource mainRoutingDataSource = new MainRoutingDataSource();
+      final String writerKey = "writerKey";
+      final String readerKey = "readerKey";
+      AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
+        @Override
+        protected Object determineCurrentLookupKey() {
+          return TransactionSynchronizationManager.isCurrentTransactionReadOnly() ?
+              readerKey : writerKey;
+        }
+      };
 
-      Map<Object, Object> dataSourceMap = new HashMap<>();
-      dataSourceMap.put(Constants.MAIN_WRITER_KEY, writerDataSource);
-      dataSourceMap.put(Constants.MAIN_READER_KEY, readerDataSource);
+      Map<Object, Object> dataSourceMap = Map.of(
+          writerKey, writerDataSource, readerKey, readerDataSource);
 
-      mainRoutingDataSource.setTargetDataSources(dataSourceMap);
-      mainRoutingDataSource.setDefaultTargetDataSource(writerDataSource);
+      routingDataSource.setTargetDataSources(dataSourceMap);
+      routingDataSource.setDefaultTargetDataSource(writerDataSource);
+      routingDataSource.afterPropertiesSet();
 
-      return mainRoutingDataSource;
+      return routingDataSource;
     }
 
+    /**
+     * 다중 데이터 소스를 설정
+     *
+     * @param routingDataSource 다중 데이터 소스
+     * @return DataSource
+     */
     @Primary
-    @Bean(Constants.MAIN_DATASOURCE)
+    @Bean(MAIN_DATASOURCE)
     public DataSource dataSourceReplication(
-        @Qualifier(Constants.MAIN_ROUTING_DATASOURCE) DataSource routingDataSource) {
+        @Qualifier(MAIN_ROUTING_DATASOURCE) DataSource routingDataSource) {
       return new LazyConnectionDataSourceProxy(routingDataSource);
     }
   }
 
+  /**
+   * JPA 속성을 설정
+   *
+   * @return JpaProperties
+   */
   @Primary
-  @Bean(Constants.MAIN_JPA + "JpaProperties")
-  @ConfigurationProperties(prefix = Constants.MAIN_JPA_PREFIX)
+  @Bean(MAIN_JPA + "JpaProperties")
+  @ConfigurationProperties(prefix = "main.jpa")
   public JpaProperties jpaProperties() {
     return new JpaProperties();
   }
 
+  /**
+   * 엔티티 매니저 팩토리를 설정
+   *
+   * @param dataSource    데이터 소스
+   * @param jpaProperties JPA 속성
+   * @return LocalContainerEntityManagerFactoryBean
+   */
   @Primary
-  @Bean(Constants.MAIN_DATASOURCE + "EntityManagerFactory")
+  @Bean(MAIN_DATASOURCE + "EntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-      @Qualifier(Constants.MAIN_DATASOURCE) DataSource dataSource,
-      @Qualifier(Constants.MAIN_JPA + "JpaProperties") JpaProperties jpaProperties) {
+      @Qualifier(MAIN_DATASOURCE) DataSource dataSource,
+      @Qualifier(MAIN_JPA + "JpaProperties") JpaProperties jpaProperties) {
     return this.entityManagerFactoryBuilder(jpaProperties)
         .dataSource(dataSource)
         .packages(Constants.BASE_PACKAGE + ".*.domain.entity")
         .properties(jpaProperties.getProperties())
-        .persistenceUnit(Constants.MAIN_DATASOURCE + "EntityManager")
+        .persistenceUnit(MAIN_DATASOURCE + "EntityManager")
         .build();
   }
 
+  /**
+   * 엔티티 매니저 팩토리 빌더를 설정
+   *
+   * @param jpaProperties JPA 속성
+   * @return EntityManagerFactoryBuilder
+   */
   private EntityManagerFactoryBuilder entityManagerFactoryBuilder(JpaProperties jpaProperties) {
     HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
     jpaVendorAdapter.setGenerateDdl(jpaProperties.isGenerateDdl());
@@ -119,10 +187,16 @@ public class MainDataSourceConfig implements DataSourceConfig {
     return new EntityManagerFactoryBuilder(jpaVendorAdapter, jpaProperties.getProperties(), null);
   }
 
+  /**
+   * 트랜잭션 매니저를 설정
+   *
+   * @param entityManagerFactory 엔티티 매니저 팩토리
+   * @return PlatformTransactionManager
+   */
   @Primary
-  @Bean(Constants.MAIN_DATASOURCE + "PlatformTransactionManager")
+  @Bean(MAIN_DATASOURCE + "PlatformTransactionManager")
   public PlatformTransactionManager platformTransactionManager(
-      @Qualifier(Constants.MAIN_DATASOURCE + "EntityManagerFactory")
+      @Qualifier(MAIN_DATASOURCE + "EntityManagerFactory")
       LocalContainerEntityManagerFactoryBean entityManagerFactory
   ) {
     JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
@@ -130,18 +204,32 @@ public class MainDataSourceConfig implements DataSourceConfig {
     return jpaTransactionManager;
   }
 
-  @Bean(name = Constants.MAIN_DATASOURCE + "JdbcTemplate")
+  /**
+   * JdbcTemplate 빈을 설정
+   *
+   * @param dataSource 데이터 소스
+   * @return JdbcTemplate
+   */
+  @Bean(name = MAIN_DATASOURCE + "JdbcTemplate")
   public JdbcTemplate jdbcTemplate(
-      @Qualifier(Constants.MAIN_DATASOURCE) DataSource dataSource) {
+      @Qualifier(MAIN_DATASOURCE) DataSource dataSource) {
     return new JdbcTemplate(dataSource);
   }
 
+  /**
+   * JPA 및 QueryDSL 설정을 위한 내부 클래스
+   */
   @Configuration
   class MainJpaQuerydslConfig {
 
-    @PersistenceContext(unitName = Constants.MAIN_DATASOURCE + "EntityManager")
+    @PersistenceContext(unitName = MAIN_DATASOURCE + "EntityManager")
     private EntityManager mainEntityManager;
 
+    /**
+     * JPAQueryFactory 빈을 설정
+     *
+     * @return JPAQueryFactory
+     */
     @Bean
     public JPAQueryFactory mainJpaQueryFactory() {
       return new JPAQueryFactory(mainEntityManager);

@@ -1,14 +1,25 @@
-version: "3"
+# compose 파일 버전
+version: '3'
 services:
-  # PostgreSQL 설정
-  postgresql:
-    image: postgres:15.0
+  # 서비스 명
+  mysql:
+    # 사용할 이미지
+    image: mysql:8.0
+    # 컨테이너 실행 시 재시작
     restart: always
-    container_name: postgres
+    # 컨테이너명 설정
+    container_name: mysql
+    # 접근 포트 설정 (컨테이너 외부:컨테이너 내부)
     ports:
-      - "5432:5432"
+      - "3306:3306"
+    # 환경 변수 설정
     environment:
-      POSTGRES_USER: root
-      POSTGRES_PASSWORD: password1!
+      MYSQL_ROOT_PASSWORD: password
+      TZ: Asia/Seoul
+    # 명렬어 설정
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    # 볼륨 설정
     volumes:
-      - ./data/postgres/:/var/lib/postgresql/data
+      - ./data/mysql/:/var/lib/mysql
