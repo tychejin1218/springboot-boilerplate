@@ -39,14 +39,14 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
     transactionManagerRef = MainDataSourceConfig.MAIN_DATASOURCE + "PlatformTransactionManager"
 )
 @Configuration
-public class MainDataSourceConfig implements DataSourceConfig {
+public class MainDataSourceConfig {
 
   public static final String MAIN_DATASOURCE = "mainDataSource";
-  private static final String MAIN_WRITER_DATASOURCE = "mainWriterDatasource";
-  private static final String MAIN_READER_DATASOURCE = "mainReaderDatasource";
-  private static final String MAIN_ROUTING_DATASOURCE = "mainRoutingDatasource";
-  private static final String MAIN_JPA = "mainJpa";
-  private static final String MAIN_DATASOURCE_PROPERTY_PREFIX = "main.datasource";
+  public static final String MAIN_WRITER_DATASOURCE = "mainWriterDatasource";
+  public static final String MAIN_READER_DATASOURCE = "mainReaderDatasource";
+  public static final String MAIN_ROUTING_DATASOURCE = "mainRoutingDatasource";
+  public static final String MAIN_JPA = "mainJpa";
+  public static final String MAIN_DATASOURCE_PROPERTY_PREFIX = "main.datasource";
 
   /**
    * 단일 데이터베이스 구성을 위한 데이터 소스 빈을 설정

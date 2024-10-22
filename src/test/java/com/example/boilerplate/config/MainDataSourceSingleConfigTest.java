@@ -1,8 +1,8 @@
 package com.example.boilerplate.config;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.example.boilerplate.common.constants.Constants;
 import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 @Slf4j
 @ActiveProfiles("local")
 @SpringBootTest
-class MainDataSourceConfigTest {
+class MainDataSourceSingleConfigTest {
 
   @Value("${main.datasource.single.driver-class-name}")
   String driverClassName;
@@ -33,16 +33,18 @@ class MainDataSourceConfigTest {
   @DisplayName("MainDataSource 설정 테스트")
   @Test
   void testMainDataSource(
-      @Qualifier(Constants.MAIN_DATASOURCE) DataSource dataSource) {
+      @Qualifier(MainDataSourceConfig.MAIN_DATASOURCE) DataSource dataSource) {
 
     // Given & When
     try (HikariDataSource hikariDataSource = (HikariDataSource) dataSource) {
       // Then
       log.debug("hikariDataSource : [{}]", hikariDataSource);
-      assertEquals(hikariDataSource.getDriverClassName(), driverClassName);
-      assertEquals(hikariDataSource.getJdbcUrl(), jdbcUrl);
-      assertEquals(hikariDataSource.isReadOnly(), readOnly);
-      assertEquals(hikariDataSource.getUsername(), username);
+      assertAll(
+          () -> assertEquals(hikariDataSource.getDriverClassName(), driverClassName),
+          () -> assertEquals(hikariDataSource.getJdbcUrl(), jdbcUrl),
+          () -> assertEquals(hikariDataSource.isReadOnly(), readOnly),
+          () -> assertEquals(hikariDataSource.getUsername(), username)
+      );
     }
   }
 }
