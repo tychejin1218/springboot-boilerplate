@@ -40,15 +40,7 @@ public enum ApiStatus {
       Stream.of(values())
           .collect(Collectors.toMap(ApiStatus::getCode, Function.identity()));
 
-  private static final Map<String, ApiStatus> BY_MESSAGE =
-      Stream.of(values())
-          .collect(Collectors.toMap(ApiStatus::getMessage, Function.identity()));
-
-  public static ApiStatus valueOfStatusCode(String code) {
+  public static ApiStatus getByCode(String code) {
     return BY_STATUS_CODE.get(code);
-  }
-
-  public static ApiStatus valueOfMessage(String message) {
-    return BY_MESSAGE.get(message);
   }
 }
