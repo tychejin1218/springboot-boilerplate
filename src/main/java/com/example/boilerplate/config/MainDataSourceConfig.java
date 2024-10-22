@@ -112,8 +112,8 @@ public class MainDataSourceConfig {
       AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
         @Override
         protected Object determineCurrentLookupKey() {
-          return TransactionSynchronizationManager.isCurrentTransactionReadOnly() ?
-              readerKey : writerKey;
+          return TransactionSynchronizationManager.isCurrentTransactionReadOnly()
+              ? readerKey : writerKey;
         }
       };
 

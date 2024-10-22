@@ -3,7 +3,6 @@ package com.example.boilerplate.config;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.zaxxer.hikari.HikariDataSource;
 import javax.sql.DataSource;
@@ -20,7 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 @Slf4j
 @ActiveProfiles("dev")
 @SpringBootTest
-public class MainDataSourceReplicationConfigTest {
+class MainDataSourceReplicationConfigTest {
 
   @Value("${main.datasource.writer.driver-class-name}")
   String writerDriverClassName;

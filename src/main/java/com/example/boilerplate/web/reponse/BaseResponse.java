@@ -3,17 +3,17 @@ package com.example.boilerplate.web.reponse;
 import com.example.boilerplate.common.type.ApiStatus;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 
 @Getter
-@Setter
+@NoArgsConstructor
 public class BaseResponse<T> {
 
-  private final String statusCode;
-  private final String message;
-  private final T data;
+  private String statusCode;
+  private String message;
+  private T data;
 
   /**
    * Builder 패턴을 통해 객체 생성
@@ -38,7 +38,6 @@ public class BaseResponse<T> {
   public BaseResponse(HttpStatus status) {
     this.statusCode = String.valueOf(status.value());
     this.message = ApiStatus.getByCode(this.statusCode).getMessage();
-    this.data = null;
   }
 
   /**
@@ -62,7 +61,7 @@ public class BaseResponse<T> {
    * @param message 상태 메시지
    * @return 현재의 BaseResponse 객체
    */
-  public BaseResponse<T> message(String message) {
+  public BaseResponse<T> withMessage(String message) {
     return BaseResponse.<T>builder()
         .statusCode(this.statusCode)
         .data(this.data)
@@ -75,7 +74,7 @@ public class BaseResponse<T> {
    * @param statusCode 상태 코드
    * @return 현재의 BaseResponse 객체
    */
-  public BaseResponse<T> statusCode(String statusCode) {
+  public BaseResponse<T> withStatusCode(String statusCode) {
     return BaseResponse.<T>builder()
         .statusCode(statusCode)
         .data(this.data)

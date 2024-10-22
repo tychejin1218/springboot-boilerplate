@@ -8,7 +8,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
 
-public class ApiExceptionTest {
+class ApiExceptionTest {
 
   @Test
   @DisplayName("HTTP 상태 코드, Api 상태 코드, 에러 메시지를 받는 생성자 테스트")

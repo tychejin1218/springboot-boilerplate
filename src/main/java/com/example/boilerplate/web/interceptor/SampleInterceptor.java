@@ -31,7 +31,7 @@ public class SampleInterceptor implements HandlerInterceptor {
     if (Constants.GET.equals(request.getMethod())
         && StringUtils.isNotBlank(request.getQueryString())) {
       log.debug("[SAMPLE] Request URL - Params:{}", request.getQueryString());
-    } else {
+    } else if (Constants.POST.equals(request.getMethod())) {
       try (ServletInputStream inputStream = request.getInputStream()) {
         String body = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
         log.debug("[SAMPLE] Request URL - Body:{}", body);
