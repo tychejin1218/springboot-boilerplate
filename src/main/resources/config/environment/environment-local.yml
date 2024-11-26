@@ -7,4 +7,4 @@ jasypt:
 # JWT 설정
 jwt:
   header: Authorization
-  secret-key: c3ByaW5nYm9vdC5ib2lsZXJwbGF0ZS5qd3Quc2VjcmV0
+  secret-key: 055b0be94bd8c5f8967a7cda82855770486892cb727d9c544055e4f83380bcda

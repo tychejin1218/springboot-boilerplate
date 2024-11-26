@@ -3,13 +3,15 @@ package com.example.boilerplate.config.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.Jwts.SIG;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import lombok.RequiredArgsConstructor;
+import javax.crypto.SecretKey;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -19,20 +21,23 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 @Slf4j
-@RequiredArgsConstructor
 @Component
 public class JwtTokenProvider {
 
+  private static final long TOKEN_VALID_TIME = 1000L * 60 * 5; // 토큰 유효 시간 5분
+
   private final UserDetailsService userDetailsService;
+  private final SecretKey secretKey;
 
   @Value("${jwt.header}")
-
   private String header;
 
-  @Value("${jwt.secret-key}")
-  private String secretKey;
-
-  private final long tokenValidTime = 1000L * 60 * 1;
+  public JwtTokenProvider(
+      UserDetailsService userDetailsService,
+      @Value("${jwt.secret-key}") String secretKey) {
+    this.userDetailsService = userDetailsService;
+    this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64URL.decode(secretKey));
+  }
 
   /**
    * JWT 토큰 생성
@@ -43,19 +48,19 @@ public class JwtTokenProvider {
    */
   public String createToken(String subject, List<String> roles) {
 
-    Map<String, Object> headerMap = new HashMap<>();
-    headerMap.put("typ", "JWT");
-    headerMap.put("alg", "HS256");
-
-    Map<String, Object> claims = new HashMap<>();
+    Map<String, List<String>> claims = new HashMap<>();
     claims.put("roles", roles);
 
+    Date now = new Date();
+    Date expiryDate = new Date(now.getTime() + TOKEN_VALID_TIME);
+
     return Jwts.builder()
-        .setHeader(headerMap)
-        .setClaims(claims)
-        .setSubject(subject)
-        .setExpiration(new Date(System.currentTimeMillis() + tokenValidTime))
-        .signWith(SignatureAlgorithm.HS256, secretKey).compact();
+        .subject(subject)
+        .claims(claims)
+        .issuedAt(now)
+        .expiration(expiryDate)
+        .signWith(secretKey, SIG.HS256)
+        .compact();
   }
 
   /**
@@ -77,10 +82,10 @@ public class JwtTokenProvider {
   public boolean validateToken(String token) {
     try {
       Jws<Claims> claims = Jwts.parser()
-          .setSigningKey(secretKey)
+          .verifyWith(secretKey)
           .build()
-          .parseClaimsJws(token);
-      return !claims.getBody().getExpiration().before(new Date());
+          .parseSignedClaims(token);
+      return !claims.getPayload().getExpiration().before(new Date());
     } catch (Exception e) {
       return false;
     }
@@ -106,10 +111,10 @@ public class JwtTokenProvider {
    */
   public String getSubject(String token) {
     return Jwts.parser()
-        .setSigningKey(secretKey)
+        .verifyWith(secretKey)
         .build()
-        .parseClaimsJws(token)
-        .getBody()
+        .parseSignedClaims(token)
+        .getPayload()
         .getSubject();
   }
 }
