@@ -29,9 +29,6 @@ public class JwtTokenProvider {
   private final UserDetailsService userDetailsService;
   private final SecretKey secretKey;
 
-  @Value("${jwt.header}")
-  private String header;
-
   public JwtTokenProvider(
       UserDetailsService userDetailsService,
       @Value("${jwt.secret-key}") String secretKey) {
@@ -64,13 +61,17 @@ public class JwtTokenProvider {
   }
 
   /**
-   * Request의 Header에서 JWT 토큰 추출 - Authorization: JWT 토큰
+   * Request의 Header에서 JWT 토큰 추출 - Authorization: Bearer JWT 토큰
    *
-   * @param request HttpServletRequest
-   * @return 추출된 JWT 토큰
+   * @param request HttpServletRequest 요청 객체
+   * @return 추출된 JWT 토큰, 토큰이 없거나 Bearer로 시작하지 않으면 null 반환
    */
   public String getResolveToken(HttpServletRequest request) {
-    return request.getHeader(header);
+    String bearerToken = request.getHeader("Authorization");
+    if (bearerToken != null && bearerToken.startsWith("Bearer ")) {
+      return bearerToken.substring(7);
+    }
+    return null;
   }
 
   /**
@@ -107,7 +108,7 @@ public class JwtTokenProvider {
    * JWT 토큰으로부터 subject 추출
    *
    * @param token JWT 토큰
-   * @return String 추출된 subject
+   * @return 추출된 subject (예: Email)
    */
   public String getSubject(String token) {
     return Jwts.parser()
