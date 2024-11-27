@@ -34,7 +34,7 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 @EnableTransactionManagement
 @EnableJpaRepositories(
-    basePackages = Constants.BASE_PACKAGE + ".*.domain.repository",
+    basePackages = MainDataSourceConfig.JPA_REPOSITORY_PACKAGES,
     entityManagerFactoryRef = MainDataSourceConfig.MAIN_DATASOURCE + "EntityManagerFactory",
     transactionManagerRef = MainDataSourceConfig.MAIN_DATASOURCE + "PlatformTransactionManager"
 )
@@ -47,6 +47,11 @@ public class MainDataSourceConfig {
   public static final String MAIN_ROUTING_DATASOURCE = "mainRoutingDatasource";
   public static final String MAIN_JPA = "mainJpa";
   public static final String MAIN_DATASOURCE_PROPERTY_PREFIX = "main.datasource";
+
+  public static final String JPA_REPOSITORY_PACKAGES =
+      Constants.BASE_PACKAGE + ".domain.repository";
+  private static final String[] JPA_ENTITY_PACKAGES = {
+      Constants.BASE_PACKAGE + ".domain.entity"};
 
   /**
    * 단일 데이터베이스 구성을 위한 데이터 소스 빈을 설정
@@ -167,7 +172,7 @@ public class MainDataSourceConfig {
       @Qualifier(MAIN_JPA + "JpaProperties") JpaProperties jpaProperties) {
     return this.entityManagerFactoryBuilder(jpaProperties)
         .dataSource(dataSource)
-        .packages(Constants.BASE_PACKAGE + ".*.domain.entity")
+        .packages(JPA_ENTITY_PACKAGES)
         .properties(jpaProperties.getProperties())
         .persistenceUnit(MAIN_DATASOURCE + "EntityManager")
         .build();

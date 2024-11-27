@@ -1,4 +1,4 @@
-package com.example.boilerplate.sample.domain.entity;
+package com.example.boilerplate.domain.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,7 +23,7 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "member")
-public class Member {
+public class MemberEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -40,5 +40,5 @@ public class Member {
   @Builder.Default
   @ToString.Exclude
   @OneToMany(mappedBy = "member")
-  private List<Todo> todos = new ArrayList<>();
+  private List<TodoEntity> todos = new ArrayList<>();
 }

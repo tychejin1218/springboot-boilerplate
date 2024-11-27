@@ -2,14 +2,14 @@ package com.example.boilerplate.sample.service;
 
 import com.example.boilerplate.common.exception.ApiException;
 import com.example.boilerplate.common.type.ApiStatus;
-import com.example.boilerplate.sample.domain.entity.Member;
-import com.example.boilerplate.sample.domain.entity.Todo;
-import com.example.boilerplate.sample.domain.entity.TodoDynamic;
+import com.example.boilerplate.domain.entity.MemberEntity;
+import com.example.boilerplate.domain.entity.TodoDynamicEntity;
+import com.example.boilerplate.domain.entity.TodoEntity;
+import com.example.boilerplate.domain.repository.MemberRepository;
+import com.example.boilerplate.domain.repository.TodoDynamicRepository;
+import com.example.boilerplate.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.domain.mapstruct.MemberMapStruct;
 import com.example.boilerplate.sample.domain.mapstruct.TodoMapStruct;
-import com.example.boilerplate.sample.domain.repository.MemberRepository;
-import com.example.boilerplate.sample.domain.repository.TodoDynamicRepository;
-import com.example.boilerplate.sample.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
 import java.util.List;
@@ -40,7 +40,7 @@ public class SampleService {
    */
   @Transactional(readOnly = true)
   public Page<MemberDto.Response> getMemberList(MemberDto.Request memberRequest) {
-    Page<Member> memberPage =
+    Page<MemberEntity> memberPage =
         memberRepository.findAllByNameContainsAndEmailContains(
             memberRequest.getName(),
             memberRequest.getEmail(),
@@ -56,7 +56,7 @@ public class SampleService {
    */
   @Transactional(readOnly = true)
   public MemberDto.Response getMember(MemberDto.Request memberRequest) {
-    Member member = memberRepository.findById(memberRequest.getId())
+    MemberEntity member = memberRepository.findById(memberRequest.getId())
         .orElseThrow(() -> new ApiException(ApiStatus.MEMBER_NOT_FOUND));
     return memberMapStruct.toDto(member);
   }
@@ -81,9 +81,9 @@ public class SampleService {
   @Transactional
   public MemberDto.Response updateMember(MemberDto.Request memberRequest) {
 
-    Member member;
+    MemberEntity member;
 
-    Optional<Member> opMember = memberRepository.findById(memberRequest.getId());
+    Optional<MemberEntity> opMember = memberRepository.findById(memberRequest.getId());
     if (opMember.isPresent()) {
       member = opMember.get();
 
@@ -111,7 +111,7 @@ public class SampleService {
    */
   @Transactional(readOnly = true)
   public List<TodoDto.Response> getTodoList(TodoDto.Request todoRequest) {
-    List<Todo> todos =
+    List<TodoEntity> todos =
         todoRepository
             .findAllByTitleContainingIgnoreCaseAndDescriptionContainingIgnoreCaseAndCompletedOrderByIdDesc(
                 todoRequest.getTitle(),
@@ -129,7 +129,7 @@ public class SampleService {
    */
   @Transactional(readOnly = true)
   public TodoDto.Response getTodo(TodoDto.Request todoRequest) {
-    Todo todo = todoRepository.findById(todoRequest.getId())
+    TodoEntity todo = todoRepository.findById(todoRequest.getId())
         .orElseThrow(() -> new ApiException(ApiStatus.TODO_NOT_FOUND));
     return todoMapStruct.toDto(todo);
   }
@@ -154,9 +154,9 @@ public class SampleService {
   @Transactional
   public TodoDto.Response updateTodo(TodoDto.Request todoRequest) {
 
-    Todo todo;
+    TodoEntity todo;
 
-    Optional<Todo> opTodo = todoRepository.findById(todoRequest.getId());
+    Optional<TodoEntity> opTodo = todoRepository.findById(todoRequest.getId());
     if (opTodo.isPresent()) {
       todo = opTodo.get();
 
@@ -187,7 +187,7 @@ public class SampleService {
    */
   @Transactional
   public void updateTodoCompleted(TodoDto.Request todoRequest) {
-    TodoDynamic todoDynamic = todoDynamicRepository.findById(todoRequest.getId())
+    TodoDynamicEntity todoDynamic = todoDynamicRepository.findById(todoRequest.getId())
         .orElseThrow(() -> new ApiException(ApiStatus.TODO_NOT_FOUND));
     todoDynamic.updateCompleted(todoRequest.getCompleted());
   }

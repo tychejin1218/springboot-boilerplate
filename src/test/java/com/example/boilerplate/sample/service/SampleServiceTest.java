@@ -8,10 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import com.example.boilerplate.common.exception.ApiException;
 import com.example.boilerplate.common.type.ApiStatus;
-import com.example.boilerplate.sample.domain.entity.Member;
-import com.example.boilerplate.sample.domain.entity.Todo;
-import com.example.boilerplate.sample.domain.repository.MemberRepository;
-import com.example.boilerplate.sample.domain.repository.TodoRepository;
+import com.example.boilerplate.domain.entity.MemberEntity;
+import com.example.boilerplate.domain.entity.TodoEntity;
+import com.example.boilerplate.domain.repository.MemberRepository;
+import com.example.boilerplate.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
 import jakarta.persistence.EntityManager;
@@ -91,7 +91,7 @@ class SampleServiceTest {
     void testGetMember() {
 
       // Given
-      Member member = getMemberAfterInsertTodos();
+      MemberEntity member = getMemberAfterInsertTodos();
 
       // When
       MemberDto.Response memberResponse = sampleService.getMember(
@@ -114,7 +114,7 @@ class SampleServiceTest {
     void testGetMemberNotFound() {
 
       // Given
-      Member member = getMemberAfterInsertTodos();
+      MemberEntity member = getMemberAfterInsertTodos();
       Long notFoundMemberId = member.getId() + 1;
       member.setId(notFoundMemberId);
 
@@ -165,7 +165,7 @@ class SampleServiceTest {
     void testUpdateMember() {
 
       // Given
-      Member member = getMemberAfterInsertTodos();
+      MemberEntity member = getMemberAfterInsertTodos();
       MemberDto.Request memberRequest = MemberDto.Request.builder()
           .id(member.getId())
           .name("admin")
@@ -218,7 +218,7 @@ class SampleServiceTest {
     void testGetTodo() {
 
       // Given
-      Todo todo = getTodoAfterInsertTodo();
+      TodoEntity todo = getTodoAfterInsertTodo();
 
       // When
       TodoDto.Response todoResponse = sampleService.getTodo(
@@ -242,7 +242,7 @@ class SampleServiceTest {
     void testGetTodoNotFound() {
 
       // Given
-      Todo todo = getTodoAfterInsertTodo();
+      TodoEntity todo = getTodoAfterInsertTodo();
       Long notFoundTodoId = todo.getId() + 1;
       todo.setId(notFoundTodoId);
 
@@ -299,7 +299,7 @@ class SampleServiceTest {
     void testUpdateTodo() {
 
       // Given
-      Todo todo = getTodoAfterInsertTodo();
+      TodoEntity todo = getTodoAfterInsertTodo();
       Long todoId = todo.getId();
       TodoDto.Response insertTodo = sampleService.getTodo(
           TodoDto.Request.builder()
@@ -339,7 +339,7 @@ class SampleServiceTest {
     void testUpdateTodoDynamic() {
 
       // Given
-      Todo todo = getTodoAfterInsertTodo();
+      TodoEntity todo = getTodoAfterInsertTodo();
       Long todoId = todo.getId();
       TodoDto.Response todoDetail01 = sampleService.getTodo(
           TodoDto.Request.builder()
@@ -379,7 +379,7 @@ class SampleServiceTest {
       String name,
       String email) {
     return memberRepository.save(
-        Member.builder()
+        MemberEntity.builder()
             .name(name)
             .email(email)
             .build()
@@ -396,9 +396,9 @@ class SampleServiceTest {
       String description,
       Boolean completed) {
     todoRepository.save(
-        Todo.builder()
+        TodoEntity.builder()
             .member(
-                Member.builder()
+                MemberEntity.builder()
                     .id(memberId)
                     .build())
             .title(title)
@@ -459,10 +459,10 @@ class SampleServiceTest {
    * 회원 1명, 할 일 10개를 저장한 후 회원을 반환
    */
   @Disabled
-  Member getMemberAfterInsertTodos() {
+  MemberEntity getMemberAfterInsertTodos() {
 
-    Member member = memberRepository.save(
-        Member.builder()
+    MemberEntity member = memberRepository.save(
+        MemberEntity.builder()
             .name(NAME_TEST_STR + "01")
             .email(EMAIL_PRE_TEST_STR + "01@gmail.com")
             .build());
@@ -485,16 +485,16 @@ class SampleServiceTest {
    * 회원 1명, 할 일 1개를 저장한 후 할 일을 반환
    */
   @Disabled
-  Todo getTodoAfterInsertTodo() {
+  TodoEntity getTodoAfterInsertTodo() {
 
-    Member member = memberRepository.save(
-        Member.builder()
+    MemberEntity member = memberRepository.save(
+        MemberEntity.builder()
             .name(NAME_TEST_STR)
             .email(EMAIL_PRE_TEST_STR + "@gmail.com")
             .build());
 
-    Todo todo = todoRepository.save(
-        Todo.builder()
+    TodoEntity todo = todoRepository.save(
+        TodoEntity.builder()
             .member(member)
             .title("Title Test Insert")
             .description("Description Test Insert")

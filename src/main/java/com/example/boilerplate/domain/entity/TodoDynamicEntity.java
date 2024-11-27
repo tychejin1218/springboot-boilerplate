@@ -1,4 +1,4 @@
-package com.example.boilerplate.sample.domain.entity;
+package com.example.boilerplate.domain.entity;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -22,7 +22,7 @@ import org.hibernate.annotations.DynamicUpdate;
 @DynamicUpdate
 @Entity
 @Table(name = "todo")
-public class TodoDynamic {
+public class TodoDynamicEntity {
 
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,40 +1,43 @@
-package com.example.boilerplate.sample.domain.repository;
+package com.example.boilerplate.sample.repository;
 
-import com.example.boilerplate.sample.domain.entity.QMember;
-import com.example.boilerplate.sample.domain.entity.QTodo;
-import com.example.boilerplate.sample.domain.entity.Todo;
+import com.example.boilerplate.domain.entity.QMemberEntity;
+import com.example.boilerplate.domain.entity.QTodoEntity;
+import com.example.boilerplate.domain.entity.TodoEntity;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
+import org.springframework.stereotype.Repository;
 import org.springframework.util.StringUtils;
 
+@Slf4j
 @RequiredArgsConstructor
-public class TodoRepositoryImpl implements TodoRepositoryCustom {
+@Repository
+public class SampleRepository {
 
   private final JPAQueryFactory jpaQueryFactory;
 
-  @Override
-  public List<Todo> getTodos(Todo todo) {
+  public List<TodoEntity> getTodos(TodoEntity todo) {
 
-    QTodo qtodo = QTodo.todo;
+    QTodoEntity todoEntity = QTodoEntity.todoEntity;
 
     // 1. BooleanBuilder를 사용한 동적 쿼리 설정
     BooleanBuilder builder = new BooleanBuilder();
 
     if (StringUtils.hasText(todo.getTitle())) {
-      builder.and(qtodo.title.contains(todo.getTitle()));
+      builder.and(todoEntity.title.contains(todo.getTitle()));
     }
     if (StringUtils.hasText(todo.getDescription())) {
-      builder.and(qtodo.description.contains(todo.getDescription()));
+      builder.and(todoEntity.description.contains(todo.getDescription()));
     }
     if (todo.getCompleted() != null) {
-      builder.and(qtodo.completed.eq(todo.getCompleted()));
+      builder.and(todoEntity.completed.eq(todo.getCompleted()));
     }
 
     // 2. Projections를 사용한 객체 생성 방법
@@ -74,73 +77,71 @@ public class TodoRepositoryImpl implements TodoRepositoryCustom {
         .orderBy(qtodo.id.desc())
         .fetch();*/
 
-    QMember qmember = QMember.member;
+    QMemberEntity memberEntity = QMemberEntity.memberEntity;
 
     // 2_3. 생성자 사용
     return jpaQueryFactory
         .select(
             Projections.constructor(
-                Todo.class,
-                qtodo.id,
-                qmember,
-                qtodo.title,
-                qtodo.description,
-                qtodo.completed
+                TodoEntity.class,
+                todoEntity.id,
+                memberEntity,
+                todoEntity.title,
+                todoEntity.description,
+                todoEntity.completed
             )
         )
-        .from(qtodo)
-        .leftJoin(qtodo.member, qmember)
+        .from(todoEntity)
+        .leftJoin(todoEntity.member, memberEntity)
         .where(builder)
-        .orderBy(qtodo.id.desc())
+        .orderBy(todoEntity.id.desc())
         .fetch();
   }
 
-  @Override
-  public Page<Todo> getTodos(Todo todo, Pageable pageable) {
+  public Page<TodoEntity> getTodos(TodoEntity todo, Pageable pageable) {
 
-    QTodo qtodo = QTodo.todo;
-
+    QTodoEntity todoEntity = QTodoEntity.todoEntity;
 
     // 1. where 설정
     BooleanBuilder builder = new BooleanBuilder();
 
     if (StringUtils.hasText(todo.getTitle())) {
-      builder.and(qtodo.title.contains(todo.getTitle()));
+      builder.and(todoEntity.title.contains(todo.getTitle()));
     }
     if (StringUtils.hasText(todo.getDescription())) {
-      builder.and(qtodo.description.contains(todo.getDescription()));
+      builder.and(todoEntity.description.contains(todo.getDescription()));
     }
     if (todo.getCompleted() != null) {
-      builder.and(qtodo.completed.eq(todo.getCompleted()));
+      builder.and(todoEntity.completed.eq(todo.getCompleted()));
     }
 
-    QMember qmember = QMember.member;
+    QMemberEntity memberEntity = QMemberEntity.memberEntity;
 
     // 2. list 조회
-    List<Todo> content = jpaQueryFactory
+    List<TodoEntity> content = jpaQueryFactory
         .select(
             Projections.constructor(
-                Todo.class,
-                qtodo.id,
-                qmember,
-                qtodo.title,
-                qtodo.description,
-                qtodo.completed
+                TodoEntity.class,
+                todoEntity.id,
+                memberEntity,
+                todoEntity.title,
+                todoEntity.description,
+                todoEntity.completed
             )
         )
-        .from(qtodo)
-        .leftJoin(qtodo.member, qmember)
+        .from(todoEntity)
+        .leftJoin(todoEntity.member, memberEntity)
         .where(builder)
-        .orderBy(qtodo.id.desc())
+        .orderBy(todoEntity.id.desc())
         .offset(pageable.getOffset())
         .limit(pageable.getPageSize())
         .fetch();
 
     // 3. count 조회
     JPAQuery<Long> countQuery = jpaQueryFactory
-        .select(qtodo.count())
-        .from(qtodo)
-        .leftJoin(qtodo.member, qmember)
+        .select(todoEntity.count())
+        .from(todoEntity)
+        .leftJoin(todoEntity.member, memberEntity)
         .where(builder);
 
     return PageableExecutionUtils.getPage(content, pageable, countQuery::fetchOne);

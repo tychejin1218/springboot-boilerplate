@@ -10,10 +10,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.example.boilerplate.common.reponse.BaseResponse;
 import com.example.boilerplate.common.type.ApiStatus;
-import com.example.boilerplate.sample.domain.entity.Member;
-import com.example.boilerplate.sample.domain.entity.Todo;
-import com.example.boilerplate.sample.domain.repository.MemberRepository;
-import com.example.boilerplate.sample.domain.repository.TodoRepository;
+import com.example.boilerplate.domain.entity.MemberEntity;
+import com.example.boilerplate.domain.entity.TodoEntity;
+import com.example.boilerplate.domain.repository.MemberRepository;
+import com.example.boilerplate.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
 import com.example.boilerplate.sign.dto.SignDto;
@@ -145,7 +145,7 @@ class SampleControllerTest {
     void testGetMember() throws Exception {
 
       // Given
-      Member member = getMemberAfterInsertTodos();
+      MemberEntity member = getMemberAfterInsertTodos();
       String url = "/sample/member/" + member.getId();
 
       // When
@@ -171,7 +171,7 @@ class SampleControllerTest {
     void testGetMemberNotFound() throws Exception {
 
       // Given
-      Member member = getMemberAfterInsertTodos();
+      MemberEntity member = getMemberAfterInsertTodos();
       String url = "/sample/member/" + member.getId() + 1;
 
       // When
@@ -229,7 +229,7 @@ class SampleControllerTest {
     void testUpdateMember() throws Exception {
 
       // Given
-      Member member = getMemberAfterInsertTodos();
+      MemberEntity member = getMemberAfterInsertTodos();
       String url = "/sample/update/member";
       MemberDto.Request memberRequest = MemberDto.Request.builder()
           .id(member.getId())
@@ -312,7 +312,7 @@ class SampleControllerTest {
     void testGetTodo() throws Exception {
 
       // Given
-      Todo todo = getTodoAfterInsertTodo();
+      TodoEntity todo = getTodoAfterInsertTodo();
       Long todoId = todo.getId();
       String url = "/sample/todo/" + todoId;
 
@@ -339,7 +339,7 @@ class SampleControllerTest {
     void testGetTodoNotFound() throws Exception {
 
       // Given
-      Todo todo = getTodoAfterInsertTodo();
+      TodoEntity todo = getTodoAfterInsertTodo();
       Long todoId = todo.getId();
       String url = "/sample/todo/" + todoId + 1;
 
@@ -403,7 +403,7 @@ class SampleControllerTest {
     void testUpdateTodo() throws Exception {
 
       // Given
-      Todo todo = getTodoAfterInsertTodo();
+      TodoEntity todo = getTodoAfterInsertTodo();
 
       String url = "/sample/update/todo";
       TodoDto.Request todoRequest = TodoDto.Request.builder()
@@ -440,7 +440,7 @@ class SampleControllerTest {
       String name,
       String email) {
     return memberRepository.save(
-        Member.builder()
+        MemberEntity.builder()
             .name(name)
             .email(email)
             .build()
@@ -457,9 +457,9 @@ class SampleControllerTest {
       String description,
       Boolean completed) {
     todoRepository.save(
-        Todo.builder()
+        TodoEntity.builder()
             .member(
-                Member.builder()
+                MemberEntity.builder()
                     .id(memberId)
                     .build())
             .title(title)
@@ -520,10 +520,10 @@ class SampleControllerTest {
    * 회원 1명, 할 일 10개를 저장한 후 회원을 반환
    */
   @Disabled
-  Member getMemberAfterInsertTodos() {
+  MemberEntity getMemberAfterInsertTodos() {
 
-    Member member = memberRepository.save(
-        Member.builder()
+    MemberEntity member = memberRepository.save(
+        MemberEntity.builder()
             .name(NAME_TEST_STR + "01")
             .email(EMAIL_PRE_TEST_STR + "01@gmail.com")
             .build());
@@ -546,16 +546,16 @@ class SampleControllerTest {
    * 회원 1명, 할 일 1개를 저장한 후 할 일을 반환
    */
   @Disabled
-  Todo getTodoAfterInsertTodo() {
+  TodoEntity getTodoAfterInsertTodo() {
 
-    Member member = memberRepository.save(
-        Member.builder()
+    MemberEntity member = memberRepository.save(
+        MemberEntity.builder()
             .name(NAME_TEST_STR)
             .email(EMAIL_PRE_TEST_STR + "@gmail.com")
             .build());
 
-    Todo todo = todoRepository.save(
-        Todo.builder()
+    TodoEntity todo = todoRepository.save(
+        TodoEntity.builder()
             .member(member)
             .title("To-Do Title")
             .description("To-Do Description")

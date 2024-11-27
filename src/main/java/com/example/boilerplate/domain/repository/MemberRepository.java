@@ -1,6 +1,6 @@
-package com.example.boilerplate.sample.domain.repository;
+package com.example.boilerplate.domain.repository;
 
-import com.example.boilerplate.sample.domain.entity.Member;
+import com.example.boilerplate.domain.entity.MemberEntity;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -10,8 +10,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 public interface MemberRepository extends
-    JpaRepository<Member, Long>,
-    JpaSpecificationExecutor<Member> {
+    JpaRepository<MemberEntity, Long>,
+    JpaSpecificationExecutor<MemberEntity> {
 
   /**
    * Query Method을 사용하여 Member를 조회
@@ -19,7 +19,7 @@ public interface MemberRepository extends
    * @param email String
    * @return Optional&lt;Member&gt;
    */
-  Optional<Member> findByEmail(String email);
+  Optional<MemberEntity> findByEmail(String email);
 
   /**
    * Query Method을 사용하여 Member 목록 조회
@@ -28,7 +28,7 @@ public interface MemberRepository extends
    * @param email String
    * @return List&lt;Member&gt;
    */
-  List<Member> findAllByNameContainingIgnoreCaseAndEmailContainingIgnoreCaseOrderByIdDesc(
+  List<MemberEntity> findAllByNameContainingIgnoreCaseAndEmailContainingIgnoreCaseOrderByIdDesc(
       String name,
       String email
   );
@@ -41,7 +41,7 @@ public interface MemberRepository extends
    * @param sort Sort
    * @return List&lt;Member&gt;
    */
-  List<Member> findAllByNameContainingIgnoreCaseAndEmailContainingIgnoreCase(
+  List<MemberEntity> findAllByNameContainingIgnoreCaseAndEmailContainingIgnoreCase(
       String name,
       String email,
       Sort sort
@@ -55,7 +55,7 @@ public interface MemberRepository extends
    * @param pageable Pageable
    * @return Page&lt;Member&gt;
    */
-  Page<Member> findAllByNameContainsAndEmailContainsOrderByIdDesc(
+  Page<MemberEntity> findAllByNameContainsAndEmailContainsOrderByIdDesc(
       String name,
       String email,
       Pageable pageable
@@ -69,7 +69,7 @@ public interface MemberRepository extends
    * @param pageable String
    * @return Page&lt;Member&gt;
    */
-  Page<Member> findAllByNameContainsAndEmailContains(
+  Page<MemberEntity> findAllByNameContainsAndEmailContains(
       String name,
       String email,
       Pageable pageable

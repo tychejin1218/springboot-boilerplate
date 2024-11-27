@@ -1,6 +1,6 @@
 package com.example.boilerplate.common.dto;
 
-import com.example.boilerplate.sample.domain.entity.Member;
+import com.example.boilerplate.domain.entity.MemberEntity;
 import java.io.Serial;
 import java.util.Arrays;
 import java.util.Collection;
@@ -20,9 +20,9 @@ public class CustomUser extends User {
   @Serial
   private static final long serialVersionUID = 2766590282782490762L;
 
-  private transient Member member;
+  private transient MemberEntity member;
 
-  public CustomUser(Member member) {
+  public CustomUser(MemberEntity member) {
     super(member.getName(), member.getPassword(), getAuthorities(member.getRole()));
     this.member = member;
   }

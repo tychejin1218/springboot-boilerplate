@@ -1,15 +1,19 @@
-package com.example.boilerplate.sample.domain.repository;
+package com.example.boilerplate.sample.repository;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import com.example.boilerplate.sample.domain.entity.Member;
-import com.example.boilerplate.sample.domain.entity.Todo;
+import com.example.boilerplate.domain.entity.MemberEntity;
+import com.example.boilerplate.domain.entity.TodoEntity;
+import com.example.boilerplate.domain.repository.MemberRepository;
+import com.example.boilerplate.domain.repository.TodoRepository;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
@@ -18,20 +22,24 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest
 @ActiveProfiles("local")
-@Disabled
-class TodoQuerydslTest {
+class SampleRepositoryTest {
 
   @Autowired
-  private TodoRepository todoRepository;
+  SampleRepository sampleRepository;
 
   @Autowired
-  private MemberRepository memberRepository;
+  TodoRepository todoRepository;
+
+  @Autowired
+  MemberRepository memberRepository;
 
   @Autowired
   EntityManager entityManager;
 
+  @Order(1)
   @Transactional
   @DisplayName("getTodos_QueryDSL을 사용하여 To-Do 목록 조회")
   @Test
@@ -40,20 +48,21 @@ class TodoQuerydslTest {
     // Given
     setUpTodos();
 
-    Todo todo = Todo.builder()
+    TodoEntity todo = TodoEntity.builder()
         .title("Title Test")
         .description("Description Test")
         .completed(false)
         .build();
 
     // When
-    List<Todo> todos = todoRepository.getTodos(todo);
+    List<TodoEntity> todos = sampleRepository.getTodos(todo);
 
     // Then
-    log.debug("todos:[{}]", todos);
-    assertTrue(!todos.isEmpty());
+    log.debug("todos : {}", todos);
+    assertFalse(todos.isEmpty());
   }
 
+  @Order(2)
   @Transactional
   @DisplayName("getTodos_Pageable을 사용하여 To-Do 목록 조회")
   @Test
@@ -62,51 +71,42 @@ class TodoQuerydslTest {
     // Given
     setUpTodos();
 
-    Todo todo = Todo.builder()
+    TodoEntity todo = TodoEntity.builder()
         .title("Title Test")
         .description("Description Test")
         .completed(true)
         .build();
 
     // When
-    Page<Todo> todoPage = todoRepository.getTodos(todo, PageRequest.of(0, 5));
+    Page<TodoEntity> todoPage = sampleRepository.getTodos(todo, PageRequest.of(0, 5));
 
     // Then
-    log.debug("Content:[{}]", todoPage.getContent());
-    log.debug("Size:[{}]", todoPage.getSize());
-    log.debug("TotalPages:[{}]", todoPage.getTotalPages());
-    log.debug("TotalElements:[{}]", todoPage.getTotalElements());
-    log.debug("NextPageable:[{}]", todoPage.nextPageable());
-    assertTrue(!todoPage.isEmpty());
+    log.debug("Content : {}", todoPage.getContent());
+    log.debug("Size : {}", todoPage.getSize());
+    log.debug("TotalPages : {}", todoPage.getTotalPages());
+    log.debug("TotalElements : {}", todoPage.getTotalElements());
+    log.debug("NextPageable : {}", todoPage.nextPageable());
+    assertFalse(todoPage.isEmpty());
   }
 
-  /**
-   * Member를 저장
-   */
-  @Disabled
-  Long insertMember(
-      String name,
-      String email) {
+  private void clearPersistenceContext() {
+    entityManager.flush();
+    entityManager.clear();
+  }
+
+  private Long insertMember(String name, String email) {
     return memberRepository.save(
-        Member.builder()
+        MemberEntity.builder()
             .name(name)
             .email(email)
             .build()
     ).getId();
   }
 
-  /**
-   * To-Do를 저장
-   */
-  @Disabled
-  void insertTodo(
-      Long memberId,
-      String title,
-      String description,
-      Boolean completed) {
+  private void insertTodo(Long memberId, String title, String description, Boolean completed) {
     todoRepository.save(
-        Todo.builder()
-            .member(Member.builder()
+        TodoEntity.builder()
+            .member(MemberEntity.builder()
                 .id(memberId)
                 .build())
             .title(title)
@@ -116,12 +116,7 @@ class TodoQuerydslTest {
     );
   }
 
-  /**
-   * To-Do 목록을 설정
-   */
-  @Disabled
-  void setUpTodos() {
-
+  private void setUpTodos() {
     Long memberId01 = insertMember("test01", "test01@naver.com");
     Long memberId02 = insertMember("test02", "test02@gmail.com");
     Long memberId03 = insertMember("test03", "test03@naver.com");
@@ -132,7 +127,6 @@ class TodoQuerydslTest {
     Boolean completed;
 
     for (int a = 1; a <= 100; a++) {
-
       if (a % 3 == 0) {
         memberId = memberId03;
       } else if (a % 2 == 0) {
@@ -143,15 +137,11 @@ class TodoQuerydslTest {
 
       title = "Title Test" + String.format("%02d", a);
       description = "Description Test" + String.format("%02d", a);
-      if (a % 2 == 0) {
-        completed = true;
-      } else {
-        completed = false;
-      }
+      completed = a % 2 == 0;
+
       insertTodo(memberId, title, description, completed);
     }
 
-    entityManager.flush();
-    entityManager.clear();
+    clearPersistenceContext();
   }
 }

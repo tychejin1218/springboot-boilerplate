@@ -3,9 +3,9 @@ package com.example.boilerplate.sign.service;
 import com.example.boilerplate.common.exception.ApiException;
 import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.config.security.JwtTokenProvider;
-import com.example.boilerplate.sample.domain.entity.Member;
+import com.example.boilerplate.domain.entity.MemberEntity;
+import com.example.boilerplate.domain.repository.MemberRepository;
 import com.example.boilerplate.sample.domain.mapstruct.MemberMapStruct;
-import com.example.boilerplate.sample.domain.repository.MemberRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sign.dto.SignDto;
 import com.example.boilerplate.sign.dto.SignDto.Response;
@@ -37,7 +37,7 @@ public class SignService {
       throw new ApiException(ApiStatus.ALREADY_EXISTS_EMAIL);
     }
 
-    Member member = memberMapStruct.toEntity(memberRequest);
+    MemberEntity member = memberMapStruct.toEntity(memberRequest);
     member.setRole("ROLE_USER");
 
     return memberMapStruct.toDto(memberRepository.save(member));
@@ -51,7 +51,7 @@ public class SignService {
    */
   public SignDto.Response signIn(SignDto.Request signRequest) {
 
-    Member member = memberRepository.findByEmail(signRequest.getEmail())
+    MemberEntity member = memberRepository.findByEmail(signRequest.getEmail())
         .orElseThrow(() -> new ApiException(ApiStatus.INVALID_REQUEST));
 
     if (!passwordEncoder.matches(signRequest.getPassword(), member.getPassword())) {
