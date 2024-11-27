@@ -1,6 +1,6 @@
 package com.example.boilerplate.config;
 
-import com.example.boilerplate.web.interceptor.SampleInterceptor;
+import com.example.boilerplate.common.interceptor.SampleInterceptor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Configuration;

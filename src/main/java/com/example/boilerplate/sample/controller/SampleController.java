@@ -4,7 +4,7 @@ import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
 import com.example.boilerplate.sample.service.SampleService;
-import com.example.boilerplate.web.reponse.BaseResponse;
+import com.example.boilerplate.common.reponse.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

@@ -1,8 +1,8 @@
-package com.example.boilerplate.web.advice;
+package com.example.boilerplate.common.advice;
 
 import com.example.boilerplate.common.exception.ApiException;
 import com.example.boilerplate.common.type.ApiStatus;
-import com.example.boilerplate.web.reponse.ErrorResponse;
+import com.example.boilerplate.common.reponse.ErrorResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import java.nio.file.AccessDeniedException;

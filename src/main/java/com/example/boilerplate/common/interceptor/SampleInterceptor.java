@@ -1,4 +1,4 @@
-package com.example.boilerplate.web.interceptor;
+package com.example.boilerplate.common.interceptor;
 
 import com.example.boilerplate.common.constants.Constants;
 import jakarta.servlet.ServletInputStream;
