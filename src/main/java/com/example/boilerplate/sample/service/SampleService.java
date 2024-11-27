@@ -33,39 +33,39 @@ public class SampleService {
   private final TodoMapStruct todoMapStruct;
 
   /**
-   * Member 목록 조회
+   * 회원 목록 조회
    *
-   * @param memberRequest MemberDto.Request
-   * @return Page&lt;MemberDto.Response&gt;
+   * @param memberRequest 검색 조건이 포함된 MemberDto.Request 객체
+   * @return Page&lt;MemberDto.Response&gt; 페이징 처리된 회원 목록
    */
   @Transactional(readOnly = true)
-  public Page<MemberDto.Response> getMembers(MemberDto.Request memberRequest) {
+  public Page<MemberDto.Response> getMemberList(MemberDto.Request memberRequest) {
     Page<Member> memberPage =
         memberRepository.findAllByNameContainsAndEmailContains(
             memberRequest.getName(),
             memberRequest.getEmail(),
             memberRequest.pageRequest());
-    return memberPage.map(member -> memberMapStruct.toDto(member));
+    return memberPage.map(memberMapStruct::toDto);
   }
 
   /**
-   * Member 상세 조회
+   * 회원 ID를 통해 특정 회원의 정보를 조회
    *
-   * @param memberRequest MemberDto.Request
-   * @return MemberDto.Response
+   * @param memberRequest ID 정보가 포함된 MemberDto.Request 객체
+   * @return MemberDto.Response 조회된 회원의 상세 정보
    */
   @Transactional(readOnly = true)
   public MemberDto.Response getMember(MemberDto.Request memberRequest) {
     Member member = memberRepository.findById(memberRequest.getId())
-        .orElseThrow(() -> new ApiException(ApiStatus.NOT_FOUND, "존재하지 않는 Member 정보입니다."));
+        .orElseThrow(() -> new ApiException(ApiStatus.MEMBER_NOT_FOUND));
     return memberMapStruct.toDto(member);
   }
 
   /**
-   * Member 저장
+   * 회원 저장
    *
-   * @param memberRequest MemberDto.Request
-   * @return MemberDto.Response
+   * @param memberRequest 저장할 회원 정보가 포함된 MemberDto.Request 객체
+   * @return MemberDto.Response 저장된 회원의 정보
    */
   @Transactional
   public MemberDto.Response insertMember(MemberDto.Request memberRequest) {
@@ -73,15 +73,15 @@ public class SampleService {
   }
 
   /**
-   * Member 수정
+   * 회원 수정
    *
-   * @param memberRequest MemberDto.Request
-   * @return MemberDto.Response
+   * @param memberRequest 수정할 정보가 포함된 MemberDto.Request 객체
+   * @return MemberDto.Response 수정된 회원의 정보
    */
   @Transactional
   public MemberDto.Response updateMember(MemberDto.Request memberRequest) {
 
-    Member member = Member.builder().build();
+    Member member;
 
     Optional<Member> opMember = memberRepository.findById(memberRequest.getId());
     if (opMember.isPresent()) {
@@ -96,19 +96,21 @@ public class SampleService {
       }
 
       memberRepository.save(member);
+    } else {
+      throw new ApiException(ApiStatus.MEMBER_NOT_FOUND);
     }
 
     return memberMapStruct.toDto(member);
   }
 
   /**
-   * To-Do 목록 조회
+   * 할 일 목록 조회
    *
-   * @param todoRequest TodoDto.Request
-   * @return List&lt;TodoDto.Response&gt;
+   * @param todoRequest 검색 조건이 포함된 TodoDto.Request 객체
+   * @return List&lt;TodoDto.Response&gt; 검색 결과에 따른 할 일 목록
    */
   @Transactional(readOnly = true)
-  public List<TodoDto.Response> getTodos(TodoDto.Request todoRequest) {
+  public List<TodoDto.Response> getTodoList(TodoDto.Request todoRequest) {
     List<Todo> todos =
         todoRepository
             .findAllByTitleContainingIgnoreCaseAndDescriptionContainingIgnoreCaseAndCompletedOrderByIdDesc(
@@ -120,23 +122,23 @@ public class SampleService {
   }
 
   /**
-   * To-Do 상세 조회
+   * 할 일 ID를 통해 특정 할 일의 정보를 조회
    *
-   * @param todoRequest TodoDto.Request
-   * @return TodoDto.Response
+   * @param todoRequest ID 정보가 포함된 TodoDto.Request 객체
+   * @return TodoDto.Response 조회된 할 일의 정보
    */
   @Transactional(readOnly = true)
   public TodoDto.Response getTodo(TodoDto.Request todoRequest) {
     Todo todo = todoRepository.findById(todoRequest.getId())
-        .orElseThrow(() -> new ApiException(ApiStatus.NOT_FOUND, "존재하지 않는 To-Do 정보입니다."));
+        .orElseThrow(() -> new ApiException(ApiStatus.TODO_NOT_FOUND));
     return todoMapStruct.toDto(todo);
   }
 
   /**
-   * To-Do 저장
+   * 할 일 저장
    *
-   * @param todoRequest TodoDto.Request
-   * @return TodoDto.Response
+   * @param todoRequest 저장할 할 일 정보가 포함된 TodoDto.Request 객체
+   * @return TodoDto.Response 저장된 할 일의 정보
    */
   @Transactional
   public TodoDto.Response insertTodo(TodoDto.Request todoRequest) {
@@ -144,15 +146,15 @@ public class SampleService {
   }
 
   /**
-   * To-Do 수정
+   * 할 일 수정
    *
-   * @param todoRequest TodoDto.Request
-   * @return TodoDto.Response
+   * @param todoRequest 수정할 정보가 포함된 TodoDto.Request 객체
+   * @return TodoDto.Response 수정된 할 일의 정보
    */
   @Transactional
   public TodoDto.Response updateTodo(TodoDto.Request todoRequest) {
 
-    Todo todo = Todo.builder().build();
+    Todo todo;
 
     Optional<Todo> opTodo = todoRepository.findById(todoRequest.getId());
     if (opTodo.isPresent()) {
@@ -171,19 +173,22 @@ public class SampleService {
       }
 
       todoRepository.save(todo);
+    } else {
+      throw new ApiException(ApiStatus.TODO_NOT_FOUND);
     }
 
     return todoMapStruct.toDto(todo);
   }
 
   /**
-   * To-Do 수정 - @DynamicUpdate - completed만 수정
+   * 할 일 수정 - @DynamicUpdate - completed만 수정
    *
-   * @param todoRequest TodoDto.Request
+   * @param todoRequest 수정할 정보가 포함된 TodoDto.Request 객체
    */
   @Transactional
   public void updateTodoCompleted(TodoDto.Request todoRequest) {
-    TodoDynamic todoDynamic = todoDynamicRepository.findById(todoRequest.getId()).get();
+    TodoDynamic todoDynamic = todoDynamicRepository.findById(todoRequest.getId())
+        .orElseThrow(() -> new ApiException(ApiStatus.TODO_NOT_FOUND));
     todoDynamic.updateCompleted(todoRequest.getCompleted());
   }
 }

@@ -2,9 +2,9 @@ package com.example.boilerplate.sample.service;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.example.boilerplate.common.exception.ApiException;
 import com.example.boilerplate.common.type.ApiStatus;
@@ -20,49 +20,56 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
-@SuppressWarnings({
-    "PMD.AvoidDuplicateLiterals"
-})
 @Slf4j
 @SpringBootTest
 @ActiveProfiles("local")
-@Disabled
 class SampleServiceTest {
 
-  @Autowired
-  private SampleService sampleService;
+  private static final String NAME_TEST_STR = "test";
+  private static final String EMAIL_PRE_TEST_STR = "test";
+  private static final String TITLE_TEST_STR = "Title Test";
+  private static final String DESCRIPTION_TEST_STR = "Description Test";
+  private static final String FORMAT_PATTERN = "%02d";
 
   @Autowired
-  private MemberRepository memberRepository;
+  SampleService sampleService;
 
   @Autowired
-  private TodoRepository todoRepository;
+  MemberRepository memberRepository;
+
+  @Autowired
+  TodoRepository todoRepository;
 
   @Autowired
   EntityManager entityManager;
 
-  @DisplayName("Member CRUD 테스트")
+  @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+  @DisplayName("회원 CRUD 테스트")
   @Nested
   class TestMember {
 
+    @Order(1)
     @Transactional
-    @DisplayName("getMembers_Member 목록 조회")
+    @DisplayName("getMemberList_회원 목록 조회")
     @Test
-    void testGetMembers() {
+    void testGetMemberList() {
 
       // Given
       setUpMembers();
       List<String> sorts = Arrays.asList("email,desc", "name,asc");
       MemberDto.Request memberRequest = MemberDto.Request.builder()
-          .name("test")
+          .name(NAME_TEST_STR)
           .email("gmail.com")
           .page(1)
           .size(10)
@@ -70,13 +77,14 @@ class SampleServiceTest {
           .build();
 
       // When
-      Page<MemberDto.Response> memberResponses = sampleService.getMembers(memberRequest);
+      Page<MemberDto.Response> memberResponses = sampleService.getMemberList(memberRequest);
 
       // Then
       log.debug("memberResponses:[{}]", memberResponses);
-      assertTrue(!memberResponses.isEmpty());
+      assertFalse(memberResponses.isEmpty());
     }
 
+    @Order(2)
     @Transactional
     @DisplayName("getMember_Member 상세 조회")
     @Test
@@ -90,17 +98,18 @@ class SampleServiceTest {
           MemberDto.Request.builder()
               .id(member.getId())
               .build());
+      log.debug("memberResponse : {}", memberResponse);
 
       // Then
-      log.debug("memberResponse:[{}]", memberResponse);
       assertAll(
           () -> assertEquals(member.getName(), memberResponse.getName()),
           () -> assertEquals(member.getEmail(), memberResponse.getEmail())
       );
     }
 
+    @Order(3)
     @Transactional
-    @DisplayName("getMember_존재하지 않는 Member 정보를 조회")
+    @DisplayName("getMember_존재하지 않는 회원 정보를 조회")
     @Test
     void testGetMemberNotFound() {
 
@@ -115,39 +124,43 @@ class SampleServiceTest {
               MemberDto.Request.builder()
                   .id(member.getId())
                   .build()));
+      log.error("apiException memberId : {}", member.getId(), apiException);
 
       // Then
-      log.debug("apiException:[{}]", apiException);
       assertAll(
-          () -> assertEquals(ApiStatus.NOT_FOUND.getCode(), apiException.getStatus().getCode()),
-          () -> assertEquals("존재하지 않는 Member 정보입니다.", apiException.getMessage())
+          () -> assertEquals(ApiStatus.MEMBER_NOT_FOUND.getCode(),
+              apiException.getStatus().getCode()),
+          () -> assertEquals(ApiStatus.MEMBER_NOT_FOUND.getMessage(), apiException.getMessage())
       );
     }
 
+    @Order(4)
     @Transactional
-    @DisplayName("insertMember_Member 저장")
+    @DisplayName("insertMember_회원 저장")
     @Test
     void testInsertMember() {
 
       // Given
       MemberDto.Request memberRequest = MemberDto.Request.builder()
-          .name("test")
-          .email("test@gmail.co.kr")
+          .name(NAME_TEST_STR)
+          .email(EMAIL_PRE_TEST_STR + "@gmail.co.kr")
+          .password("password1!")
           .build();
 
       // When
       MemberDto.Response memberResponse = sampleService.insertMember(memberRequest);
+      log.debug("memberResponse : {}", memberResponse);
 
       // Then
-      log.debug("memberResponse:[{}]", memberResponse);
       assertAll(
           () -> assertEquals(memberRequest.getName(), memberResponse.getName()),
           () -> assertEquals(memberRequest.getEmail(), memberResponse.getEmail())
       );
     }
 
+    @Order(5)
     @Transactional
-    @DisplayName("updateMember_Member 수정")
+    @DisplayName("updateMember_회원 수정")
     @Test
     void testUpdateMember() {
 
@@ -161,9 +174,9 @@ class SampleServiceTest {
 
       // When
       MemberDto.Response memberResponse = sampleService.updateMember(memberRequest);
+      log.debug("memberResponse : {}", memberResponse);
 
       // Then
-      log.debug("memberResponse:[{}]", memberResponse);
       assertAll(
           () -> assertEquals(memberRequest.getName(), memberResponse.getName()),
           () -> assertEquals(memberRequest.getEmail(), memberResponse.getEmail())
@@ -171,33 +184,36 @@ class SampleServiceTest {
     }
   }
 
-  @DisplayName("To-Do CRUD 테스트")
+  @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+  @DisplayName("할 일 CRUD 테스트")
   @Nested
   class TestTodo {
 
+    @Order(1)
     @Transactional
-    @DisplayName("getTodos_To-Do 목록 조회")
+    @DisplayName("getTodoList_할 일 목록 조회")
     @Test
     void testGetTodos() {
 
       // Given
       setUpTodos();
       TodoDto.Request todoRequest = TodoDto.Request.builder()
-          .title("Title Test")
-          .description("Description Test")
+          .title(TITLE_TEST_STR)
+          .description(DESCRIPTION_TEST_STR)
           .completed(true)
           .build();
 
       // When
-      List<TodoDto.Response> todoResponses = sampleService.getTodos(todoRequest);
+      List<TodoDto.Response> todoResponses = sampleService.getTodoList(todoRequest);
+      log.debug("todoResponses : {}", todoResponses);
 
       // Then
-      log.debug("todoResponses:[{}]", todoResponses);
-      assertTrue(!todoResponses.isEmpty());
+      assertFalse(todoResponses.isEmpty());
     }
 
+    @Order(2)
     @Transactional
-    @DisplayName("getTodo_To-Do 상세 조회")
+    @DisplayName("getTodo_할 일 상세 조회")
     @Test
     void testGetTodo() {
 
@@ -209,9 +225,9 @@ class SampleServiceTest {
           TodoDto.Request.builder()
               .id(todo.getId())
               .build());
+      log.debug("todoResponse : {}", todoResponse);
 
       // Then
-      log.debug("todoResponse:[{}]", todoResponse);
       assertAll(
           () -> assertEquals(todo.getTitle(), todoResponse.getTitle()),
           () -> assertEquals(todo.getDescription(), todoResponse.getDescription()),
@@ -219,8 +235,9 @@ class SampleServiceTest {
       );
     }
 
+    @Order(3)
     @Transactional
-    @DisplayName("getMember_존재하지 않는 To-Do 정보를 조회")
+    @DisplayName("getTodo_존재하지 않는 할 일 정보를 조회")
     @Test
     void testGetTodoNotFound() {
 
@@ -235,37 +252,39 @@ class SampleServiceTest {
               TodoDto.Request.builder()
                   .id(todo.getId())
                   .build()));
+      log.error("apiException todoId : {}", todo.getId(), apiException);
 
       // Then
-      log.debug("apiException:[{}]", apiException);
       assertAll(
-          () -> assertEquals(ApiStatus.NOT_FOUND.getCode(), apiException.getStatus().getCode()),
-          () -> assertEquals("존재하지 않는 To-Do 정보입니다.", apiException.getMessage())
+          () -> assertEquals(ApiStatus.TODO_NOT_FOUND.getCode(),
+              apiException.getStatus().getCode()),
+          () -> assertEquals(ApiStatus.TODO_NOT_FOUND.getMessage(), apiException.getMessage())
       );
     }
 
+    @Order(4)
     @Transactional
-    @DisplayName("insertTodo_To-Do 저장")
+    @DisplayName("insertTodo_할 일 저장")
     @Test
     void testInsertTodo() {
 
       // Given
-      Long memberId = insertMember("test", "test@gmail.co.kr");
+      Long memberId = insertMember(NAME_TEST_STR, EMAIL_PRE_TEST_STR + "@gmail.co.kr");
       entityManager.flush();
       entityManager.clear();
 
       TodoDto.Request todoRequest = TodoDto.Request.builder()
-          .title("Title Test")
+          .title(TITLE_TEST_STR)
           .memberId(memberId)
-          .description("Description Test")
+          .description(DESCRIPTION_TEST_STR)
           .completed(false)
           .build();
 
       // When
       TodoDto.Response todoResponse = sampleService.insertTodo(todoRequest);
+      log.debug("todoResponse : {}", todoResponse);
 
       // Then
-      log.debug("todoResponse:[{}]", todoResponse);
       assertAll(
           () -> assertEquals(todoRequest.getTitle(), todoResponse.getTitle()),
           () -> assertEquals(todoRequest.getDescription(), todoResponse.getDescription()),
@@ -273,19 +292,20 @@ class SampleServiceTest {
       );
     }
 
+    @Order(5)
     @Transactional
-    @DisplayName("updateTodo_To-Do 수정")
+    @DisplayName("updateTodo_할 일 수정")
     @Test
     void testUpdateTodo() {
 
       // Given
       Todo todo = getTodoAfterInsertTodo();
       Long todoId = todo.getId();
-      TodoDto.Response todoDetail01 = sampleService.getTodo(
+      TodoDto.Response insertTodo = sampleService.getTodo(
           TodoDto.Request.builder()
               .id(todo.getId())
               .build());
-      log.debug("todoDetail01:[{}]", todoDetail01);
+      log.debug("insertTodo : {}", insertTodo);
 
       // When
       sampleService.updateTodo(
@@ -297,23 +317,24 @@ class SampleServiceTest {
               .build());
       entityManager.flush();
       entityManager.clear();
-      TodoDto.Response todoDetail02 = sampleService.getTodo(
+      TodoDto.Response updateTodo = sampleService.getTodo(
           TodoDto.Request.builder()
               .id(todoId)
               .build());
-      log.debug("todoDetail02:[{}]", todoDetail02);
+      log.debug("updateTodo : {}", updateTodo);
 
       // Then
       assertAll(
-          () -> assertEquals(todoDetail01.getId(), todoDetail02.getId()),
-          () -> assertNotEquals(todoDetail01.getTitle(), todoDetail02.getTitle()),
-          () -> assertNotEquals(todoDetail01.getDescription(), todoDetail02.getDescription()),
-          () -> assertNotEquals(todoDetail01.getCompleted(), todoDetail02.getCompleted())
+          () -> assertEquals(insertTodo.getId(), updateTodo.getId()),
+          () -> assertNotEquals(insertTodo.getTitle(), updateTodo.getTitle()),
+          () -> assertNotEquals(insertTodo.getDescription(), updateTodo.getDescription()),
+          () -> assertNotEquals(insertTodo.getCompleted(), updateTodo.getCompleted())
       );
     }
 
+    @Order(6)
     @Transactional
-    @DisplayName("updateTodoDynamic_To-Do 수정")
+    @DisplayName("updateTodoDynamic_할 일 수정")
     @Test
     void testUpdateTodoDynamic() {
 
@@ -351,7 +372,7 @@ class SampleServiceTest {
   }
 
   /**
-   * Member 저장
+   * 회원 저장
    */
   @Disabled
   Long insertMember(
@@ -366,24 +387,25 @@ class SampleServiceTest {
   }
 
   /**
-   * To-Do 저장
+   * 할 일 저장
    */
   @Disabled
-  Long insertTodo(
+  void insertTodo(
       Long memberId,
       String title,
       String description,
       Boolean completed) {
-    return todoRepository.save(
+    todoRepository.save(
         Todo.builder()
-            .member(Member.builder()
-                .id(memberId)
-                .build())
+            .member(
+                Member.builder()
+                    .id(memberId)
+                    .build())
             .title(title)
             .description(description)
             .completed(completed)
             .build()
-    ).getId();
+    );
   }
 
   /**
@@ -392,33 +414,18 @@ class SampleServiceTest {
   @Disabled
   void setUpMembers() {
 
-    Long memberId;
-    String name;
-    String email;
-
-    String title;
-    String description;
-    Boolean completed;
-
     for (int a = 1; a <= 100; a++) {
-
-      name = "test" + String.format("%02d", a);
-      if (a % 2 == 0) {
-        email = name + "@naver.com";
-      } else {
-        email = name + "@gmail.com";
-      }
-      memberId = insertMember(name, email);
-
+      Long memberId =
+          insertMember(NAME_TEST_STR + String.format(FORMAT_PATTERN, a),
+              (a % 2 == 0)
+                  ? EMAIL_PRE_TEST_STR + String.format(FORMAT_PATTERN, a) + "@naver.com"
+                  : EMAIL_PRE_TEST_STR + String.format(FORMAT_PATTERN, a) + "@gmail.com");
       for (int b = 1; b <= 5; b++) {
-        title = "Title Test" + String.format("%02d", b);
-        description = "Description Test" + String.format("%02d", b);
-        if (b % 2 == 0) {
-          completed = true;
-        } else {
-          completed = false;
-        }
-        insertTodo(memberId, title, description, completed);
+        insertTodo(
+            memberId,
+            TITLE_TEST_STR + String.format(FORMAT_PATTERN, b),
+            DESCRIPTION_TEST_STR + String.format(FORMAT_PATTERN, b),
+            b % 2 == 0);
       }
     }
 
@@ -427,38 +434,21 @@ class SampleServiceTest {
   }
 
   /**
-   * To-Do 목록을 설정
+   * 할 일 목록을 설정
    */
   @Disabled
   void setUpTodos() {
 
-    Long memberId01 = insertMember("test01", "test01@gmail.com");
-    Long memberId02 = insertMember("test02", "test02@naver.com");
-    Long memberId03 = insertMember("test03", "test03@daum.net");
-
-    Long memberId;
-    String title;
-    String description;
-    Boolean completed;
+    Long memberId01 = insertMember(NAME_TEST_STR + "01", EMAIL_PRE_TEST_STR + "01@gmail.com");
+    Long memberId02 = insertMember(NAME_TEST_STR + "02", EMAIL_PRE_TEST_STR + "02@naver.com");
+    Long memberId03 = insertMember(NAME_TEST_STR + "03", EMAIL_PRE_TEST_STR + "03@daum.net");
 
     for (int a = 1; a <= 100; a++) {
-
-      if (a % 3 == 0) {
-        memberId = memberId03;
-      } else if (a % 2 == 0) {
-        memberId = memberId02;
-      } else {
-        memberId = memberId01;
-      }
-
-      title = "Title Test" + String.format("%02d", a);
-      description = "Description Test" + String.format("%02d", a);
-      if (a % 2 == 0) {
-        completed = true;
-      } else {
-        completed = false;
-      }
-      insertTodo(memberId, title, description, completed);
+      Long memberId = (a % 3 == 0) ? memberId03 : (a % 2 == 0) ? memberId02 : memberId01;
+      insertTodo(memberId,
+          TITLE_TEST_STR + String.format(FORMAT_PATTERN, a),
+          DESCRIPTION_TEST_STR + String.format(FORMAT_PATTERN, a),
+          a % 2 == 0);
     }
 
     entityManager.flush();
@@ -466,31 +456,23 @@ class SampleServiceTest {
   }
 
   /**
-   * Member 1개, To-Do 10개를 저장한 후 Member를 반환
+   * 회원 1명, 할 일 10개를 저장한 후 회원을 반환
    */
   @Disabled
   Member getMemberAfterInsertTodos() {
 
     Member member = memberRepository.save(
         Member.builder()
-            .name("test01")
-            .email("test01@gmail.com")
+            .name(NAME_TEST_STR + "01")
+            .email(EMAIL_PRE_TEST_STR + "01@gmail.com")
             .build());
 
-    String title;
-    String description;
-    Boolean completed;
-
     for (int a = 1; a <= 10; a++) {
-
-      title = "Title Test" + String.format("%02d", a);
-      description = "Description Test" + String.format("%02d", a);
-      if (a % 2 == 0) {
-        completed = true;
-      } else {
-        completed = false;
-      }
-      insertTodo(member.getId(), title, description, completed);
+      insertTodo(
+          member.getId(),
+          TITLE_TEST_STR + String.format(FORMAT_PATTERN, a),
+          DESCRIPTION_TEST_STR + String.format(FORMAT_PATTERN, a),
+          a % 2 == 0);
     }
 
     entityManager.flush();
@@ -500,15 +482,15 @@ class SampleServiceTest {
   }
 
   /**
-   * Member, To-Do를 1개씩 저장한 후 Todo를 반환
+   * 회원 1명, 할 일 1개를 저장한 후 할 일을 반환
    */
   @Disabled
   Todo getTodoAfterInsertTodo() {
 
     Member member = memberRepository.save(
         Member.builder()
-            .name("test")
-            .email("test@gmail.com")
+            .name(NAME_TEST_STR)
+            .email(EMAIL_PRE_TEST_STR + "@gmail.com")
             .build());
 
     Todo todo = todoRepository.save(

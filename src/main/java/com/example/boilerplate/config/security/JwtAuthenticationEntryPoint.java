@@ -1,8 +1,7 @@
 package com.example.boilerplate.config.security;
 
-
-import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.common.reponse.ErrorResponse;
+import com.example.boilerplate.common.type.ApiStatus;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

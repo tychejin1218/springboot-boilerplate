@@ -1,10 +1,10 @@
 package com.example.boilerplate.sample.controller;
 
+import com.example.boilerplate.common.reponse.BaseResponse;
 import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
 import com.example.boilerplate.sample.service.SampleService;
-import com.example.boilerplate.common.reponse.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -31,13 +31,13 @@ public class SampleController {
       value = "/sample/members",
       consumes = MediaType.APPLICATION_JSON_VALUE,
       produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity getMembers(
+  public ResponseEntity getMemberList(
       @RequestBody MemberDto.Request memberRequest) {
     return ResponseEntity
         .status(HttpStatus.OK)
         .body(BaseResponse.builder()
             .statusCode(ApiStatus.OK.getCode())
-            .data(sampleService.getMembers(memberRequest))
+            .data(sampleService.getMemberList(memberRequest))
             .build());
   }
 
@@ -117,7 +117,7 @@ public class SampleController {
         .status(HttpStatus.OK)
         .body(BaseResponse.builder()
             .statusCode(ApiStatus.OK.getCode())
-            .data(sampleService.getTodos(todoRequest))
+            .data(sampleService.getTodoList(todoRequest))
             .build());
   }
 

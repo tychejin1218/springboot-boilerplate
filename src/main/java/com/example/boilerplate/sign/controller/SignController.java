@@ -1,10 +1,10 @@
 package com.example.boilerplate.sign.controller;
 
+import com.example.boilerplate.common.reponse.BaseResponse;
 import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sign.dto.SignDto;
 import com.example.boilerplate.sign.service.SignService;
-import com.example.boilerplate.common.reponse.BaseResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
