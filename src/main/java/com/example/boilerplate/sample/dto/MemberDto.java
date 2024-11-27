@@ -24,6 +24,12 @@ public class MemberDto {
     private String password;
     private String name;
     private String email;
+
+    public static Request of(Long id) {
+      return MemberDto.Request.builder()
+          .id(id)
+          .build();
+    }
   }
 
   @Getter

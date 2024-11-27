@@ -122,7 +122,7 @@ public class SampleService {
   }
 
   /**
-   * 할 일 ID를 통해 특정 할 일의 정보를 조회
+   * 할 일 조회
    *
    * @param todoRequest ID 정보가 포함된 TodoDto.Request 객체
    * @return TodoDto.Response 조회된 할 일의 정보

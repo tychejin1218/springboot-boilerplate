@@ -28,10 +28,11 @@ public class SignService {
   /**
    * 회원가입
    *
-   * @param memberRequest MemberDto.Request
-   * @return MemberDto.Response
+   * @param memberRequest 회원 요청 정보가 포함된 MemberDto.Request 객체
+   * @return MemberDto.Response 회원 응답 정보가 포함된 객체
    */
   public MemberDto.Response signUp(MemberDto.Request memberRequest) {
+
     if (memberRepository.findByEmail(memberRequest.getEmail()).isPresent()) {
       throw new ApiException(ApiStatus.ALREADY_EXISTS_EMAIL);
     }
@@ -45,8 +46,8 @@ public class SignService {
   /**
    * 로그인
    *
-   * @param signRequest SignDto.Request
-   * @return SignDto.Response
+   * @param signRequest 로그인 요청 정보가 포함된 SignDto.Request 객체
+   * @return SignDto.Response 로그인 응답 정보가 포함된 객체
    */
   public SignDto.Response signIn(SignDto.Request signRequest) {
 

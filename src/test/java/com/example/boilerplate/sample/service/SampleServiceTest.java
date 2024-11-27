@@ -86,7 +86,7 @@ class SampleServiceTest {
 
     @Order(2)
     @Transactional
-    @DisplayName("getMember_Member 상세 조회")
+    @DisplayName("getMember_회원 조회")
     @Test
     void testGetMember() {
 
@@ -213,7 +213,7 @@ class SampleServiceTest {
 
     @Order(2)
     @Transactional
-    @DisplayName("getTodo_할 일 상세 조회")
+    @DisplayName("getTodo_할 일 조회")
     @Test
     void testGetTodo() {
 
@@ -409,7 +409,7 @@ class SampleServiceTest {
   }
 
   /**
-   * Member 목록 설정
+   * 회원 목록 설정
    */
   @Disabled
   void setUpMembers() {

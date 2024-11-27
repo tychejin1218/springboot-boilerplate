@@ -1,11 +1,14 @@
 package com.example.boilerplate.sample.controller;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+import com.example.boilerplate.common.reponse.BaseResponse;
 import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.sample.domain.entity.Member;
 import com.example.boilerplate.sample.domain.entity.Todo;
@@ -13,11 +16,13 @@ import com.example.boilerplate.sample.domain.repository.MemberRepository;
 import com.example.boilerplate.sample.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
+import com.example.boilerplate.sign.dto.SignDto;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
-import java.util.Arrays;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -41,6 +46,15 @@ import org.springframework.transaction.annotation.Transactional;
 @ActiveProfiles("local")
 class SampleControllerTest {
 
+  private static final String AUTHORIZATION_HEADER = "Authorization";
+  private static final String AUTHORIZATION_TOKEN_PREFIX = "Bearer ";
+
+  private static final String NAME_TEST_STR = "test";
+  private static final String EMAIL_PRE_TEST_STR = "test";
+  private static final String TITLE_TEST_STR = "Title Test";
+  private static final String DESCRIPTION_TEST_STR = "Description Test";
+  private static final String FORMAT_PATTERN = "%02d";
+
   @Autowired
   MockMvc mockMvc;
 
@@ -48,27 +62,53 @@ class SampleControllerTest {
   ObjectMapper objectMapper;
 
   @Autowired
-  private MemberRepository memberRepository;
+  MemberRepository memberRepository;
 
   @Autowired
-  private TodoRepository todoRepository;
+  TodoRepository todoRepository;
 
   @Autowired
   EntityManager entityManager;
 
-  @DisplayName("Member CRUD 테스트")
+  private static String token;
+
+  @BeforeAll
+  static void setUp(
+      @Autowired MockMvc mockMvc,
+      @Autowired ObjectMapper objectMapper) throws Exception {
+
+    SignDto.Request signInRequest = SignDto.Request.builder()
+        .email("admin@naver.com")
+        .password("password1!")
+        .build();
+
+    ResultActions signInActions = mockMvc.perform(
+        post("/sign/signin")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(objectMapper.writeValueAsString(signInRequest))
+    );
+    signInActions.andDo(print());
+
+    String jsonResponse = signInActions.andReturn().getResponse().getContentAsString();
+    BaseResponse<SignDto.Response> baseResponse = objectMapper.readValue(jsonResponse,
+        new TypeReference<>() {
+        });
+    token = baseResponse.getData().getToken();
+  }
+
+  @DisplayName("회원 CRUD 테스트")
   @Nested
   class TestMember {
 
     @Transactional
-    @DisplayName("getMembers_Member 목록 조회_statusCode:200")
+    @DisplayName("getMemberList_회원 목록 조회_statusCode:200")
     @Test
-    void testGetMembers() throws Exception {
+    void testGetMemberList() throws Exception {
 
       // Given
       setUpMembers();
       String url = "/sample/members";
-      List<String> sorts = Arrays.asList("email,desc", "name,asc");
+      List<String> sorts = List.of("email,desc", "name,asc");
       MemberDto.Request memberRequest = MemberDto.Request.builder()
           .name("test")
           .email("test")
@@ -76,11 +116,16 @@ class SampleControllerTest {
           .size(10)
           .sorts(sorts)
           .build();
+      String queryParams = String.format("?name=%s&email=%s&page=%d&size=%d&sorts=%s&sorts=%s",
+          memberRequest.getName(), memberRequest.getEmail(), memberRequest.getPage(),
+          memberRequest.getSize(), memberRequest.getSorts().get(0),
+          memberRequest.getSorts().get(1));
 
       // When
       ResultActions resultActions = mockMvc.perform(
-          post(url)
+          get(url + queryParams)
               .contentType(MediaType.APPLICATION_JSON)
+              .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + token)
               .content(objectMapper.writeValueAsString(memberRequest))
       );
 
@@ -95,22 +140,19 @@ class SampleControllerTest {
     }
 
     @Transactional
-    @DisplayName("getMember_Member 상세 조회_statusCode:200")
+    @DisplayName("getMember_회원 조회_statusCode:200")
     @Test
     void testGetMember() throws Exception {
 
       // Given
       Member member = getMemberAfterInsertTodos();
-      String url = "/sample/member";
-      MemberDto.Request memberRequest = MemberDto.Request.builder()
-          .id(member.getId())
-          .build();
+      String url = "/sample/member/" + member.getId();
 
       // When
       ResultActions resultActions = mockMvc.perform(
-          post(url)
+          get(url)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(memberRequest))
+              .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + token)
       );
 
       // Then
@@ -124,39 +166,34 @@ class SampleControllerTest {
     }
 
     @Transactional
-    @DisplayName("getMember_Member가 존재하지 않는 경우_statusCode:804")
+    @DisplayName("getMember_회원이 존재하지 않는 경우_statusCode:807")
     @Test
     void testGetMemberNotFound() throws Exception {
 
       // Given
       Member member = getMemberAfterInsertTodos();
-      String url = "/sample/member";
-      MemberDto.Request memberRequest = MemberDto.Request.builder()
-          .id(member.getId() + 1)
-          .build();
+      String url = "/sample/member/" + member.getId() + 1;
 
       // When
       ResultActions resultActions = mockMvc.perform(
-          post(url)
+          get(url)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(memberRequest))
+              .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + token)
       );
 
       // Then
       resultActions
           .andExpect(status().isBadRequest())
           .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-          .andExpect(jsonPath("$.statusCode").value(
-              ApiStatus.NOT_FOUND.getCode()))
-          .andExpect(jsonPath("$.message").value(
-              "존재하지 않는 Member 정보입니다."))
-          .andExpect(jsonPath("method").value(HttpMethod.POST.toString()))
+          .andExpect(jsonPath("$.statusCode").value(ApiStatus.MEMBER_NOT_FOUND.getCode()))
+          .andExpect(jsonPath("$.message").value(ApiStatus.MEMBER_NOT_FOUND.getMessage()))
+          .andExpect(jsonPath("method").value(HttpMethod.GET.toString()))
           .andExpect(jsonPath("timestamp").isNotEmpty())
           .andDo(print());
     }
 
     @Transactional
-    @DisplayName("insertMember_Member 저장_statusCode:200")
+    @DisplayName("insertMember_회원 저장_statusCode:200")
     @Test
     void testInsertMember() throws Exception {
 
@@ -165,12 +202,14 @@ class SampleControllerTest {
       MemberDto.Request memberRequest = MemberDto.Request.builder()
           .name("test")
           .email("test@gmail.co.kr")
+          .password("password1!")
           .build();
 
       // When
       ResultActions resultActions = mockMvc.perform(
           post(url)
               .contentType(MediaType.APPLICATION_JSON)
+              .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + token)
               .content(objectMapper.writeValueAsString(memberRequest))
       );
 
@@ -185,7 +224,7 @@ class SampleControllerTest {
     }
 
     @Transactional
-    @DisplayName("updateMember_Member 수정_statusCode:200")
+    @DisplayName("updateMember_회원 수정_statusCode:200")
     @Test
     void testUpdateMember() throws Exception {
 
@@ -200,8 +239,9 @@ class SampleControllerTest {
 
       // When
       ResultActions resultActions = mockMvc.perform(
-          post(url)
+          put(url)
               .contentType(MediaType.APPLICATION_JSON)
+              .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + token)
               .content(objectMapper.writeValueAsString(memberRequest))
       );
 
@@ -216,20 +256,19 @@ class SampleControllerTest {
     }
   }
 
-
-  @DisplayName("To-Do CRUD 테스트")
+  @DisplayName("할 일 CRUD 테스트")
   @Nested
   class TestTodo {
 
     @Transactional
-    @DisplayName("getTodos_To-Do 목록 조회_statusCode:200")
+    @DisplayName("getTodos_할 일 목록 조회_statusCode:200")
     @Test
     void testGetTodos() throws Exception {
 
       // Given
       setUpTodos();
       String url = "/sample/todos";
-      List<String> sorts = Arrays.asList("id,desc");
+      List<String> sorts = List.of("id,desc");
       TodoDto.Request todoRequest = TodoDto.Request.builder()
           .title("test")
           .description("test")
@@ -239,10 +278,21 @@ class SampleControllerTest {
           .sorts(sorts)
           .build();
 
+      String queryParams = String.format(
+          "?title=%s&description=%s&completed=%b&page=%d&size=%d&sorts=%s",
+          todoRequest.getTitle(),
+          todoRequest.getDescription(),
+          todoRequest.getCompleted(),
+          todoRequest.getPage(),
+          todoRequest.getSize(),
+          String.join("&sorts=", todoRequest.getSorts())
+      );
+
       // When
       ResultActions resultActions = mockMvc.perform(
-          post(url)
+          get(url + queryParams)
               .contentType(MediaType.APPLICATION_JSON)
+              .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + token)
               .content(objectMapper.writeValueAsString(todoRequest))
       );
 
@@ -257,23 +307,20 @@ class SampleControllerTest {
     }
 
     @Transactional
-    @DisplayName("getTodo_To-Do 상세 조회_statusCode:200")
+    @DisplayName("getTodo_할 일 조회_statusCode:200")
     @Test
     void testGetTodo() throws Exception {
 
       // Given
       Todo todo = getTodoAfterInsertTodo();
       Long todoId = todo.getId();
-      String url = "/sample/todo";
-      TodoDto.Request todoRequest = TodoDto.Request.builder()
-          .id(todoId)
-          .build();
+      String url = "/sample/todo/" + todoId;
 
       // When
       ResultActions resultActions = mockMvc.perform(
-          post(url)
+          get(url)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(todoRequest))
+              .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + token)
       );
 
       // Then
@@ -287,40 +334,35 @@ class SampleControllerTest {
     }
 
     @Transactional
-    @DisplayName("getTodo_To-Do가 존재하지 않는 경우_statusCode:804")
+    @DisplayName("getTodo_할 일이 존재하지 않는 경우_statusCode:808")
     @Test
     void testGetTodoNotFound() throws Exception {
 
       // Given
       Todo todo = getTodoAfterInsertTodo();
       Long todoId = todo.getId();
-      String url = "/sample/todo";
-      TodoDto.Request todoRequest = TodoDto.Request.builder()
-          .id(todoId + 1)
-          .build();
+      String url = "/sample/todo/" + todoId + 1;
 
       // When
       ResultActions resultActions = mockMvc.perform(
-          post(url)
+          get(url)
               .contentType(MediaType.APPLICATION_JSON)
-              .content(objectMapper.writeValueAsString(todoRequest))
+              .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + token)
       );
 
       // Then
       resultActions
           .andExpect(status().isBadRequest())
           .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-          .andExpect(jsonPath("$.statusCode").value(
-              ApiStatus.NOT_FOUND.getCode()))
-          .andExpect(jsonPath("$.message").value(
-              "존재하지 않는 To-Do 정보입니다."))
-          .andExpect(jsonPath("method").value(HttpMethod.POST.toString()))
+          .andExpect(jsonPath("$.statusCode").value(ApiStatus.TODO_NOT_FOUND.getCode()))
+          .andExpect(jsonPath("$.message").value(ApiStatus.TODO_NOT_FOUND.getMessage()))
+          .andExpect(jsonPath("method").value(HttpMethod.GET.toString()))
           .andExpect(jsonPath("timestamp").isNotEmpty())
           .andDo(print());
     }
 
     @Transactional
-    @DisplayName("insertTodo_To-Do 저장_statusCode:200")
+    @DisplayName("insertTodo_할 일 저장_statusCode:200")
     @Test
     void testInsertTodo() throws Exception {
 
@@ -341,6 +383,7 @@ class SampleControllerTest {
       ResultActions resultActions = mockMvc.perform(
           post(url)
               .contentType(MediaType.APPLICATION_JSON)
+              .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + token)
               .content(objectMapper.writeValueAsString(todoRequest))
       );
 
@@ -355,7 +398,7 @@ class SampleControllerTest {
     }
 
     @Transactional
-    @DisplayName("updateTodo_To-Do 수정_statusCode:200")
+    @DisplayName("updateTodo_할 일 수정_statusCode:200")
     @Test
     void testUpdateTodo() throws Exception {
 
@@ -372,8 +415,9 @@ class SampleControllerTest {
 
       // When
       ResultActions resultActions = mockMvc.perform(
-          post(url)
+          put(url)
               .contentType(MediaType.APPLICATION_JSON)
+              .header(AUTHORIZATION_HEADER, AUTHORIZATION_TOKEN_PREFIX + token)
               .content(objectMapper.writeValueAsString(todoRequest))
       );
 
@@ -389,7 +433,7 @@ class SampleControllerTest {
   }
 
   /**
-   * Member 저장
+   * 회원 저장
    */
   @Disabled
   Long insertMember(
@@ -404,59 +448,45 @@ class SampleControllerTest {
   }
 
   /**
-   * To-Do 저장
+   * 할 일 저장
    */
   @Disabled
-  Long insertTodo(
+  void insertTodo(
       Long memberId,
       String title,
       String description,
       Boolean completed) {
-    return todoRepository.save(
+    todoRepository.save(
         Todo.builder()
-            .member(Member.builder()
-                .id(memberId)
-                .build())
+            .member(
+                Member.builder()
+                    .id(memberId)
+                    .build())
             .title(title)
             .description(description)
             .completed(completed)
             .build()
-    ).getId();
+    );
   }
 
   /**
-   * Member 목록 설정
+   * 회원 목록 설정
    */
   @Disabled
   void setUpMembers() {
 
-    Long memberId;
-    String name;
-    String email;
-
-    String title;
-    String description;
-    Boolean completed;
-
-    for (int a = 1; a <= 10; a++) {
-
-      name = "test" + String.format("%02d", a);
-      if (a % 2 == 0) {
-        email = "test@naver.com";
-      } else {
-        email = "test@gmail.com";
-      }
-      memberId = insertMember(name, email);
-
+    for (int a = 1; a <= 100; a++) {
+      Long memberId =
+          insertMember(NAME_TEST_STR + String.format(FORMAT_PATTERN, a),
+              (a % 2 == 0)
+                  ? EMAIL_PRE_TEST_STR + String.format(FORMAT_PATTERN, a) + "@naver.com"
+                  : EMAIL_PRE_TEST_STR + String.format(FORMAT_PATTERN, a) + "@gmail.com");
       for (int b = 1; b <= 5; b++) {
-        title = "Title Test" + String.format("%02d", b);
-        description = "Description Test" + String.format("%02d", b);
-        if (b % 2 == 0) {
-          completed = true;
-        } else {
-          completed = false;
-        }
-        insertTodo(memberId, title, description, completed);
+        insertTodo(
+            memberId,
+            TITLE_TEST_STR + String.format(FORMAT_PATTERN, b),
+            DESCRIPTION_TEST_STR + String.format(FORMAT_PATTERN, b),
+            b % 2 == 0);
       }
     }
 
@@ -470,33 +500,16 @@ class SampleControllerTest {
   @Disabled
   void setUpTodos() {
 
-    Long memberId01 = insertMember("test01", "test01@gmail.com");
-    Long memberId02 = insertMember("test02", "test02@naver.com");
-    Long memberId03 = insertMember("test03", "test03@daum.net");
-
-    Long memberId;
-    String title;
-    String description;
-    Boolean completed;
+    Long memberId01 = insertMember(NAME_TEST_STR + "01", EMAIL_PRE_TEST_STR + "01@gmail.com");
+    Long memberId02 = insertMember(NAME_TEST_STR + "02", EMAIL_PRE_TEST_STR + "02@naver.com");
+    Long memberId03 = insertMember(NAME_TEST_STR + "03", EMAIL_PRE_TEST_STR + "03@daum.net");
 
     for (int a = 1; a <= 100; a++) {
-
-      if (a % 3 == 0) {
-        memberId = memberId03;
-      } else if (a % 2 == 0) {
-        memberId = memberId02;
-      } else {
-        memberId = memberId01;
-      }
-
-      title = "Title Test" + String.format("%02d", a);
-      description = "Description Test" + String.format("%02d", a);
-      if (a % 2 == 0) {
-        completed = true;
-      } else {
-        completed = false;
-      }
-      insertTodo(memberId, title, description, completed);
+      Long memberId = (a % 3 == 0) ? memberId03 : (a % 2 == 0) ? memberId02 : memberId01;
+      insertTodo(memberId,
+          TITLE_TEST_STR + String.format(FORMAT_PATTERN, a),
+          DESCRIPTION_TEST_STR + String.format(FORMAT_PATTERN, a),
+          a % 2 == 0);
     }
 
     entityManager.flush();
@@ -504,31 +517,23 @@ class SampleControllerTest {
   }
 
   /**
-   * Member 1개, To-Do 10개를 저장한 후 Member를 반환
+   * 회원 1명, 할 일 10개를 저장한 후 회원을 반환
    */
   @Disabled
   Member getMemberAfterInsertTodos() {
 
     Member member = memberRepository.save(
         Member.builder()
-            .name("test01")
-            .email("test01@gmail.com")
+            .name(NAME_TEST_STR + "01")
+            .email(EMAIL_PRE_TEST_STR + "01@gmail.com")
             .build());
 
-    String title;
-    String description;
-    Boolean completed;
-
     for (int a = 1; a <= 10; a++) {
-
-      title = "Title Test" + String.format("%02d", a);
-      description = "Description Test" + String.format("%02d", a);
-      if (a % 2 == 0) {
-        completed = true;
-      } else {
-        completed = false;
-      }
-      insertTodo(member.getId(), title, description, completed);
+      insertTodo(
+          member.getId(),
+          TITLE_TEST_STR + String.format(FORMAT_PATTERN, a),
+          DESCRIPTION_TEST_STR + String.format(FORMAT_PATTERN, a),
+          a % 2 == 0);
     }
 
     entityManager.flush();
@@ -538,22 +543,22 @@ class SampleControllerTest {
   }
 
   /**
-   * Member, To-Do를 1개씩 저장한 후 Todo를 반환
+   * 회원 1명, 할 일 1개를 저장한 후 할 일을 반환
    */
   @Disabled
   Todo getTodoAfterInsertTodo() {
 
     Member member = memberRepository.save(
         Member.builder()
-            .name("test")
-            .email("test@gmail.com")
+            .name(NAME_TEST_STR)
+            .email(EMAIL_PRE_TEST_STR + "@gmail.com")
             .build());
 
     Todo todo = todoRepository.save(
         Todo.builder()
             .member(member)
-            .title("Title Test Insert")
-            .description("Description Test Insert")
+            .title("To-Do Title")
+            .description("To-Do Description")
             .completed(false)
             .build());
 

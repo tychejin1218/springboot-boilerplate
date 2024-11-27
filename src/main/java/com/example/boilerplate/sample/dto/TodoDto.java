@@ -25,6 +25,12 @@ public class TodoDto {
     private String title;
     private String description;
     private Boolean completed;
+
+    public static TodoDto.Request of(Long id) {
+      return TodoDto.Request.builder()
+          .id(id)
+          .build();
+    }
   }
 
   @Getter
