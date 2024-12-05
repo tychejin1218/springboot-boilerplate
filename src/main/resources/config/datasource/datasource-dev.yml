@@ -75,3 +75,4 @@ main:
 redis:
   cluster:
     nodes:
+      127.0.0.1:7001

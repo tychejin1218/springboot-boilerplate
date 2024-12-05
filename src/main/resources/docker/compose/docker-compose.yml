@@ -1,25 +1,31 @@
 # compose 파일 버전
 version: '3'
 services:
-  # 서비스 명
+  # MySQL 서비스
   mysql:
-    # 사용할 이미지
     image: mysql:8.0
-    # 컨테이너 실행 시 재시작
     restart: always
-    # 컨테이너명 설정
     container_name: mysql
-    # 접근 포트 설정 (컨테이너 외부:컨테이너 내부)
     ports:
-      - "3306:3306"
-    # 환경 변수 설정
+      - "3306:3306" # 호스트와 컨테이너의 MySQL 포트 매핑
     environment:
       MYSQL_ROOT_PASSWORD: password
       TZ: Asia/Seoul
-    # 명렬어 설정
     command:
-      - --character-set-server=utf8mb4
-      - --collation-server=utf8mb4_unicode_ci
-    # 볼륨 설정
+      - --character-set-server=utf8mb4 # 문자셋 설정
+      - --collation-server=utf8mb4_unicode_ci  # 콜레이션 설정
     volumes:
       - ./data/mysql/:/var/lib/mysql
+
+  # Redis Cluster 서비스
+  redis-cluster:
+    container_name: redis-cluster-6
+    image: grokzen/redis-cluster:7.0.15
+    environment:
+      - IP=0.0.0.0  # 모든 네트워크 인터페이스를 수신
+      - BIND_ADDRESS=0.0.0.0  # 모든 네트워크 인터페이스에 바인드
+      - INITIAL_PORT=7001  # 초기 포트 번호
+      - MASTERS=3  # 마스터 노드의 수
+      - SLAVES_PER_MASTER=1  # 각 마스터 노드당 슬레이브 노드의 수
+    ports:
+      - "7001-7006:7001-7006"  # 호스트 포트와 컨테이너 포트 매핑

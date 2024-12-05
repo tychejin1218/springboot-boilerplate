@@ -18,18 +18,18 @@
 main:
   datasource:
     single:
-        driver-class-name: com.mysql.cj.jdbc.Driver
-        jdbc-url: jdbc:mysql://localhost:3306/sample?serverTimezone=UTC&characterEncoding=UTF-8
-        read-only: false
-        username: sample
-        # password: password1!
-        password: ENC(Mc7GDTyzk57XXU7hf+OTYl8n20zzViY8BIclFDIUN8vmuBGVNcRFVNOXlO3MONlH)
-        poolName: mysqlDbConnectionPool
-        maximum-pool-size: 5
-        minimum-idle: 5
-        idle-timeout: 10000
-        max-life-time: 580000
-        connection-test-query: SELECT 1
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url: jdbc:mysql://localhost:3306/sample?serverTimezone=UTC&characterEncoding=UTF-8
+      read-only: false
+      username: sample
+      # password: password1!
+      password: ENC(Mc7GDTyzk57XXU7hf+OTYl8n20zzViY8BIclFDIUN8vmuBGVNcRFVNOXlO3MONlH)
+      poolName: mysqlDbConnectionPool
+      maximum-pool-size: 5
+      minimum-idle: 5
+      idle-timeout: 10000
+      max-life-time: 580000
+      connection-test-query: SELECT 1
   # JPA 설정
   jpa:
     generate-ddl: false # 데이터베이스 테이블을 자동으로 생성
@@ -50,3 +50,4 @@ main:
 redis:
   cluster:
     nodes:
+      127.0.0.1:7001

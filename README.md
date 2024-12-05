@@ -10,7 +10,8 @@ Spring Boot를 이용하여 Backend 개발 환경을 구축합니다.
 - **JDK**: 17
 - **Spring Boot**: 3.3.1
 - **Build Tool**: Gradle 8.8
-- **Database**: Docker 컨테이너를 사용하며, `docker.compose` 폴더에 `docker-compose.yml` 파일이 위치
+- **MySQL**: Docker 컨테이너에서 실행되며, 설정은 `docker.compose` 폴더에 `docker-compose.yml`에 정의
+- **Redis Cluster**: Docker 컨테이너에서 실행되며, 설정은 `docker.compose` 폴더에 `docker-compose.yml`에 정의
 - **샘플 데이터 파일 경로**: `script/sample/data.sql` 및 `schema.sql`
 - **로그 설정**: `logback-spring`을 사용하여 설정
 
