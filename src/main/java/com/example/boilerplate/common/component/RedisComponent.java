@@ -124,4 +124,19 @@ public class RedisComponent {
     }
     return null;
   }
+
+  /**
+   * 키에 해당하는 값을 삭제
+   *
+   * @param key 삭제할 키
+   * @return 삭제가 성공했는지 여부
+   */
+  public boolean deleteKey(String key) {
+    try {
+      return Boolean.TRUE.equals(stringRedisTemplate.delete(key));
+    } catch (Exception e) {
+      log.error("deleteKey key : {}", key, e);
+      return false;
+    }
+  }
 }

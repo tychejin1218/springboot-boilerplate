@@ -3,6 +3,8 @@ package com.example.boilerplate.common.component;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
@@ -58,7 +60,7 @@ class RedisComponentTest {
 
     // Given
     String key = "SAMPLE:OBJECT_100";
-    SampleDto sample = SampleDto.of("100", "Daekyo", 30);
+    SampleDto sample = SampleDto.of("100", "Gildong", 30);
     long duration = 10L;
     TimeUnit timeUnit = TimeUnit.MINUTES;
 
@@ -149,6 +151,69 @@ class RedisComponentTest {
         () -> assertEquals(stringInitialValue, retrievedStringValue),
         () -> assertNotNull(retrievedIntValue),
         () -> assertEquals(intNewValue, retrievedIntValue)
+    );
+  }
+
+  @Order(6)
+  @DisplayName("문자열 삭제")
+  @Test
+  void testDeleteStringKey() {
+
+    // Given
+    String key = "SAMPLE:STR_101";
+    String strValue = "Delete Test String";
+    redisComponent.setStringValue(key, strValue, 10, TimeUnit.MINUTES);
+    assertNotNull(redisComponent.getStringValue(key));
+
+    // When
+    boolean deleted = redisComponent.deleteKey(key);
+
+    // Then
+    assertAll(
+        () -> assertTrue(deleted),
+        () -> assertNull(redisComponent.getStringValue(key))
+    );
+  }
+
+  @Order(7)
+  @DisplayName("객체 삭제")
+  @Test
+  void testDeleteObjectKey() {
+
+    // Given
+    String key = "SAMPLE:OBJECT_101";
+    SampleDto sample = SampleDto.of("101", "Gildong", 25);
+    redisComponent.setObjectValue(key, sample, 10, TimeUnit.MINUTES);
+    assertNotNull(redisComponent.getObjectValue(key, SampleDto.class));
+
+    // When
+    boolean deleted = redisComponent.deleteKey(key);
+
+    // Then
+    assertAll(
+        () -> assertTrue(deleted),
+        () -> assertNull(redisComponent.getObjectValue(key, SampleDto.class))
+    );
+  }
+
+  @Order(8)
+  @DisplayName("정수 삭제")
+  @Test
+  void testDeleteIntegerKey() {
+
+    // Given
+    String key = "SAMPLE:INT_101";
+    Integer intValue = 6789;
+    redisComponent.setIntegerValue(key, intValue, 10, TimeUnit.MINUTES);
+    assertNotNull(redisComponent.getIntegerValue(key));
+
+    // When
+    boolean deleted = redisComponent.deleteKey(key);
+
+    // Then
+    assertAll(
+        () -> assertTrue(deleted),
+        () -> assertNull(redisComponent.getIntegerValue(key))
     );
   }
 
