@@ -45,3 +45,8 @@ main:
         highlight-sql: true
         use-sql-comments: true
         physical-naming-strategy: com.example.boilerplate.config.MainJpaNamingStrategy
+
+# Redis 설정
+redis:
+  cluster:
+    nodes:

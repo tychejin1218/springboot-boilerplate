@@ -42,6 +42,9 @@ Spring Boot를 이용하여 Backend 개발 환경을 구축합니다.
     - `jakarta.persistence-api`: Jakarta Persistence API
     - `jakarta.annotation-api`: Jakarta 어노테이션 API
 
+* **Redis**
+  - `spring-boot-starter-data-redis`: Redis 사용을 위한 기본 설정 및 지원
+   
 * **Lombok**
     - `lombok`: 코드 최소화를 위한 어노테이션 제공 (compileOnly 및 테스트 조합 사용)
 
