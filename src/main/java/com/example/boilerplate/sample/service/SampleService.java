@@ -1,5 +1,6 @@
 package com.example.boilerplate.sample.service;
 
+import com.example.boilerplate.common.component.RedisComponent;
 import com.example.boilerplate.common.exception.ApiException;
 import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.domain.entity.MemberEntity;
@@ -14,8 +15,10 @@ import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
@@ -31,6 +34,7 @@ public class SampleService {
   private final TodoRepository todoRepository;
   private final TodoDynamicRepository todoDynamicRepository;
   private final TodoMapStruct todoMapStruct;
+  private final RedisComponent redisComponent;
 
   /**
    * 회원 목록 조회
@@ -52,13 +56,32 @@ public class SampleService {
    * 회원 ID를 통해 특정 회원의 정보를 조회
    *
    * @param memberRequest ID 정보가 포함된 MemberDto.Request 객체
-   * @return MemberDto.Response 조회된 회원의 상세 정보
+   * @return MemberDto.Response 조회된 회원의 정보
    */
   @Transactional(readOnly = true)
   public MemberDto.Response getMember(MemberDto.Request memberRequest) {
-    MemberEntity member = memberRepository.findById(memberRequest.getId())
-        .orElseThrow(() -> new ApiException(ApiStatus.MEMBER_NOT_FOUND));
-    return memberMapStruct.toDto(member);
+
+    // Redis에 사용할 키 생성
+    String redisKey = String.format("SAMPLE:MEMBER:%s", memberRequest.getId());
+
+    // Redis에서 회원 정보를 조회
+    MemberDto.Response memberResponse = redisComponent.getObjectValue(
+        redisKey, MemberDto.Response.class);
+    log.debug("Redis redisKey : {}, memberResponse : {}", redisKey, memberResponse);
+
+    if (ObjectUtils.isEmpty(memberResponse)) {
+
+      // 회원 정보를 조회
+      MemberEntity member = memberRepository.findById(memberRequest.getId())
+          .orElseThrow(() -> new ApiException(ApiStatus.MEMBER_NOT_FOUND));
+      memberResponse = memberMapStruct.toDto(member);
+      log.debug("MySQL memberId : {}, memberResponse : {}", memberRequest.getId(), memberResponse);
+
+      // Redis에 회원 정보를 저장
+      redisComponent.setObjectValue(redisKey, memberResponse, 10L, TimeUnit.MINUTES);
+    }
+
+    return memberResponse;
   }
 
   /**
@@ -81,26 +104,31 @@ public class SampleService {
   @Transactional
   public MemberDto.Response updateMember(MemberDto.Request memberRequest) {
 
-    MemberEntity member;
+    // 회원 정보를 조회
+    MemberEntity member = memberRepository.findById(memberRequest.getId())
+        .orElseThrow(() -> new ApiException(ApiStatus.MEMBER_NOT_FOUND));
 
-    Optional<MemberEntity> opMember = memberRepository.findById(memberRequest.getId());
-    if (opMember.isPresent()) {
-      member = opMember.get();
+    // 회원명과 이메일을 요청받은 정보로 수정
+    Optional.ofNullable(memberRequest.getName())
+        .filter(StringUtils::isNotBlank)
+        .ifPresent(member::setName);
 
-      if (StringUtils.isNotBlank(memberRequest.getName())) {
-        member.setName(memberRequest.getName());
-      }
+    Optional.ofNullable(memberRequest.getEmail())
+        .filter(StringUtils::isNotBlank)
+        .ifPresent(member::setEmail);
 
-      if (StringUtils.isNotBlank(memberRequest.getEmail())) {
-        member.setEmail(memberRequest.getEmail());
-      }
+    // 수정된 회원 정보를 저장
+    memberRepository.save(member);
 
-      memberRepository.save(member);
-    } else {
-      throw new ApiException(ApiStatus.MEMBER_NOT_FOUND);
-    }
+    MemberDto.Response memberResponse = memberMapStruct.toDto(member);
 
-    return memberMapStruct.toDto(member);
+    // Redis에 사용할 키 생성
+    String redisKey = String.format("SAMPLE:MEMBER:%s", memberRequest.getId());
+
+    // Redis에 회원 정보를 수정
+    redisComponent.setObjectValue(redisKey, memberResponse, 10L, TimeUnit.MINUTES);
+
+    return memberResponse;
   }
 
   /**
@@ -154,28 +182,24 @@ public class SampleService {
   @Transactional
   public TodoDto.Response updateTodo(TodoDto.Request todoRequest) {
 
-    TodoEntity todo;
+    // 할 일의 정보를 조회
+    TodoEntity todo = todoRepository.findById(todoRequest.getId())
+        .orElseThrow(() -> new ApiException(ApiStatus.TODO_NOT_FOUND));
 
-    Optional<TodoEntity> opTodo = todoRepository.findById(todoRequest.getId());
-    if (opTodo.isPresent()) {
-      todo = opTodo.get();
+    // 제목, 상세한 설명, 완료 여부를 요청받은 정보로 수정
+    Optional.ofNullable(todoRequest.getTitle())
+        .filter(StringUtils::isNotBlank)
+        .ifPresent(todo::setTitle);
 
-      if (StringUtils.isNotBlank(todoRequest.getTitle())) {
-        todo.setTitle(todoRequest.getTitle());
-      }
+    Optional.ofNullable(todoRequest.getDescription())
+        .filter(StringUtils::isNotBlank)
+        .ifPresent(todo::setDescription);
 
-      if (StringUtils.isNotBlank(todoRequest.getDescription())) {
-        todo.setDescription(todoRequest.getDescription());
-      }
+    Optional.ofNullable(todoRequest.getCompleted())
+        .ifPresent(todo::setCompleted);
 
-      if (todoRequest.getCompleted() != null) {
-        todo.setCompleted(todoRequest.getCompleted());
-      }
-
-      todoRepository.save(todo);
-    } else {
-      throw new ApiException(ApiStatus.TODO_NOT_FOUND);
-    }
+    // 수정된 할 일 정보를 저장
+    todoRepository.save(todo);
 
     return todoMapStruct.toDto(todo);
   }
