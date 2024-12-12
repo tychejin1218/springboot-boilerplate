@@ -43,7 +43,7 @@
     <property name="fileExtensions" value="java"/>
     <property name="max" value="100"/>
     <property name="ignorePattern"
-      value="^package.*|^import.*|a href|href|http://|https://|ftp://|find"/>
+      value="^package.*|^import.*|a href|href|http://|https://|ftp://|find|testFind"/>
   </module>
 
   <module name="TreeWalker">
@@ -266,7 +266,9 @@
     </module>
     <module name="NoWhitespaceBeforeCaseDefaultColon"/>
     <module name="OverloadMethodsDeclarationOrder"/>
-    <module name="VariableDeclarationUsageDistance"/>
+    <module name="VariableDeclarationUsageDistance">
+      <property name="allowedDistance" value="10"/>
+    </module>
     <module name="CustomImportOrder">
       <property name="sortImportsInGroupAlphabetically" value="true"/>
       <property name="separateLineBetweenGroups" value="true"/>

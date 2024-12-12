@@ -1,6 +1,6 @@
 plugins {
-    id 'org.springframework.boot' version '3.3.1'
-    id 'io.spring.dependency-management' version '1.1.5'
+    id 'org.springframework.boot' version '3.4.0'
+    id 'io.spring.dependency-management' version '1.1.6'
     id 'java'
     id 'checkstyle'
     id 'pmd'
@@ -90,8 +90,14 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.12.6'
 }
 
+// JUnit Platform 사용하도록 설정
 test {
-    exclude '**/*'
+    useJUnitPlatform()
+}
+
+// 빌드 시 테스트가 실행되지 않도록 설정
+tasks.withType(Test).configureEach {
+    enabled = false
 }
 
 clean {
@@ -104,8 +110,8 @@ checkstyle {
     configProperties = ["suppressionFile": project(':').file('config/checkstyle/checkstyle-suppressions.xml')]
     ignoreFailures = false
     maxWarnings = 0
-    reportsDir = file("${buildDir}/checkstyle-output")
-    toolVersion = '10.9.3'
+    reportsDir = file(project.layout.buildDirectory.dir("checkstyle-output").get().asFile.path)
+    toolVersion = '10.20.0'
 }
 
 checkstyleMain {
@@ -120,8 +126,8 @@ pmd {
     ruleSets = []
     consoleOutput = true
     ignoreFailures = false
-    reportsDir = file("${buildDir}/pmd-output")
-    toolVersion = '6.55.0'
+    reportsDir = file(project.layout.buildDirectory.dir("pmd-output").get().asFile.path)
+    toolVersion = '7.7.0'
 }
 
 pmdMain {
@@ -130,3 +136,4 @@ pmdMain {
         xml.required = true
     }
 }
+

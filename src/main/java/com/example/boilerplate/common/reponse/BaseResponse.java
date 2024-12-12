@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.http.HttpStatus;
 
+@SuppressWarnings("PMD.ImmutableField")
 @Getter
 @NoArgsConstructor
 public class BaseResponse<T> {

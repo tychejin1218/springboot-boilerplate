@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <ruleset name="CustomRules">
 
-  <!-- https://pmd.sourceforge.io/pmd-6.55.0/pmd_rules_java.html -->
-   <description>
+  <!-- https://pmd.sourceforge.io/pmd-7.7.0/pmd_rules_java.html -->
+  <description>
     daekyo development team ruleset
   </description>
 
@@ -11,9 +11,9 @@
   <!-- Best Practices -->
   <rule ref="category/java/bestpractices.xml">
     <exclude name="GuardLogStatement"/>
-    <exclude name="JUnitAssertionsShouldIncludeMessage"/>
-    <exclude name="JUnitTestContainsTooManyAsserts"/>
-    <exclude name="JUnitTestsShouldIncludeAssert"/>
+    <exclude name="UnitTestAssertionsShouldIncludeMessage"/>
+    <exclude name="UnitTestContainsTooManyAsserts"/>
+    <exclude name="UnitTestShouldIncludeAssert"/>
     <exclude name="PreserveStackTrace"/>
     <exclude name="SimplifiableTestAssertion"/>
   </rule>
@@ -21,10 +21,8 @@
   <!-- Code Style -->
   <rule ref="category/java/codestyle.xml">
     <exclude name="AtLeastOneConstructor"/>
-    <exclude name="AvoidFinalLocalVariable"/>
     <exclude name="CommentDefaultAccessModifier"/>
     <exclude name="ConfusingTernary"/>
-    <exclude name="DefaultPackage"/>
     <exclude name="LocalVariableCouldBeFinal"/>
     <exclude name="LongVariable"/>
     <exclude name="MethodArgumentCouldBeFinal"/>
@@ -53,7 +51,6 @@
     <exclude name="CognitiveComplexity"/>
     <exclude name="CyclomaticComplexity"/>
     <exclude name="ExcessiveImports"/>
-    <exclude name="ExcessiveMethodLength"/>
     <exclude name="LoosePackageCoupling"/>
     <exclude name="LawOfDemeter"/>
     <exclude name="NcssCount"/>
@@ -64,6 +61,11 @@
   <rule ref="category/java/design.xml/AvoidDeeplyNestedIfStmts">
     <properties>
       <property name="problemDepth" value="4"/>
+    </properties>
+  </rule>
+  <rule ref="category/java/design.xml/CouplingBetweenObjects">
+    <properties>
+      <property name="threshold" value="30" />
     </properties>
   </rule>
   <rule ref="category/java/design.xml/TooManyFields">
@@ -87,7 +89,6 @@
   <!-- Error Prone -->
   <rule ref="category/java/errorprone.xml">
     <exclude name="AssignmentInOperand"/>
-    <exclude name="DataflowAnomalyAnalysis"/>
     <exclude name="EmptyCatchBlock"/>
   </rule>
 

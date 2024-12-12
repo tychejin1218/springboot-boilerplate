@@ -9,6 +9,11 @@ import java.io.StringReader;
 import java.util.Scanner;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * {@link HttpServletRequest}를 확장하여 요청 본문(request body)을 여러 번 읽을 수 있도록 하는 커스텀 래퍼 클래스
+ *
+ * <p>이 클래스는 요청 본문 데이터를 내부 변수에 저장한 후, {@link ServletInputStream}을 통해 요청 데이터를 재사용할 수 있도록 처리
+ */
 @Slf4j
 public class RequestServletWrapper extends HttpServletRequestWrapper {
 
@@ -17,11 +22,11 @@ public class RequestServletWrapper extends HttpServletRequestWrapper {
   public RequestServletWrapper(HttpServletRequest request) {
 
     super(request);
-    
+
     try (Scanner s = new Scanner(request.getInputStream()).useDelimiter("\\A")) {
       requestData = s.hasNext() ? s.next() : "";
     } catch (IOException e) {
-      log.error("RequestServletWrapper:[{}]", e);
+      log.error("RequestServletWrapper", e);
     }
   }
 
@@ -32,8 +37,6 @@ public class RequestServletWrapper extends HttpServletRequestWrapper {
 
     return new ServletInputStream() {
 
-      ReadListener readListener;
-
       @Override
       public int read() throws IOException {
         return reader.read();
@@ -42,16 +45,14 @@ public class RequestServletWrapper extends HttpServletRequestWrapper {
       @Override
       public void setReadListener(ReadListener listener) {
 
-        this.readListener = listener;
-
         try {
           if (!isFinished()) {
-            readListener.onDataAvailable();
+            listener.onDataAvailable();
           } else {
-            readListener.onAllDataRead();
+            listener.onAllDataRead();
           }
         } catch (IOException e) {
-          log.error("getInputStream.setReadListener:", e);
+          log.error("getInputStream.setReadListener", e);
         }
       }
 
@@ -65,7 +66,7 @@ public class RequestServletWrapper extends HttpServletRequestWrapper {
         try (reader) {
           return reader.read() < 0;
         } catch (IOException e) {
-          log.error("getInputStream.isFinished:[{}]", e);
+          log.error("getInputStream.isFinished", e);
         }
         return false;
       }
