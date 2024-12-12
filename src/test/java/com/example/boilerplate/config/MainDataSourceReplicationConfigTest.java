@@ -48,7 +48,8 @@ class MainDataSourceReplicationConfigTest {
   @DisplayName("Writer DataSource 설정 테스트")
   @Test
   void testWriterDataSource(
-      @Qualifier(MainDataSourceConfig.MAIN_WRITER_DATASOURCE) DataSource writerDataSource) {
+      @Qualifier(MainDataSourceConfig.DATASOURCE_PREFIX
+          + "WriterDataSource") DataSource writerDataSource) {
 
     // Given & When
     try (HikariDataSource hikariDataSource = (HikariDataSource) writerDataSource) {
@@ -66,7 +67,8 @@ class MainDataSourceReplicationConfigTest {
   @DisplayName("Reader DataSource 설정 테스트")
   @Test
   void testReaderDataSource(
-      @Qualifier(MainDataSourceConfig.MAIN_READER_DATASOURCE) DataSource readerDataSource) {
+      @Qualifier(MainDataSourceConfig.DATASOURCE_PREFIX
+          + "ReaderDataSource") DataSource readerDataSource) {
 
     // Given & When
     try (HikariDataSource hikariDataSource = (HikariDataSource) readerDataSource) {
@@ -84,7 +86,8 @@ class MainDataSourceReplicationConfigTest {
   @DisplayName("Routing DataSource 설정 테스트")
   @Test
   void testRoutingDataSource(
-      @Qualifier(MainDataSourceConfig.MAIN_DATASOURCE) DataSource dataSource) {
+      @Qualifier(MainDataSourceConfig.DATASOURCE_PREFIX
+          + MainDataSourceConfig.DATASOURCE_BEAN_NAME) DataSource dataSource) {
 
     // Given
     assertInstanceOf(LazyConnectionDataSourceProxy.class, dataSource);

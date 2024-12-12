@@ -33,7 +33,8 @@ class MainDataSourceSingleConfigTest {
   @DisplayName("MainDataSource 설정 테스트")
   @Test
   void testMainDataSource(
-      @Qualifier(MainDataSourceConfig.MAIN_DATASOURCE) DataSource dataSource) {
+      @Qualifier(MainDataSourceConfig.DATASOURCE_PREFIX
+          + MainDataSourceConfig.DATASOURCE_BEAN_NAME) DataSource dataSource) {
 
     // Given & When
     try (HikariDataSource hikariDataSource = (HikariDataSource) dataSource) {

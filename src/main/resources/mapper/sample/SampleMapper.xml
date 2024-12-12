@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.boilerplate.sample.mapper.SampleMapper">
+
+  <select id="selectMembers" parameterType="MemberRequest" resultType="MemberResponse">
+
+    select *
+    from member
+    <where>
+      <if test="name != null and name != 'name'">
+        and name like concat('%', #{name}, '%')
+      </if>
+      <if test="email != null and email != ''">
+        and email like concat('%', #{email}, '%')
+      </if>
+    </where>
+    order by id desc
+
+  </select>
+
+  <select id="selectMember" parameterType="MemberRequest" resultType="MemberResponse">
+
+    select *
+    from member
+    where id = #{id}
+    order by id desc
+
+  </select>
+
+  <insert id="insertMember" parameterType="MemberRequest" useGeneratedKeys="true" keyProperty="id">
+
+    insert
+    into member (name,
+                 email,
+                 password)
+    values (#{name},
+            #{email},
+            #{password})
+
+  </insert>
+
+  <update id="updateMember" parameterType="MemberRequest">
+
+    update member
+    set name     = #{name},
+        email    = #{email},
+        password = #{password}
+    where id = #{id}
+
+  </update>
+
+  <delete id="deleteMember" parameterType="long">
+
+    delete
+    from member
+    where id = #{memberid}
+
+  </delete>
+
+</mapper>

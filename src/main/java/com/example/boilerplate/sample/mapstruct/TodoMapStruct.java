@@ -1,4 +1,4 @@
-package com.example.boilerplate.sample.domain.mapstruct;
+package com.example.boilerplate.sample.mapstruct;
 
 import com.example.boilerplate.domain.entity.TodoEntity;
 import com.example.boilerplate.sample.dto.TodoDto;

@@ -1,17 +1,32 @@
 ## Spring Boot Backend Boilerplate
 
+## 목차
+
+* [개요](#개요)
+* [개발 환경](#개발-환경)
+* [Library](#library)
+* [Profile](#profile)
+* [Package](#package)
+* [Filename Prefix and Suffix](#Filename-Prefix-and-Suffix)
+* [Method Prefix and Suffix](#Method-Prefix-and-Suffix)
+* [Response Format](#Response-Format)
+* [Response Code](#Response-Code)
+* [Static Analysis Tools](#static-analysis-tools)
+
+---
+
 ### 개요
 
-Spring Boot를 이용하여 Backend 개발 환경을 구축합니다.
+Spring Boot를 기반으로 한 Boilerplate 프로젝트입니다. 개발 초기 설정에 필요한 필수 구성 요소와 주요 라이브러리를 포함하고 있습니다.
 
 ### 개발 환경
 
 - **IDE**: IntelliJ IDEA 2024.2
 - **JDK**: 17
-- **Spring Boot**: 3.3.1
-- **Build Tool**: Gradle 8.8
+- **Spring Boot**: 3.4.0
+- **Build Tool**: Gradle 8.10.2
 - **MySQL**: Docker 컨테이너에서 실행되며, 설정은 `docker.compose` 폴더에 `docker-compose.yml`에 정의
-- **Redis Cluster**: Docker 컨테이너에서 실행되며, 설정은 `docker.compose` 폴더에 `docker-compose.yml`에 정의
+- **Redis**: Docker 컨테이너에서 실행되며, 설정은 `docker.compose` 폴더에 `docker-compose.yml`에 정의
 - **샘플 데이터 파일 경로**: `script/sample/data.sql` 및 `schema.sql`
 - **로그 설정**: `logback-spring`을 사용하여 설정
 
@@ -44,8 +59,8 @@ Spring Boot를 이용하여 Backend 개발 환경을 구축합니다.
     - `jakarta.annotation-api`: Jakarta 어노테이션 API
 
 * **Redis**
-  - `spring-boot-starter-data-redis`: Redis 사용을 위한 기본 설정 및 지원
-   
+    - `spring-boot-starter-data-redis`: Redis 사용을 위한 기본 설정 및 지원
+
 * **Lombok**
     - `lombok`: 코드 최소화를 위한 어노테이션 제공 (compileOnly 및 테스트 조합 사용)
 
@@ -81,33 +96,39 @@ Spring Boot를 이용하여 Backend 개발 환경을 구축합니다.
 * **Service** 관련된 클래스는 `com.example.boilerplate.*.service` 하위에 작성
 * **Dto** 관련된 클래스는 `com.example.boilerplate.*.dto` 하위에 작성
 * **Entity** 관련된 클래스는 `com.example.boilerplate.domain.entity` 하위에 작성
-* **Repository** 관련된 클래스는 `com.example.boilerplate.domain.repository` 하위에 작성
-* **Repository** 관련된 클래스는 `com.example.boilerplate.*.repository` 하위에 작성
+* **Entity Repository** 관련된 클래스 및 인터페이스는 `com.example.boilerplate.domain.repository` 하위에 작성
+  → **Entity**와 직접적으로 연관된 클래스 및 인터페이스로, `JpaRepository` 등을 활용하여 기본적인 CRUD(저장, 조회, 수정, 삭제) 작업을 처리하는
+  경우
+* **Custom Repository** 관련된 클래스 및 인터페이스는 `com.example.boilerplate.*.repository` 하위에 작성  
+  → **복잡한 Query**를 처리하기 위한 클래스 및 인터페이스로, **QueryDSL**와 같이 조건이 많거나 동적 SQL 처리가 필요한 경우
 * **Mapper** 관련된 클래스는 `com.example.boilerplate.*.mapper` 하위에 작성, SQLMapper는 `resource.mapper.*` 하위에
   작성
+* **Mapstruct** 관련된 인터페이스는 `com.example.boilerplate.*.mapstruct` 하위에 작성
 
 ---
 
-### Filename Prefix/Suffix
+### Filename Prefix and Suffix
 
 #### Filename suffix
 
 * `XXXController`: 요청값을 검사하고 응답값을 반환하기 위한 클래스
 * `XXXService`: 비즈니스 로직을 처리하기 위한 클래스
 * `XXXDto`: 파라미터를 전달받기 위한 클래스
-* `XXXRepository`: JpaRepository를 상속받아 Entity의 기본적인 CRUD를 사용하기 위한 인터페이스 또는 QueryDSL을 사용하는 메소드를 정의하는
-  클래스
+* `XXXRepository`: `JpaRepository`를 상속받아 Entity의 기본적인 CRUD(저장, 조회, 수정, 삭제) 작업을 처리하거나, 복잡한 Query 처리를
+  위한 메서드를 정의하는 클래스 및 인터페이스
 * `XXXMapStruct`: Entity와 Dto 간의 매핑을 위한 인터페이스
 * `XXXSpecification`: JPA Specification 사용하여 다중 조건을 구현하기 위한 클래스
 * `XXXMapper`: 저장 프로시저나 SQL문으로 객체를 연결하기 위한 클래스
 
 ---
 
-### Method Prefix/Suffix
+### Method Prefix and Suffix
 
 #### Controller, Service Method Prefix
 
 * `getXXX`: 객체를 반환하는 경우
+* `setXXX`: 객체를 설정하는 경우
+* `buildXXX`: 객체를 빌더 패턴으로 설정하는 경우
 * `insertXXX`: 객체를 저장하는 경우
 * `updateXXX`: 객체를 수정하는 경우
 * `deleteXXX`: 객체를 삭제하는 경우
@@ -164,3 +185,22 @@ Spring Boot를 이용하여 Backend 개발 환경을 구축합니다.
     * `908`: 읽을 수 있는 요청 정보가 없습니다.
 
 ---
+
+### Static Analysis Tools
+
+#### Checkstyle
+
+Checkstyle은 코드 스타일 유지를 위한 정적 코드 분석 도구입니다.
+
+* **Version**: 10.20.0
+* **Configuration**:
+    * `config/checkstyle/google-checkstyle.xml`: Google 스타일 가이드를 따르는 Checkstyle 규칙을 정의한 설정 파일입니다.
+    * `config/checkstyle/checkstyle-suppressions.xml`: 특정 경고나 규칙 위반을 억제하기 위한 설정 파일입니다.
+
+#### PMD
+
+PMD는 코드 품질 유지 및 코드 스타일 규칙 적용을 위한 정적 코드 분석 도구입니다.
+
+* **Version**: 7.7.0
+* **Configuration**:
+    * `config/pmd/custom-ruleset.xml`: PMD 규칙을 정의한 설정 파일입니다.

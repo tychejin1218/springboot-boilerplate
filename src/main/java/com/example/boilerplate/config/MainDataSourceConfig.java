@@ -5,10 +5,20 @@ import com.querydsl.jpa.impl.JPAQueryFactory;
 import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.session.SqlSessionFactory;
+import org.apache.ibatis.type.Alias;
+import org.mybatis.spring.SqlSessionFactoryBean;
+import org.mybatis.spring.SqlSessionTemplate;
+import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.JpaProperties;
@@ -16,9 +26,13 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.jdbc.DataSourceBuilder;
 import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ClassPathScanningCandidateComponentProvider;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
+import org.springframework.core.type.filter.AnnotationTypeFilter;
+import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
@@ -30,28 +44,35 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+/**
+ * Main 데이터 소스 설정 클래스
+ *
+ * <p>다중 데이터 소스 (읽기/쓰기 전용)를 설정하고 관리하는 구성 클래스</p>
+ */
+@Slf4j
 @AllArgsConstructor
 @EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class})
 @EnableTransactionManagement
+@MapperScan(annotationClass = Mapper.class,
+    basePackages = MainDataSourceConfig.MYBATIS_MAPPER_PACKAGES,
+    sqlSessionFactoryRef = MainDataSourceConfig.DATASOURCE_PREFIX + "SessionFactory")
 @EnableJpaRepositories(
     basePackages = MainDataSourceConfig.JPA_REPOSITORY_PACKAGES,
-    entityManagerFactoryRef = MainDataSourceConfig.MAIN_DATASOURCE + "EntityManagerFactory",
-    transactionManagerRef = MainDataSourceConfig.MAIN_DATASOURCE + "PlatformTransactionManager"
+    entityManagerFactoryRef = MainDataSourceConfig.DATASOURCE_PREFIX
+        + MainDataSourceConfig.DATASOURCE_BEAN_NAME + "EntityManagerFactory",
+    transactionManagerRef = MainDataSourceConfig.DATASOURCE_PREFIX
+        + MainDataSourceConfig.DATASOURCE_BEAN_NAME + "TransactionManager"
 )
+@EnableJpaAuditing
 @Configuration
 public class MainDataSourceConfig {
 
-  public static final String MAIN_DATASOURCE = "mainDataSource";
-  public static final String MAIN_WRITER_DATASOURCE = "mainWriterDatasource";
-  public static final String MAIN_READER_DATASOURCE = "mainReaderDatasource";
-  public static final String MAIN_ROUTING_DATASOURCE = "mainRoutingDatasource";
-  public static final String MAIN_JPA = "mainJpa";
-  public static final String MAIN_DATASOURCE_PROPERTY_PREFIX = "main.datasource";
-
-  public static final String JPA_REPOSITORY_PACKAGES =
-      Constants.BASE_PACKAGE + ".domain.repository";
-  private static final String[] JPA_ENTITY_PACKAGES = {
-      Constants.BASE_PACKAGE + ".domain.entity"};
+  public static final String DATASOURCE_PREFIX = "main";
+  public static final String DATASOURCE_BEAN_NAME = "DataSource";
+  private static final String DATASOURCE_CONFIG_PROPERTY_PREFIX = "main.datasource";
+  public static final String MYBATIS_MAPPER_PACKAGES = Constants.BASE_PACKAGE + ".**.mapper";
+  private static final String[] JPA_ENTITY_PACKAGES = {Constants.BASE_PACKAGE + ".**.entity"};
+  public static final String JPA_REPOSITORY_PACKAGES = Constants.BASE_PACKAGE + ".**.repository";
 
   /**
    * 단일 데이터베이스 구성을 위한 데이터 소스 빈을 설정
@@ -60,9 +81,8 @@ public class MainDataSourceConfig {
    */
   @Profile("main_db_single")
   @Primary
-  @Bean(MAIN_DATASOURCE)
-  @ConfigurationProperties(prefix = MAIN_DATASOURCE_PROPERTY_PREFIX
-      + ".single")
+  @ConfigurationProperties(prefix = DATASOURCE_CONFIG_PROPERTY_PREFIX + ".single")
+  @Bean(DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME)
   public DataSource dataSource() {
     return DataSourceBuilder.create().type(HikariDataSource.class).build();
   }
@@ -79,9 +99,8 @@ public class MainDataSourceConfig {
      *
      * @return DataSource
      */
-    @Bean(MAIN_WRITER_DATASOURCE)
-    @ConfigurationProperties(prefix = MAIN_DATASOURCE_PROPERTY_PREFIX
-        + ".writer")
+    @ConfigurationProperties(prefix = DATASOURCE_CONFIG_PROPERTY_PREFIX + ".writer")
+    @Bean(DATASOURCE_PREFIX + "WriterDataSource")
     public DataSource writerDataSource() {
       return DataSourceBuilder.create().type(HikariDataSource.class).build();
     }
@@ -92,9 +111,8 @@ public class MainDataSourceConfig {
      * @return DataSource
      */
     @Primary
-    @Bean(MAIN_READER_DATASOURCE)
-    @ConfigurationProperties(prefix = MAIN_DATASOURCE_PROPERTY_PREFIX
-        + ".reader")
+    @ConfigurationProperties(prefix = DATASOURCE_CONFIG_PROPERTY_PREFIX + ".reader")
+    @Bean(DATASOURCE_PREFIX + "ReaderDataSource")
     public DataSource readerDataSource() {
       return DataSourceBuilder.create().type(HikariDataSource.class).build();
     }
@@ -107,10 +125,10 @@ public class MainDataSourceConfig {
      * @return DataSource
      */
     @Primary
-    @Bean(MAIN_ROUTING_DATASOURCE)
+    @Bean(DATASOURCE_PREFIX + "RoutingDatasource")
     public DataSource routingDataSource(
-        @Qualifier(MAIN_WRITER_DATASOURCE) DataSource writerDataSource,
-        @Qualifier(MAIN_READER_DATASOURCE) DataSource readerDataSource) {
+        @Qualifier(DATASOURCE_PREFIX + "WriterDataSource") DataSource writerDataSource,
+        @Qualifier(DATASOURCE_PREFIX + "ReaderDataSource") DataSource readerDataSource) {
 
       final String writerKey = "writerKey";
       final String readerKey = "readerKey";
@@ -139,11 +157,58 @@ public class MainDataSourceConfig {
      * @return DataSource
      */
     @Primary
-    @Bean(MAIN_DATASOURCE)
+    @Bean(DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME)
     public DataSource dataSourceReplication(
-        @Qualifier(MAIN_ROUTING_DATASOURCE) DataSource routingDataSource) {
+        @Qualifier(DATASOURCE_PREFIX + "RoutingDatasource") DataSource routingDataSource) {
       return new LazyConnectionDataSourceProxy(routingDataSource);
     }
+  }
+
+  /**
+   * MyBatis SqlSessionFactory 설정
+   *
+   * @param dataSource 데이터 소스
+   * @return 설정된 SqlSessionFactory 객체
+   * @throws Exception exception
+   */
+  @Bean(DATASOURCE_PREFIX + "SessionFactory")
+  public SqlSessionFactory sessionFactory(
+      @Qualifier(DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME) DataSource dataSource) throws Exception {
+
+    SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
+    factoryBean.setDataSource(dataSource);
+
+    // @Alias을 조회
+    ClassPathScanningCandidateComponentProvider provider =
+        new ClassPathScanningCandidateComponentProvider(false);
+    provider.addIncludeFilter(new AnnotationTypeFilter(Alias.class));
+
+    Set<Class<?>> aliasAnnotatedClasses = new HashSet<>();
+    for (BeanDefinition beanDefinition : provider.findCandidateComponents(Constants.BASE_PACKAGE)) {
+      String className = beanDefinition.getBeanClassName();
+      Class<?> clazz = Class.forName(className);
+      if (clazz.isAnnotationPresent(Alias.class)) {
+        aliasAnnotatedClasses.add(clazz);
+      }
+    }
+    Class<?>[] typeAliases = aliasAnnotatedClasses.toArray(new Class<?>[0]);
+
+    factoryBean.setTypeAliases(typeAliases);
+    factoryBean.setMapperLocations(
+        new PathMatchingResourcePatternResolver().getResources("classpath:mapper/**/*.xml"));
+    return factoryBean.getObject();
+  }
+
+  /**
+   * MyBatis SqlSessionTemplate 설정
+   *
+   * @param sqlSessionFactory qlSessionFactory 객체
+   * @return 설정된 SqlSessionTemplate 객체
+   */
+  @Bean(DATASOURCE_PREFIX + "SqlSessionTemplate")
+  public SqlSessionTemplate sqlSessionTemplate(
+      @Qualifier(DATASOURCE_PREFIX + "SessionFactory") SqlSessionFactory sqlSessionFactory) {
+    return new SqlSessionTemplate(sqlSessionFactory);
   }
 
   /**
@@ -152,8 +217,8 @@ public class MainDataSourceConfig {
    * @return JpaProperties
    */
   @Primary
-  @Bean(MAIN_JPA + "JpaProperties")
-  @ConfigurationProperties(prefix = "main.jpa")
+  @Bean(DATASOURCE_PREFIX + "JpaProperties")
+  @ConfigurationProperties(prefix = DATASOURCE_CONFIG_PROPERTY_PREFIX + "jpa")
   public JpaProperties jpaProperties() {
     return new JpaProperties();
   }
@@ -166,15 +231,15 @@ public class MainDataSourceConfig {
    * @return LocalContainerEntityManagerFactoryBean
    */
   @Primary
-  @Bean(MAIN_DATASOURCE + "EntityManagerFactory")
+  @Bean(DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME + "EntityManagerFactory")
   public LocalContainerEntityManagerFactoryBean entityManagerFactory(
-      @Qualifier(MAIN_DATASOURCE) DataSource dataSource,
-      @Qualifier(MAIN_JPA + "JpaProperties") JpaProperties jpaProperties) {
+      @Qualifier(DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME) DataSource dataSource,
+      @Qualifier(DATASOURCE_PREFIX + "JpaProperties") JpaProperties jpaProperties) {
     return this.entityManagerFactoryBuilder(jpaProperties)
         .dataSource(dataSource)
         .packages(JPA_ENTITY_PACKAGES)
         .properties(jpaProperties.getProperties())
-        .persistenceUnit(MAIN_DATASOURCE + "EntityManager")
+        .persistenceUnit(DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME + "EntityManager")
         .build();
   }
 
@@ -199,9 +264,9 @@ public class MainDataSourceConfig {
    * @return PlatformTransactionManager
    */
   @Primary
-  @Bean(MAIN_DATASOURCE + "PlatformTransactionManager")
+  @Bean(DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME + "TransactionManager")
   public PlatformTransactionManager platformTransactionManager(
-      @Qualifier(MAIN_DATASOURCE + "EntityManagerFactory")
+      @Qualifier(DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME + "EntityManagerFactory")
       LocalContainerEntityManagerFactoryBean entityManagerFactory
   ) {
     JpaTransactionManager jpaTransactionManager = new JpaTransactionManager();
@@ -215,9 +280,9 @@ public class MainDataSourceConfig {
    * @param dataSource 데이터 소스
    * @return JdbcTemplate
    */
-  @Bean(name = MAIN_DATASOURCE + "JdbcTemplate")
+  @Bean(name = DATASOURCE_PREFIX + "JdbcTemplate")
   public JdbcTemplate jdbcTemplate(
-      @Qualifier(MAIN_DATASOURCE) DataSource dataSource) {
+      @Qualifier(DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME) DataSource dataSource) {
     return new JdbcTemplate(dataSource);
   }
 
@@ -227,7 +292,7 @@ public class MainDataSourceConfig {
   @Configuration
   class MainJpaQuerydslConfig {
 
-    @PersistenceContext(unitName = MAIN_DATASOURCE + "EntityManager")
+    @PersistenceContext(unitName = DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME + "EntityManager")
     private EntityManager mainEntityManager;
 
     /**
