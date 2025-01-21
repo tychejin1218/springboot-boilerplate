@@ -44,7 +44,7 @@ Spring Boot를 기반으로 한 Boilerplate 프로젝트입니다. 개발 초기
     - `spring-boot-starter-test`: 테스트 지원
 
 * **Jasypt**
-    - `jasypt-spring-boot-starter`: 암호화 기능 제공
+    - `jasypt-spring-boot-starter`: 속성값 암호화를 위한 기능 제공
 
 * **Database**
     - `mybatis-spring-boot-starter`: MyBatis 통합 지원
@@ -52,26 +52,26 @@ Spring Boot를 기반으로 한 Boilerplate 프로젝트입니다. 개발 초기
     - `mysql-connector-j`: MySQL 데이터베이스 커넥터
 
 * **QueryDSL**
-    - `querydsl-core`: QueryDSL 핵심 모듈
-    - `querydsl-jpa`: JPA용 QueryDSL 모듈
+    - `querydsl-core`: QueryDSL의 주요 기능 모듈
+    - `querydsl-jpa`: QueryDSL JPA 모듈
     - `querydsl-apt`: QueryDSL 어노테이션 프로세서
     - `jakarta.persistence-api`: Jakarta Persistence API
     - `jakarta.annotation-api`: Jakarta 어노테이션 API
 
 * **Redis**
-    - `spring-boot-starter-data-redis`: Redis 사용을 위한 기본 설정 및 지원
+    - `spring-boot-starter-data-redis`: Redis 연동을 위한 기본 설정 및 지원
 
 * **Lombok**
-    - `lombok`: 코드 최소화를 위한 어노테이션 제공 (compileOnly 및 테스트 조합 사용)
+    - `lombok`: 반복적인 코드를 줄이기 위한 어노테이션 제공 (compileOnly 및 테스트 조합 사용)
 
 * **MapStruct**
-    - `mapstruct`: 객체 매핑 라이브러리
-    - `mapstruct-processor`: MapStruct 프로세서
+    - `mapstruct`: 객체 간의 매핑을 지원
+    - `mapstruct-processor`: 컴파일 타임에 매핑 코드를 자동 생성
 
 * **Apache Commons**
-    - `commons-io`: Apache Commons IO 라이브러리
-    - `commons-lang3`: Apache Commons Lang 라이브러리
-    - `commons-text`: Apache Commons Text 라이브러리
+    - `commons-io`: Apache Commons IO 유틸리티
+    - `commons-lang3`: Apache Commons Lang 유틸리티
+    - `commons-text`: Apache Commons Text 유틸리티
 
 * **JJWT**
     - `jjwt-api`: JWT 기능 제공
