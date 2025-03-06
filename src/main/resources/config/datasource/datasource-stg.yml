@@ -1,0 +1,45 @@
+# Main 데이터베이스 설정
+main:
+  # 데이터 소스 설정 (데이터베이스 연결을 관리하는 HikariCP 관련 설정 포함)
+  datasource:
+    writer:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url:
+      read-only: false
+      username:
+      password:
+      poolName: mysqlDbConnectionPool
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 30000
+      max-life-time: 600000
+      connection-test-query: SELECT 1
+    reader:
+      driver-class-name: com.mysql.cj.jdbc.Driver
+      jdbc-url:
+      read-only: true
+      username:
+      password:
+      poolName: mysqlDbConnectionPool
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 30000
+      max-life-time: 600000
+      connection-test-query: SELECT 1
+  # JPA 설정
+  jpa:
+    generate-ddl: false
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    properties:
+      hibernate:
+        show-sql: false
+        format-sql: false
+        highlight-sql: false
+        use-sql-comments: false
+
+# Redis 설정
+redis:
+  cluster:
+    nodes:
+      127.0.0.1:7001

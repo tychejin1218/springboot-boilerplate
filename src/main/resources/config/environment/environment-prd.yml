@@ -1,0 +1,9 @@
+# 암호화 설정
+jasypt:
+  encryptor:
+    bean: jasyptStringEncryptor
+    password:
+
+# JWT 설정
+jwt:
+  secret-key: 

@@ -1,67 +1,35 @@
-# Main(PostgreSQL) Datasource
-#main:
-#  datasource:
-#    writer:
-#      driver-class-name: org.postgresql.Driver
-#      jdbc-url: jdbc:postgresql://127.0.0.1:5432/sample
-#      read-only: false
-#      username: sample
-#      # password: password1!
-#      password: ENC(Mc7GDTyzk57XXU7hf+OTYl8n20zzViY8BIclFDIUN8vmuBGVNcRFVNOXlO3MONlH)
-#      poolName: postgresDbConnectionPool
-#      maximum-pool-size: 5
-#      minimum-idle: 5
-#      idle-timeout: 10000
-#      max-life-time: 580000
-#      connection-test-query: SELECT 1
-#    reader:
-#      driver-class-name: org.postgresql.Driver
-#      jdbc-url: jdbc:postgresql://127.0.0.1:5432/sample
-#      read-only: true
-#      username: sample
-#      # password: password1!
-#      password: ENC(Mc7GDTyzk57XXU7hf+OTYl8n20zzViY8BIclFDIUN8vmuBGVNcRFVNOXlO3MONlH)
-#      poolName: postgresDbConnectionPool
-#      maximum-pool-size: 5
-#      minimum-idle: 5
-#      idle-timeout: 10000
-#      max-life-time: 580000
-#      connection-test-query: SELECT 1
+# Main 데이터베이스 설정
 main:
+  # 데이터 소스 설정 (데이터베이스 연결을 관리하는 HikariCP 관련 설정 포함)
   datasource:
     writer:
       driver-class-name: com.mysql.cj.jdbc.Driver
       jdbc-url: jdbc:mysql://localhost:3306/sample?serverTimezone=UTC&characterEncoding=UTF-8
       read-only: false
       username: sample
-      # password: password1!
-      password: ENC(Mc7GDTyzk57XXU7hf+OTYl8n20zzViY8BIclFDIUN8vmuBGVNcRFVNOXlO3MONlH)
+      password: ENC(Mc7GDTyzk57XXU7hf+OTYl8n20zzViY8BIclFDIUN8vmuBGVNcRFVNOXlO3MONlH) # password1!
       poolName: mysqlDbConnectionPool
-      maximum-pool-size: 5
-      minimum-idle: 5
+      maximum-pool-size: 10
+      minimum-idle: 3
       idle-timeout: 10000
-      max-life-time: 580000
+      max-life-time: 300000
       connection-test-query: SELECT 1
     reader:
       driver-class-name: com.mysql.cj.jdbc.Driver
       jdbc-url: jdbc:mysql://localhost:3306/sample?serverTimezone=UTC&characterEncoding=UTF-8
       read-only: true
       username: sample
-      # password: password1!
-      password: ENC(Mc7GDTyzk57XXU7hf+OTYl8n20zzViY8BIclFDIUN8vmuBGVNcRFVNOXlO3MONlH)
+      password: ENC(Mc7GDTyzk57XXU7hf+OTYl8n20zzViY8BIclFDIUN8vmuBGVNcRFVNOXlO3MONlH) # password1!
       poolName: mysqlDbConnectionPool
-      maximum-pool-size: 5
-      minimum-idle: 5
+      maximum-pool-size: 10
+      minimum-idle: 3
       idle-timeout: 10000
-      max-life-time: 580000
+      max-life-time: 300000
       connection-test-query: SELECT 1
   # JPA 설정
   jpa:
-    generate-ddl: false # 데이터베이스 테이블을 자동으로 생성
-    show-sql: false # 콘솔에 실행되는 테이블 생성 DDL을 출력
-    # PostgreSQL
-    # database-platform: org.hibernate.dialect.PostgreSQLDialect
-    # MySQL
+    generate-ddl: false
+    show-sql: false
     database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:
@@ -69,7 +37,6 @@ main:
         format-sql: true
         highlight-sql: true
         use-sql-comments: true
-        physical-naming-strategy: com.example.boilerplate.config.MainJpaNamingStrategy
 
 # Redis 설정
 redis:
