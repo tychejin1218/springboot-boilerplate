@@ -6,7 +6,6 @@ import com.zaxxer.hikari.HikariDataSource;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
@@ -36,13 +35,11 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.LazyConnectionDataSourceProxy;
-import org.springframework.jdbc.datasource.lookup.AbstractRoutingDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 /**
  * Main 데이터 소스 설정 클래스
@@ -66,8 +63,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 public class MainDataSourceConfig {
 
   public static final String DATASOURCE_PREFIX = "main";
-  public static final String DATASOURCE_BEAN_NAME = "DataSource";
   private static final String DATASOURCE_PROPERTY_PREFIX = "main.datasource";
+
+  public static final String DATASOURCE_BEAN_NAME = "DataSource";
+  public static final String WRITER_DATASOURCE_BEAN = DATASOURCE_PREFIX + "WriterDataSource";
+  public static final String READER_DATASOURCE_BEAN = DATASOURCE_PREFIX + "ReaderDataSource";
+  public static final String SESSION_FACTORY_BEAN = DATASOURCE_PREFIX + "SessionFactory";
+
   public static final String MYBATIS_MAPPER_PACKAGES = Constants.BASE_PACKAGE + ".**.mapper";
   private static final String[] JPA_ENTITY_PACKAGES = {Constants.BASE_PACKAGE + ".**.entity"};
   public static final String JPA_REPOSITORY_PACKAGES = Constants.BASE_PACKAGE + ".**.repository";
@@ -95,10 +97,10 @@ public class MainDataSourceConfig {
     /**
      * 쓰기 전용 데이터 소스를 설정
      *
-     * @return DataSource
+     *  @return HikariCP 기반의 {@link DataSource} 객체
      */
     @ConfigurationProperties(prefix = DATASOURCE_PROPERTY_PREFIX + ".writer")
-    @Bean(DATASOURCE_PREFIX + "WriterDataSource")
+    @Bean(WRITER_DATASOURCE_BEAN)
     public DataSource writerDataSource() {
       return DataSourceBuilder.create().type(HikariDataSource.class).build();
     }
@@ -106,72 +108,44 @@ public class MainDataSourceConfig {
     /**
      * 읽기 전용 데이터 소스를 설정
      *
-     * @return DataSource
+     * @return 설정된 읽기 전용 {@link DataSource}
      */
     @Primary
     @ConfigurationProperties(prefix = DATASOURCE_PROPERTY_PREFIX + ".reader")
-    @Bean(DATASOURCE_PREFIX + "ReaderDataSource")
+    @Bean(READER_DATASOURCE_BEAN)
     public DataSource readerDataSource() {
       return DataSourceBuilder.create().type(HikariDataSource.class).build();
     }
 
     /**
-     * 다중 데이터 소스를 설정
+     * Lazy 연결을 지원하는 다중 데이터 소스를 설정
      *
      * @param writerDataSource 쓰기 전용 데이터 소스
      * @param readerDataSource 읽기 전용 데이터 소스
-     * @return DataSource
-     */
-    @Primary
-    @Bean(DATASOURCE_PREFIX + "RoutingDatasource")
-    public DataSource routingDataSource(
-        @Qualifier(DATASOURCE_PREFIX + "WriterDataSource") DataSource writerDataSource,
-        @Qualifier(DATASOURCE_PREFIX + "ReaderDataSource") DataSource readerDataSource) {
-
-      final String writerKey = "writerKey";
-      final String readerKey = "readerKey";
-      AbstractRoutingDataSource routingDataSource = new AbstractRoutingDataSource() {
-        @Override
-        protected Object determineCurrentLookupKey() {
-          return TransactionSynchronizationManager.isCurrentTransactionReadOnly()
-              ? readerKey : writerKey;
-        }
-      };
-
-      Map<Object, Object> dataSourceMap = Map.of(
-          writerKey, writerDataSource, readerKey, readerDataSource);
-
-      routingDataSource.setTargetDataSources(dataSourceMap);
-      routingDataSource.setDefaultTargetDataSource(writerDataSource);
-      routingDataSource.afterPropertiesSet();
-
-      return routingDataSource;
-    }
-
-    /**
-     * 다중 데이터 소스를 설정
-     *
-     * @param routingDataSource 다중 데이터 소스
-     * @return DataSource
+     * @return {@link LazyConnectionDataSourceProxy}를 사용한 데이터 소스
      */
     @Primary
     @Bean(DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME)
-    public DataSource dataSourceReplication(
-        @Qualifier(DATASOURCE_PREFIX + "RoutingDatasource") DataSource routingDataSource) {
-      return new LazyConnectionDataSourceProxy(routingDataSource);
+    public DataSource dataSource(
+        @Qualifier(WRITER_DATASOURCE_BEAN) DataSource writerDataSource,
+        @Qualifier(READER_DATASOURCE_BEAN) DataSource readerDataSource) {
+      LazyConnectionDataSourceProxy lazyConnectionDataSourceProxy =
+          new LazyConnectionDataSourceProxy(writerDataSource);
+      lazyConnectionDataSourceProxy.setReadOnlyDataSource(readerDataSource);
+      return lazyConnectionDataSourceProxy;
     }
   }
 
   /**
-   * MyBatis SqlSessionFactory 설정
+   * MyBatis SqlSessionFactory를 설정
    *
    * @param dataSource 데이터 소스
-   * @return 설정된 SqlSessionFactory 객체
-   * @throws Exception exception
+   * @return 설정된 {@link SqlSessionFactory}
    */
-  @Bean(DATASOURCE_PREFIX + "SessionFactory")
+  @Bean(SESSION_FACTORY_BEAN)
   public SqlSessionFactory sessionFactory(
-      @Qualifier(DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME) DataSource dataSource) throws Exception {
+      @Qualifier(DATASOURCE_PREFIX + DATASOURCE_BEAN_NAME) DataSource dataSource)
+      throws Exception {
 
     SqlSessionFactoryBean factoryBean = new SqlSessionFactoryBean();
     factoryBean.setDataSource(dataSource);
@@ -185,7 +159,7 @@ public class MainDataSourceConfig {
   /**
    * 주어진 패키지에서 {@link Alias} 어노테이션이 선언된 클래스 타입을 검색하여 반환
    *
-   * @param basePackage 검색할 기본 패키지 경로 (예: "com.example.package")
+   * @param basePackage 검색할 기본 패키지 경로 (예: "com.example.boilerplate")
    * @return {@link Alias} 어노테이션이 붙은 클래스 타입 배열
    * @throws ClassNotFoundException 스캔된 클래스의 클래스 정의를 찾을 수 없을 때 발생
    */
@@ -217,7 +191,7 @@ public class MainDataSourceConfig {
   /**
    * JPA 속성을 설정
    *
-   * @return JpaProperties
+   * @return @return 설정된 {@link JpaProperties} 객체
    */
   @Primary
   @Bean(DATASOURCE_PREFIX + "JpaProperties")
@@ -227,11 +201,11 @@ public class MainDataSourceConfig {
   }
 
   /**
-   * 엔티티 매니저 팩토리를 설정
+   * JPA 엔티티 매니저 팩토리를 설정
    *
    * @param dataSource    데이터 소스
-   * @param jpaProperties JPA 속성
-   * @return LocalContainerEntityManagerFactoryBean
+   * @param jpaProperties JPA 관련 속성
+   * @return 설정된 {@link LocalContainerEntityManagerFactoryBean}
    */
   @Primary
   @Bean(DATASOURCE_PREFIX + "EntityManagerFactory")
@@ -249,8 +223,8 @@ public class MainDataSourceConfig {
   /**
    * 엔티티 매니저 팩토리 빌더를 설정
    *
-   * @param jpaProperties JPA 속성
-   * @return EntityManagerFactoryBuilder
+   * @param jpaProperties JPA 관련 속성(Properties) 객체
+   * @return {@link EntityManagerFactoryBuilder} 설정된 엔티티 매니저 팩토리 빌더
    */
   private EntityManagerFactoryBuilder entityManagerFactoryBuilder(JpaProperties jpaProperties) {
     HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
@@ -263,8 +237,8 @@ public class MainDataSourceConfig {
   /**
    * 트랜잭션 매니저를 설정
    *
-   * @param entityManagerFactory 엔티티 매니저 팩토리
-   * @return PlatformTransactionManager
+   * @param entityManagerFactory JPA 엔티티 매니저 팩토리
+   * @return JPA 기반의 {@link PlatformTransactionManager}
    */
   @Primary
   @Bean(DATASOURCE_PREFIX + "TransactionManager")
