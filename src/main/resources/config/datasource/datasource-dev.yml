@@ -5,7 +5,6 @@ main:
     writer:
       driver-class-name: com.mysql.cj.jdbc.Driver
       jdbc-url: jdbc:mysql://localhost:3306/sample?serverTimezone=UTC&characterEncoding=UTF-8
-      read-only: false
       username: sample
       password: ENC(Mc7GDTyzk57XXU7hf+OTYl8n20zzViY8BIclFDIUN8vmuBGVNcRFVNOXlO3MONlH) # password1!
       poolName: mysqlDbConnectionPool
@@ -17,7 +16,6 @@ main:
     reader:
       driver-class-name: com.mysql.cj.jdbc.Driver
       jdbc-url: jdbc:mysql://localhost:3306/sample?serverTimezone=UTC&characterEncoding=UTF-8
-      read-only: true
       username: sample
       password: ENC(Mc7GDTyzk57XXU7hf+OTYl8n20zzViY8BIclFDIUN8vmuBGVNcRFVNOXlO3MONlH) # password1!
       poolName: mysqlDbConnectionPool

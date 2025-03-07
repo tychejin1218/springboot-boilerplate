@@ -5,7 +5,6 @@ main:
     writer:
       driver-class-name: com.mysql.cj.jdbc.Driver
       jdbc-url:
-      read-only: false
       username:
       password:
       poolName: mysqlDbConnectionPool
@@ -17,7 +16,6 @@ main:
     reader:
       driver-class-name: com.mysql.cj.jdbc.Driver
       jdbc-url:
-      read-only: true
       username:
       password:
       poolName: mysqlDbConnectionPool

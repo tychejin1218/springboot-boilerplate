@@ -204,7 +204,7 @@ public class MainDataSourceConfig {
    * JPA 엔티티 매니저 팩토리를 설정
    *
    * @param dataSource    데이터 소스
-   * @param jpaProperties JPA 관련 속성
+   * @param jpaProperties JPA 설정 속성 (Hibernate 관련 설정 포함)
    * @return 설정된 {@link LocalContainerEntityManagerFactoryBean}
    */
   @Primary
@@ -273,9 +273,9 @@ public class MainDataSourceConfig {
     private EntityManager mainEntityManager;
 
     /**
-     * JPAQueryFactory 빈을 설정
+     * JPAQueryFactory 빈을 생성하고 반환
      *
-     * @return JPAQueryFactory
+     * @return QueryDSL 기반의 {@link JPAQueryFactory} 객체
      */
     @Bean
     public JPAQueryFactory mainJpaQueryFactory() {
