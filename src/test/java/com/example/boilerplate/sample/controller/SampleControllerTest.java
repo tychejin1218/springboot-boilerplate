@@ -8,7 +8,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import com.example.boilerplate.common.reponse.BaseResponse;
+import com.example.boilerplate.common.response.BaseResponse;
 import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.domain.entity.MemberEntity;
 import com.example.boilerplate.domain.entity.TodoEntity;

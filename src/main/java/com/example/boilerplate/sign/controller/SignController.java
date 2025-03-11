@@ -1,6 +1,6 @@
 package com.example.boilerplate.sign.controller;
 
-import com.example.boilerplate.common.reponse.BaseResponse;
+import com.example.boilerplate.common.response.BaseResponse;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sign.dto.SignDto;
 import com.example.boilerplate.sign.service.SignService;

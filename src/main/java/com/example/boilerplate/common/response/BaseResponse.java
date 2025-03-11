@@ -1,4 +1,4 @@
-package com.example.boilerplate.common.reponse;
+package com.example.boilerplate.common.response;
 
 import com.example.boilerplate.common.type.ApiStatus;
 import lombok.Builder;

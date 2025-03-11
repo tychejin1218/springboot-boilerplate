@@ -1,6 +1,6 @@
 package com.example.boilerplate.sample.controller;
 
-import com.example.boilerplate.common.reponse.BaseResponse;
+import com.example.boilerplate.common.response.BaseResponse;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
 import com.example.boilerplate.sample.dto.TodoDto.Response;
