@@ -13,6 +13,7 @@ import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
 import com.example.boilerplate.sample.mapstruct.MemberMapStruct;
 import com.example.boilerplate.sample.mapstruct.TodoMapStruct;
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -66,7 +67,8 @@ public class SampleService {
 
     // Redis에서 회원 정보를 조회
     MemberDto.Response memberResponse = redisComponent.getObjectValue(
-        redisKey, MemberDto.Response.class);
+        redisKey, new TypeReference<>() {
+        });
     log.debug("Redis redisKey : {}, memberResponse : {}", redisKey, memberResponse);
 
     if (ObjectUtils.isEmpty(memberResponse)) {

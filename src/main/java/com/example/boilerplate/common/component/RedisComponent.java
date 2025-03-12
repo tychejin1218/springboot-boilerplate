@@ -1,5 +1,7 @@
 package com.example.boilerplate.common.component;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ public class RedisComponent {
   private final StringRedisTemplate stringRedisTemplate;
   private final RedisTemplate<String, Object> objectRedisTemplate;
   private final RedisTemplate<String, Integer> integerRedisTemplate;
+  private final ObjectMapper objectMapper;
 
   /**
    * 키에 해당하는 문자열을 저장
@@ -75,17 +78,18 @@ public class RedisComponent {
    * 키에 해당하는 JSON 문자열을 조회하여 객체로 반환
    *
    * @param key   검색할 키
-   * @param clazz 반환할 객체의 클래스 타입
+   * @param typeReference 반환할 객체의 타입 정보를 포함한 {@code TypeReference}
    * @param <T>   반환하는 객체의 타입
    * @return 해당 키로부터 가져온 객체, 없거나 오류가 발생하면 null 반환
    */
-  public <T> T getObjectValue(String key, Class<T> clazz) {
+  public <T> T getObjectValue(String key, TypeReference<T> typeReference) {
     try {
       ValueOperations<String, Object> valueOperations = objectRedisTemplate.opsForValue();
       Object result = valueOperations.get(key);
-      if (clazz.isInstance(result)) {
-        return clazz.cast(result);
+      if (result == null) {
+        return null;
       }
+      return objectMapper.convertValue(result, typeReference);
     } catch (Exception e) {
       log.error("getObjectValue key: {}", key, e);
     }

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -68,7 +69,8 @@ class RedisComponentTest {
     redisComponent.setObjectValue(key, sample, duration, timeUnit);
 
     // Then
-    SampleDto retrievedSample = redisComponent.getObjectValue(key, SampleDto.class);
+    SampleDto retrievedSample = redisComponent.getObjectValue(key, new TypeReference<>() {
+    });
     log.debug("retrievedSample : {}", retrievedSample);
 
     assertAll(
@@ -184,7 +186,8 @@ class RedisComponentTest {
     String key = "SAMPLE:OBJECT_101";
     SampleDto sample = SampleDto.of("101", "Gildong", 25);
     redisComponent.setObjectValue(key, sample, 10, TimeUnit.MINUTES);
-    assertNotNull(redisComponent.getObjectValue(key, SampleDto.class));
+    assertNotNull(redisComponent.getObjectValue(key, new TypeReference<SampleDto>() {
+    }));
 
     // When
     boolean deleted = redisComponent.deleteKey(key);
@@ -192,7 +195,8 @@ class RedisComponentTest {
     // Then
     assertAll(
         () -> assertTrue(deleted),
-        () -> assertNull(redisComponent.getObjectValue(key, SampleDto.class))
+        () -> assertNull(redisComponent.getObjectValue(key, new TypeReference<>() {
+        }))
     );
   }
 
