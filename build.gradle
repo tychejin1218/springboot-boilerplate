@@ -43,6 +43,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
+    // SpringDoc OpenAPI
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.5'
+
     // Javax Annotation
     implementation 'jakarta.annotation:jakarta.annotation-api'
     testAnnotationProcessor 'jakarta.annotation:jakarta.annotation-api'

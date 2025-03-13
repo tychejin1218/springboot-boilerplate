@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Slf4j
 @RequiredArgsConstructor
 @RestController
-public class SampleController {
+public class SampleController implements SampleControllerApiDocs {
 
   private final SampleService sampleService;
 
@@ -31,6 +31,7 @@ public class SampleController {
    * @return 페이징 처리된 회원 목록
    */
   @GetMapping("/sample/members")
+  @Override
   public BaseResponse<Page<MemberDto.Response>> getMemberList(
       @ModelAttribute MemberDto.Request memberRequest) {
     return BaseResponse.ok(sampleService.getMemberList(memberRequest));
@@ -43,6 +44,7 @@ public class SampleController {
    * @return 조회된 회원의 정보
    */
   @GetMapping("/sample/member/{id}")
+  @Override
   public BaseResponse<MemberDto.Response> getMember(@PathVariable Long id) {
     return BaseResponse.ok(sampleService.getMember(MemberDto.Request.of(id)));
   }
@@ -54,6 +56,7 @@ public class SampleController {
    * @return 저장된 회원의 정보
    */
   @PostMapping("/sample/insert/member")
+  @Override
   public BaseResponse<MemberDto.Response> insertMember(
       @RequestBody MemberDto.Request memberRequest) {
     return BaseResponse.ok(sampleService.insertMember(memberRequest));
@@ -66,6 +69,8 @@ public class SampleController {
    * @return 수정된 회원의 정보
    */
   @PutMapping("/sample/update/member")
+  @Override
+
   public BaseResponse<MemberDto.Response> updateMember(
       @RequestBody MemberDto.Request memberRequest) {
     return BaseResponse.ok(sampleService.updateMember(memberRequest));
@@ -78,6 +83,7 @@ public class SampleController {
    * @return 검색 결과에 따른 할 일 목록
    */
   @GetMapping("/sample/todos")
+  @Override
   public BaseResponse<List<Response>> getTodos(
       @ModelAttribute TodoDto.Request todoRequest) {
     return BaseResponse.ok(sampleService.getTodoList(todoRequest));
@@ -90,6 +96,7 @@ public class SampleController {
    * @return 조회된 할 일의 정보
    */
   @GetMapping("/sample/todo/{id}")
+  @Override
   public BaseResponse<TodoDto.Response> getTodo(@PathVariable Long id) {
     return BaseResponse.ok(sampleService.getTodo(TodoDto.Request.of(id)));
   }
@@ -101,6 +108,7 @@ public class SampleController {
    * @return 저장된 할 일의 정보
    */
   @PostMapping("/sample/insert/todo")
+  @Override
   public BaseResponse<TodoDto.Response> insertTodo(
       @RequestBody TodoDto.Request todoRequest) {
     return BaseResponse.ok(sampleService.insertTodo(todoRequest));
@@ -113,6 +121,7 @@ public class SampleController {
    * @return 수정된 할 일의 정보
    */
   @PutMapping("/sample/update/todo")
+  @Override
   public BaseResponse<TodoDto.Response> updateTodo(
       @RequestBody TodoDto.Request todoRequest) {
     return BaseResponse.ok(sampleService.updateTodo(todoRequest));

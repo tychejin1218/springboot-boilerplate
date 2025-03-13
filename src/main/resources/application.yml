@@ -27,7 +27,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   profiles:
-    active: dev
+    active: local
     group:
       local: profiles-local
         , logging-type-console , logging-level-local

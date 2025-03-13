@@ -7,3 +7,10 @@ jasypt:
 # JWT 설정
 jwt:
   secret-key: 
+
+# SpringDoc 설정
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false

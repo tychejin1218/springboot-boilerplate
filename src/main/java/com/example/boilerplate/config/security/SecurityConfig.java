@@ -41,6 +41,8 @@ public class SecurityConfig {
         .addFilter(corsFilter())
         .authorizeHttpRequests(
             authorizeHttpRequests -> authorizeHttpRequests
+                .requestMatchers("/api-docs/**", "/swagger-ui/**", "/swagger-ui.html")
+                .permitAll()
                 .requestMatchers("/sign/signin", "/sign/signup").permitAll()
                 .requestMatchers("/admin").hasRole("ADMIN")
                 .requestMatchers("/user").hasRole("USER")
