@@ -19,11 +19,11 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.ObjectUtils;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -112,11 +112,11 @@ public class SampleService {
 
     // 회원명과 이메일을 요청받은 정보로 수정
     Optional.ofNullable(memberRequest.getName())
-        .filter(StringUtils::isNotBlank)
+        .filter(StringUtils::hasText)
         .ifPresent(member::setName);
 
     Optional.ofNullable(memberRequest.getEmail())
-        .filter(StringUtils::isNotBlank)
+        .filter(StringUtils::hasText)
         .ifPresent(member::setEmail);
 
     // 수정된 회원 정보를 저장
@@ -190,11 +190,11 @@ public class SampleService {
 
     // 제목, 상세한 설명, 완료 여부를 요청받은 정보로 수정
     Optional.ofNullable(todoRequest.getTitle())
-        .filter(StringUtils::isNotBlank)
+        .filter(StringUtils::hasText)
         .ifPresent(todo::setTitle);
 
     Optional.ofNullable(todoRequest.getDescription())
-        .filter(StringUtils::isNotBlank)
+        .filter(StringUtils::hasText)
         .ifPresent(todo::setDescription);
 
     Optional.ofNullable(todoRequest.getCompleted())

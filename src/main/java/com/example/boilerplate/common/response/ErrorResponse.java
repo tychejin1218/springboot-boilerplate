@@ -1,12 +1,13 @@
 package com.example.boilerplate.common.response;
 
+
 import com.example.boilerplate.common.type.ApiStatus;
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
+import org.springframework.util.StringUtils;
 
 @Getter
 @Setter
@@ -27,13 +28,11 @@ public class ErrorResponse {
       String timestamp
   ) {
     this.statusCode = statusCode;
-    this.message =
-        StringUtils.isNotBlank(message) ? message
-            : ApiStatus.getByCode(statusCode).getMessage();
+    this.message = StringUtils.hasText(message) ? message
+        : ApiStatus.getByCode(statusCode).getMessage();
     this.method = method;
     this.path = path;
-    this.timestamp =
-        StringUtils.isNotBlank(timestamp) ? timestamp
-            : DateFormatUtils.format(new Date(), "yyyyMMddHHMMSS");
+    this.timestamp = StringUtils.hasText(timestamp) ? timestamp
+        : LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS"));
   }
 }

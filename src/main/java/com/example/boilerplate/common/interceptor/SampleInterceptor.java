@@ -7,9 +7,9 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
+import org.springframework.util.StringUtils;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 @Slf4j
@@ -29,7 +29,7 @@ public class SampleInterceptor implements HandlerInterceptor {
         request.getRequestURL().toString(), startTime);
 
     if (Constants.GET.equals(request.getMethod())
-        && StringUtils.isNotBlank(request.getQueryString())) {
+        && StringUtils.hasText(request.getQueryString())) {
       log.debug("[SAMPLE] Request URL - Params:{}", request.getQueryString());
     } else if (Constants.POST.equals(request.getMethod())) {
       try (ServletInputStream inputStream = request.getInputStream()) {

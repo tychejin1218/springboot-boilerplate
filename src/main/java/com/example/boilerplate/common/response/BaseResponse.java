@@ -4,8 +4,7 @@ import com.example.boilerplate.common.type.ApiStatus;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.http.HttpStatus;
+import org.springframework.util.StringUtils;
 
 @SuppressWarnings("PMD.ImmutableField")
 @Getter
@@ -17,68 +16,86 @@ public class BaseResponse<T> {
   private T data;
 
   /**
-   * Builder 패턴을 통해 객체 생성
+   * API 응답 생성자
    *
    * @param statusCode 상태 코드
    * @param message    상태 메시지
-   * @param data       데이터
+   * @param data       응답 데이터
    */
   @Builder
   public BaseResponse(String statusCode, String message, T data) {
-    this.statusCode = StringUtils.defaultIfBlank(statusCode, "200");
-    this.message = StringUtils.defaultIfBlank(message,
-        ApiStatus.getByCode(this.statusCode).getMessage());
+    this.statusCode = StringUtils.hasText(statusCode) ? statusCode : ApiStatus.OK.getCode();
+    this.message = StringUtils.hasText(message) ? message : ApiStatus.OK.getMessage();
     this.data = data;
   }
 
   /**
-   * 상태 코드와 메시지 초기화
+   * 공통적으로 BaseResponse를 생성
    *
-   * @param status HttpStatus 상태
-   */
-  public BaseResponse(HttpStatus status) {
-    this.statusCode = String.valueOf(status.value());
-    this.message = ApiStatus.getByCode(this.statusCode).getMessage();
-  }
-
-  /**
-   * 성공 응답을 생성
-   *
-   * @param body 응답 데이터
-   * @param <T>  데이터 타입
+   * @param statusCode 상태 코드
+   * @param message    메시지
+   * @param data       응답 데이터
+   * @param <T>        데이터 타입
    * @return BaseResponse 객체
    */
-  public static <T> BaseResponse<T> ok(T body) {
+  private static <T> BaseResponse<T> buildResponse(String statusCode, String message, T data) {
     return BaseResponse.<T>builder()
-        .statusCode("200")
-        .data(body)
-        .message(ApiStatus.getByCode("200").getMessage())
+        .statusCode(statusCode)
+        .message(message)
+        .data(data)
         .build();
   }
 
   /**
-   * 메시지 설정 후 현재 객체 반환
+   * 성공 응답 객체 생성 (기본 상태 코드와 기본 메시지 포함)
    *
-   * @param message 상태 메시지
-   * @return 현재의 BaseResponse 객체
+   * @param body 응답 데이터
+   * @param <T>  데이터 타입
+   * @return 성공 응답 BaseResponse 객체
    */
-  public BaseResponse<T> withMessage(String message) {
-    return BaseResponse.<T>builder()
-        .statusCode(this.statusCode)
-        .data(this.data)
-        .message(message).build();
+  public static <T> BaseResponse<T> ok(T body) {
+    return buildResponse(ApiStatus.OK.getCode(), ApiStatus.OK.getMessage(), body);
   }
 
   /**
-   * 상태 코드 설정 후 현재 객체 반환
+   * 사용자 지정 메시지의 성공 응답 객체 생성
    *
-   * @param statusCode 상태 코드
-   * @return 현재의 BaseResponse 객체
+   * @param message 성공 메시지
+   * @param <T>     데이터 타입
+   * @return 성공 응답 BaseResponse 객체
+   */
+  public static <T> BaseResponse<T> okWithMessage(String message) {
+    return buildResponse(ApiStatus.OK.getCode(), message, null);
+  }
+
+  /**
+   * ApiStatus를 사용하여 상태 코드와 메시지가 포함된 응답 객체 생성
+   *
+   * @param apiStatus ApiStatus 객체
+   * @param <T>       데이터 타입
+   * @return 성공 응답 BaseResponse 객체
+   */
+  public static <T> BaseResponse<T> okWithStatus(ApiStatus apiStatus) {
+    return buildResponse(apiStatus.getCode(), apiStatus.getMessage(), null);
+  }
+
+  /**
+   * 메시지 변경된 새로운 BaseResponse 반환 (상태 코드와 데이터는 유지)
+   *
+   * @param message 새로운 메시지
+   * @return 수정된 BaseResponse 객체
+   */
+  public BaseResponse<T> withMessage(String message) {
+    return buildResponse(this.statusCode, message, this.data);
+  }
+
+  /**
+   * 상태 코드 변경된 새로운 BaseResponse 반환 (메시지와 데이터 유지)
+   *
+   * @param statusCode 새로운 상태 코드
+   * @return 수정된 BaseResponse 객체
    */
   public BaseResponse<T> withStatusCode(String statusCode) {
-    return BaseResponse.<T>builder()
-        .statusCode(statusCode)
-        .data(this.data)
-        .message(this.message).build();
+    return buildResponse(statusCode, this.message, this.data);
   }
 }

@@ -5,11 +5,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -48,7 +48,7 @@ public class RedisComponent {
     try {
       ValueOperations<String, String> valueOperations = stringRedisTemplate.opsForValue();
       String value = valueOperations.get(key);
-      if (StringUtils.isNotBlank(value)) {
+      if (StringUtils.hasText(value)) {
         return value;
       }
     } catch (Exception e) {
@@ -77,9 +77,9 @@ public class RedisComponent {
   /**
    * 키에 해당하는 JSON 문자열을 조회하여 객체로 반환
    *
-   * @param key   검색할 키
+   * @param key           검색할 키
    * @param typeReference 반환할 객체의 타입 정보를 포함한 {@code TypeReference}
-   * @param <T>   반환하는 객체의 타입
+   * @param <T>           반환하는 객체의 타입
    * @return 해당 키로부터 가져온 객체, 없거나 오류가 발생하면 null 반환
    */
   public <T> T getObjectValue(String key, TypeReference<T> typeReference) {
