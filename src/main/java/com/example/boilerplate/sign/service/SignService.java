@@ -6,12 +6,12 @@ import com.example.boilerplate.config.security.JwtTokenProvider;
 import com.example.boilerplate.domain.entity.MemberEntity;
 import com.example.boilerplate.domain.repository.MemberRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
-import com.example.boilerplate.sample.mapstruct.MemberMapStruct;
 import com.example.boilerplate.sign.dto.SignDto;
 import com.example.boilerplate.sign.dto.SignDto.Response;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +21,9 @@ import org.springframework.stereotype.Service;
 public class SignService {
 
   private final MemberRepository memberRepository;
-  private final MemberMapStruct memberMapStruct;
   private final JwtTokenProvider jwtTokenProvider;
   private final PasswordEncoder passwordEncoder;
+  private final ModelMapper modelMapper;
 
   /**
    * 회원가입
@@ -37,10 +37,11 @@ public class SignService {
       throw new ApiException(ApiStatus.ALREADY_EXISTS_EMAIL);
     }
 
-    MemberEntity member = memberMapStruct.toEntity(memberRequest);
-    member.setRole("ROLE_USER");
+    MemberEntity memberEntity = modelMapper.map(memberRequest, MemberEntity.class);
+    memberEntity.setPassword(passwordEncoder.encode(memberRequest.getPassword()));
+    memberEntity.setRole("ROLE_USER");
 
-    return memberMapStruct.toDto(memberRepository.save(member));
+    return modelMapper.map(memberRepository.save(memberEntity), MemberDto.Response.class);
   }
 
   /**

@@ -79,9 +79,8 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
 
-    // MapStruct
-    implementation 'org.mapstruct:mapstruct:1.6.3'
-    annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
+    // ModelMapper
+    implementation 'org.modelmapper:modelmapper:3.2.2'
 
     // JJWT
     implementation 'io.jsonwebtoken:jjwt-api:0.12.6'

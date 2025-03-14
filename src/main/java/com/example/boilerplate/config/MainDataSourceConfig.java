@@ -13,6 +13,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.apache.ibatis.type.Alias;
+import org.modelmapper.ModelMapper;
+import org.modelmapper.convention.MatchingStrategies;
+import org.modelmapper.convention.NameTokenizers;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.mybatis.spring.annotation.MapperScan;
@@ -97,7 +100,7 @@ public class MainDataSourceConfig {
     /**
      * 쓰기 전용 데이터 소스를 설정
      *
-     *  @return HikariCP 기반의 {@link DataSource} 객체
+     * @return HikariCP 기반의 {@link DataSource} 객체
      */
     @ConfigurationProperties(prefix = DATASOURCE_PROPERTY_PREFIX + ".writer")
     @Bean(WRITER_DATASOURCE_BEAN)
@@ -281,5 +284,22 @@ public class MainDataSourceConfig {
     public JPAQueryFactory mainJpaQueryFactory() {
       return new JPAQueryFactory(mainEntityManager);
     }
+  }
+
+  /**
+   * ModelMapper 빈을 설정
+   *
+   * @return {@link ModelMapper} 객체
+   */
+  @Bean
+  public ModelMapper modelMapper() {
+    ModelMapper modelMapper = new ModelMapper();
+    modelMapper.getConfiguration()
+        .setMatchingStrategy(MatchingStrategies.STRICT)
+        .setDestinationNameTokenizer(NameTokenizers.CAMEL_CASE)
+        .setSourceNameTokenizer(NameTokenizers.CAMEL_CASE)
+        .setFieldMatchingEnabled(true)
+        .setFieldAccessLevel(org.modelmapper.config.Configuration.AccessLevel.PRIVATE);
+    return modelMapper;
   }
 }

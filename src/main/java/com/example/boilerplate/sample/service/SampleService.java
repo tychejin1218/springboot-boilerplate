@@ -11,14 +11,13 @@ import com.example.boilerplate.domain.repository.TodoDynamicRepository;
 import com.example.boilerplate.domain.repository.TodoRepository;
 import com.example.boilerplate.sample.dto.MemberDto;
 import com.example.boilerplate.sample.dto.TodoDto;
-import com.example.boilerplate.sample.mapstruct.MemberMapStruct;
-import com.example.boilerplate.sample.mapstruct.TodoMapStruct;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,11 +30,10 @@ import org.springframework.util.StringUtils;
 public class SampleService {
 
   private final MemberRepository memberRepository;
-  private final MemberMapStruct memberMapStruct;
   private final TodoRepository todoRepository;
   private final TodoDynamicRepository todoDynamicRepository;
-  private final TodoMapStruct todoMapStruct;
   private final RedisComponent redisComponent;
+  private final ModelMapper modelMapper;
 
   /**
    * 회원 목록 조회
@@ -50,7 +48,7 @@ public class SampleService {
             memberRequest.getName(),
             memberRequest.getEmail(),
             memberRequest.pageRequest());
-    return memberPage.map(memberMapStruct::toDto);
+    return memberPage.map(member -> modelMapper.map(member, MemberDto.Response.class));
   }
 
   /**
@@ -76,7 +74,7 @@ public class SampleService {
       // 회원 정보를 조회
       MemberEntity member = memberRepository.findById(memberRequest.getId())
           .orElseThrow(() -> new ApiException(ApiStatus.MEMBER_NOT_FOUND));
-      memberResponse = memberMapStruct.toDto(member);
+      memberResponse = modelMapper.map(member, MemberDto.Response.class);
       log.debug("MySQL memberId : {}, memberResponse : {}", memberRequest.getId(), memberResponse);
 
       // Redis에 회원 정보를 저장
@@ -94,7 +92,8 @@ public class SampleService {
    */
   @Transactional
   public MemberDto.Response insertMember(MemberDto.Request memberRequest) {
-    return memberMapStruct.toDto(memberRepository.save(memberMapStruct.toEntity(memberRequest)));
+    MemberEntity memberEntity = modelMapper.map(memberRequest, MemberEntity.class);
+    return modelMapper.map(memberRepository.save(memberEntity), MemberDto.Response.class);
   }
 
   /**
@@ -122,7 +121,7 @@ public class SampleService {
     // 수정된 회원 정보를 저장
     memberRepository.save(member);
 
-    MemberDto.Response memberResponse = memberMapStruct.toDto(member);
+    MemberDto.Response memberResponse = modelMapper.map(member, MemberDto.Response.class);
 
     // Redis에 사용할 키 생성
     String redisKey = String.format("SAMPLE:MEMBER:%s", memberRequest.getId());
@@ -141,14 +140,16 @@ public class SampleService {
    */
   @Transactional(readOnly = true)
   public List<TodoDto.Response> getTodoList(TodoDto.Request todoRequest) {
-    List<TodoEntity> todos =
+    List<TodoEntity> todoList =
         todoRepository
             .findAllByTitleContainingIgnoreCaseAndDescriptionContainingIgnoreCaseAndCompletedOrderByIdDesc(
                 todoRequest.getTitle(),
                 todoRequest.getDescription(),
                 todoRequest.getCompleted()
             );
-    return todoMapStruct.todosToTodoResponses(todos);
+    return todoList.stream()
+        .map(todo -> modelMapper.map(todo, TodoDto.Response.class))
+        .toList();
   }
 
   /**
@@ -161,7 +162,7 @@ public class SampleService {
   public TodoDto.Response getTodo(TodoDto.Request todoRequest) {
     TodoEntity todo = todoRepository.findById(todoRequest.getId())
         .orElseThrow(() -> new ApiException(ApiStatus.TODO_NOT_FOUND));
-    return todoMapStruct.toDto(todo);
+    return modelMapper.map(todo, TodoDto.Response.class);
   }
 
   /**
@@ -172,7 +173,9 @@ public class SampleService {
    */
   @Transactional
   public TodoDto.Response insertTodo(TodoDto.Request todoRequest) {
-    return todoMapStruct.toDto(todoRepository.save(todoMapStruct.toEntity(todoRequest)));
+    TodoEntity todoEntity = modelMapper.map(todoRequest, TodoEntity.class);
+    TodoEntity savedEntity = todoRepository.save(todoEntity);
+    return modelMapper.map(savedEntity, TodoDto.Response.class);
   }
 
   /**
@@ -203,7 +206,7 @@ public class SampleService {
     // 수정된 할 일 정보를 저장
     todoRepository.save(todo);
 
-    return todoMapStruct.toDto(todo);
+    return modelMapper.map(todo, TodoDto.Response.class);
   }
 
   /**
