@@ -14,19 +14,19 @@ public interface MemberRepository extends
     JpaSpecificationExecutor<MemberEntity> {
 
   /**
-   * Query Method을 사용하여 Member를 조회
+   * 이메일로 Member 조회
    *
-   * @param email String
-   * @return Optional&lt;Member&gt;
+   * @param email 이메일
+   * @return MemberEntity(Optional)
    */
   Optional<MemberEntity> findByEmail(String email);
 
   /**
-   * Query Method을 사용하여 Member 목록 조회
+   * 이름과 이메일을 포함하는 Member 목록을 ID 내림차순으로 조회(부분 문자열, 대소문자 무시)
    *
-   * @param name String
-   * @param email String
-   * @return List&lt;Member&gt;
+   * @param name  이름
+   * @param email 이메일
+   * @return MemberEntity 목록
    */
   List<MemberEntity> findAllByNameContainingIgnoreCaseAndEmailContainingIgnoreCaseOrderByIdDesc(
       String name,
@@ -34,12 +34,12 @@ public interface MemberRepository extends
   );
 
   /**
-   * Query Method을 사용할 때 정렬 조건(Sort)를 추가하여 Member 목록을 조회
+   * 이름과 이메일을 포함하는 Member 목록을 정렬 조건에 따라 조회(부분 문자열, 대소문자 무시)
    *
-   * @param name String
-   * @param email String
-   * @param sort Sort
-   * @return List&lt;Member&gt;
+   * @param name  이름
+   * @param email 이메일
+   * @param sort  정렬 조건
+   * @return MemberEntity 목록
    */
   List<MemberEntity> findAllByNameContainingIgnoreCaseAndEmailContainingIgnoreCase(
       String name,
@@ -48,12 +48,12 @@ public interface MemberRepository extends
   );
 
   /**
-   * Query Method을 사용할 때 페이징(Pageable)을 추가하여 Member 목록 조회
+   * 이름과 이메일을 포함하는 Member 목록을 페이징하여 ID 내림차순으로 조회
    *
-   * @param name String
-   * @param email String
-   * @param pageable Pageable
-   * @return Page&lt;Member&gt;
+   * @param name     이름
+   * @param email    이메일
+   * @param pageable 페이징 정보
+   * @return 페이징된 MemberEntity(Page)
    */
   Page<MemberEntity> findAllByNameContainsAndEmailContainsOrderByIdDesc(
       String name,
@@ -62,12 +62,12 @@ public interface MemberRepository extends
   );
 
   /**
-   * Query Method을 사용할 때 페이징(Pageable)을 추가하여 Member 목록 조회
+   * 이름과 이메일을 포함하는 Member 목록을 페이징하여 조회
    *
-   * @param name String
-   * @param email String
-   * @param pageable String
-   * @return Page&lt;Member&gt;
+   * @param name     이름
+   * @param email    이메일
+   * @param pageable 페이징 정보
+   * @return 페이징된 MemberEntity(Page)
    */
   Page<MemberEntity> findAllByNameContainsAndEmailContains(
       String name,

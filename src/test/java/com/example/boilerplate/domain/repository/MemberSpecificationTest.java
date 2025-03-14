@@ -21,9 +21,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@SpringBootTest
 @ActiveProfiles("local")
+@SpringBootTest
 class MemberSpecificationTest {
+
+  private static final String TEST_NAME_PREFIX = "test";
 
   @Autowired
   MemberRepository memberRepository;
@@ -35,18 +37,18 @@ class MemberSpecificationTest {
   EntityManager entityManager;
 
   @Order(1)
+  @DisplayName("Specification(likeName)을 사용하여 회원 목록을 조회")
   @Transactional
-  @DisplayName("Specification(likeName)을 사용하여 Member 목록을 조회")
   @Test
-  void testFindAllSpecLikeName() {
+  void testFindMembersByNameUsingSpecification() {
 
     // Given
-    setUpMembers();
+    setUpMemberList();
     clearPersistenceContext();
 
     // When
     List<MemberEntity> memberList = memberRepository.findAll(
-        MemberSpecification.likeName("test")
+        MemberSpecification.likeName(TEST_NAME_PREFIX) // 상수 사용
     );
 
     // Then
@@ -55,18 +57,18 @@ class MemberSpecificationTest {
   }
 
   @Order(2)
+  @DisplayName("Specification(likeEmail)을 사용하여 회원 목록을 조회")
   @Transactional
-  @DisplayName("Specification(likeEmail)을 사용하여 Member 목록을 조회")
   @Test
-  void testFindAllSpecLikeEmail() {
+  void testFindMembersByEmailUsingSpecification() {
 
     // Given
-    setUpMembers();
+    setUpMemberList();
     clearPersistenceContext();
 
     // When
     List<MemberEntity> memberList = memberRepository.findAll(
-        MemberSpecification.likeEmail("gmail")
+        MemberSpecification.likeEmail("gmail") // 그대로 유지 (중복 없음)
     );
 
     // Then
@@ -75,20 +77,20 @@ class MemberSpecificationTest {
   }
 
   @Order(3)
+  @DisplayName("Specification(likeName)을 사용할 때 정렬 조건(Sort)를 추가하여 회원 목록을 조회")
   @Transactional
-  @DisplayName("Specification(likeName)을 사용할 때 정렬 조건(Sort)를 추가하여 Member 목록을 조회")
   @Test
-  void testFindAllSpecLikeNameSort() {
+  void testFindMembersByNameWithSortingUsingSpecification() {
 
     // Given
-    setUpMembers();
+    setUpMemberList();
     clearPersistenceContext();
 
     Sort sort = Sort.by(Sort.Order.desc("id"));
 
     // When
     List<MemberEntity> memberList = memberRepository.findAll(
-        MemberSpecification.likeName("test"),
+        MemberSpecification.likeName(TEST_NAME_PREFIX), // 상수 사용
         sort
     );
 
@@ -104,33 +106,31 @@ class MemberSpecificationTest {
   }
 
   @Disabled
-  private void setUpMembers() {
+  private MemberEntity saveMemberAndEntity(String name, String email) {
+    return memberRepository.save(
+        MemberEntity.builder()
+            .name(name)
+            .email(email)
+            .build());
+  }
 
-    for (int a = 1; a <= 10; a++) {
-
-      String name = "test" + String.format("%02d", a);
-      String email = a % 2 == 0 ? name + "@naver.com" : name + "@gmail.com";
-
-      Long memberId = memberRepository.save(
-          MemberEntity.builder()
-              .name(name)
-              .email(email)
-              .build()
-      ).getId();
-
-      for (int b = 1; b <= 5; b++) {
-        todoRepository.save(createTodoEntity(memberId, b));
+  @Disabled
+  private void setUpMemberList() {
+    for (int i = 1; i <= 5; i++) {
+      String name = TEST_NAME_PREFIX + i; // 상수 사용
+      String email = TEST_NAME_PREFIX + i + "@example.com"; // 상수 사용
+      MemberEntity memberEntity = memberRepository.save(saveMemberAndEntity(name, email));
+      for (int j = 1; j <= 3; j++) {
+        todoRepository.save(createTodoEntity(memberEntity.getId(), j));
       }
     }
   }
 
   @Disabled
   private TodoEntity createTodoEntity(Long memberId, int index) {
-
-    String title = "Title Test" + String.format("%02d", index);
-    String description = "Description Test" + String.format("%02d", index);
-    Boolean completed = index % 2 == 0;
-
+    String title = "할 일 " + index;
+    String description = "할 일 설명 " + index;
+    boolean completed = index % 2 == 0;
     return TodoEntity.builder()
         .member(MemberEntity.builder().id(memberId).build())
         .title(title)

@@ -1,5 +1,6 @@
 package com.example.boilerplate.domain.repository;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -23,9 +24,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-@SpringBootTest
 @ActiveProfiles("local")
+@SpringBootTest
 class MemberRepositoryTest {
+
+  private static final String TEST_NAME = "test01";
+  private static final String TEST_EMAIL = "test01@gmail.com";
 
   @Autowired
   MemberRepository memberRepository;
@@ -37,13 +41,13 @@ class MemberRepositoryTest {
   EntityManager entityManager;
 
   @Order(1)
+  @DisplayName("모든 회원 조회 시, 모든 회원 반환")
   @Transactional
-  @DisplayName("findAll_회원 목록 조회")
   @Test
-  void testFindAll() {
+  void testFindAllMembers() {
 
     // Given
-    setUpMembers();
+    setUpMemberList();
     clearPersistenceContext();
 
     // When
@@ -55,29 +59,31 @@ class MemberRepositoryTest {
   }
 
   @Order(2)
+  @DisplayName("회원 ID로 조회 시, 해당 회원 반환")
   @Transactional
-  @DisplayName("findById_회원 조회")
   @Test
-  void testFindById() {
+  void testFindMemberById() {
 
     // Given
-    Long memberId = getMemberIdAfterInsertTodos();
+    Long memberId = saveMemberAndReturnId(TEST_NAME, TEST_EMAIL);
     clearPersistenceContext();
     log.debug("memberId : {}", memberId);
 
     // When
-    Optional<MemberEntity> opMember = memberRepository.findById(memberId);
+    Optional<MemberEntity> optMember = memberRepository.findById(memberId);
 
     // Then
-    log.debug("opMember : {}", opMember);
-    assertTrue(opMember.isPresent());
+    assertTrue(optMember.isPresent());
+    MemberEntity memberEntity = optMember.get();
+    assertEquals(TEST_NAME, memberEntity.getName());
+    assertEquals(TEST_EMAIL, memberEntity.getEmail());
   }
 
   @Order(3)
+  @DisplayName("회원 저장 요청 시, 저장된 회원 반환")
   @Transactional
-  @DisplayName("save_회원 저장")
   @Test
-  void testInsert() throws Exception {
+  void testSaveNewMember() throws Exception {
 
     // Given
     MemberEntity requestMember = MemberEntity.builder()
@@ -102,52 +108,50 @@ class MemberRepositoryTest {
   }
 
   @Order(4)
+  @DisplayName("회원 수정 요청 시, 수정된 회원 반환")
   @Transactional
-  @DisplayName("save_회원 수정")
   @Test
-  void testUpdate() throws Exception {
+  void testUpdateExistingMember() throws Exception {
 
     // Given
-    MemberEntity insertMember = getMemberAfterInsertMember();
+    Long memberId = saveMemberAndReturnId(TEST_NAME, TEST_EMAIL);
     clearPersistenceContext();
 
     MemberEntity requestMember = MemberEntity.builder()
-        .id(insertMember.getId())
+        .id(memberId)
         .name("test02")
         .email("test02@gmail.com")
         .build();
 
     // When
-    memberRepository.save(requestMember);
+    MemberEntity updatedMember = memberRepository.save(requestMember);
     clearPersistenceContext();
 
     // Then
-    Optional<MemberEntity> opMember = memberRepository.findById(requestMember.getId());
-    if (opMember.isPresent()) {
-      MemberEntity updateMember = opMember.get();
-      assertEquals(requestMember.getName(), updateMember.getName());
-      assertEquals(requestMember.getEmail(), updateMember.getEmail());
-    } else {
-      log.debug("requestMember : {}, opMember : {}", requestMember, opMember);
-      throw new Exception();
-    }
+    MemberEntity savedMember = memberRepository.findById(updatedMember.getId())
+        .orElseThrow(() -> new Exception("회원 수정 실패"));
+
+    assertAll(
+        () -> assertEquals(requestMember.getName(), savedMember.getName()),
+        () -> assertEquals(requestMember.getEmail(), savedMember.getEmail())
+    );
   }
 
   @Order(5)
+  @DisplayName("회원 삭제 요청 시, 해당 회원 제거")
   @Transactional
-  @DisplayName("deleteById_회원 삭제")
   @Test
-  void testDelete() {
+  void testDeleteMemberById() {
 
     // Given
-    MemberEntity insertMember = getMemberAfterInsertMember();
+    Long memberId = saveMemberAndReturnId(TEST_NAME, TEST_EMAIL);
     clearPersistenceContext();
 
     // When
-    memberRepository.deleteById(insertMember.getId());
+    memberRepository.deleteById(memberId);
 
     // Then
-    assertTrue(memberRepository.findById(insertMember.getId()).isEmpty());
+    assertTrue(memberRepository.findById(memberId).isEmpty());
   }
 
   @Disabled
@@ -157,59 +161,36 @@ class MemberRepositoryTest {
   }
 
   @Disabled
-  private MemberEntity getMemberAfterInsertMember() {
+  private MemberEntity saveMemberAndEntity(String name, String email) {
     return memberRepository.save(
         MemberEntity.builder()
-            .name("test")
-            .email("test@gmail.com")
+            .name(name)
+            .email(email)
             .build());
   }
 
   @Disabled
-  private Long getMemberIdAfterInsertTodos() {
-
-    Long memberId = memberRepository.save(
-        MemberEntity.builder()
-            .name("test")
-            .email("test@gmail.com")
-            .build()
-    ).getId();
-
-    for (int a = 1; a <= 10; a++) {
-      todoRepository.save(createTodoEntity(memberId, a));
-    }
-
-    return memberId;
+  private Long saveMemberAndReturnId(String name, String email) {
+    return saveMemberAndEntity(name, email).getId();
   }
 
   @Disabled
-  private void setUpMembers() {
-
-    for (int a = 1; a <= 10; a++) {
-
-      String name = "test" + String.format("%02d", a);
-      String email = a % 2 == 0 ? name + "@naver.com" : name + "@gmail.com";
-
-      Long memberId = memberRepository.save(
-          MemberEntity.builder()
-              .name(name)
-              .email(email)
-              .build()
-      ).getId();
-
-      for (int b = 1; b <= 5; b++) {
-        todoRepository.save(createTodoEntity(memberId, b));
+  private void setUpMemberList() {
+    for (int i = 1; i <= 5; i++) {
+      String name = "test" + i;
+      String email = "test" + i + "@example.com";
+      MemberEntity memberEntity = memberRepository.save(saveMemberAndEntity(name, email));
+      for (int j = 1; j <= 3; j++) {
+        todoRepository.save(createTodoEntity(memberEntity.getId(), j));
       }
     }
   }
 
   @Disabled
   private TodoEntity createTodoEntity(Long memberId, int index) {
-
-    String title = "Title Test" + String.format("%02d", index);
-    String description = "Description Test" + String.format("%02d", index);
-    Boolean completed = index % 2 == 0;
-
+    String title = "할 일 " + index;
+    String description = "할 일 설명 " + index;
+    boolean completed = index % 2 == 0;
     return TodoEntity.builder()
         .member(MemberEntity.builder().id(memberId).build())
         .title(title)
