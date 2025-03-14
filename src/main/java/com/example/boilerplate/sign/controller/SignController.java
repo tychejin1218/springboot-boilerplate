@@ -1,7 +1,7 @@
 package com.example.boilerplate.sign.controller;
 
 import com.example.boilerplate.common.response.BaseResponse;
-import com.example.boilerplate.sample.dto.MemberDto;
+import com.example.boilerplate.member.dto.MemberDto;
 import com.example.boilerplate.sign.dto.SignDto;
 import com.example.boilerplate.sign.service.SignService;
 import io.swagger.v3.oas.annotations.Hidden;
@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class SignController implements SignControllerApiDocs {
 
-  private final SignService securityService;
+  private final SignService signService;
 
   /**
    * 회원가입
@@ -31,7 +31,7 @@ public class SignController implements SignControllerApiDocs {
   @Override
   public BaseResponse<MemberDto.Response> signUp(
       @RequestBody MemberDto.Request memberRequest) {
-    return BaseResponse.ok(securityService.signUp(memberRequest));
+    return BaseResponse.ok(signService.signUp(memberRequest));
   }
 
   /**
@@ -44,7 +44,7 @@ public class SignController implements SignControllerApiDocs {
   @Override
   public BaseResponse<SignDto.Response> signIn(
       @RequestBody SignDto.Request signRequest) {
-    return BaseResponse.ok(securityService.signIn(signRequest));
+    return BaseResponse.ok(signService.signIn(signRequest));
   }
 
   /**

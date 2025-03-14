@@ -13,7 +13,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 import org.hibernate.annotations.DynamicUpdate;
 
 @Getter
@@ -21,7 +20,6 @@ import org.hibernate.annotations.DynamicUpdate;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-@ToString
 @DynamicUpdate
 @Entity
 @Table(name = "todo")
@@ -31,7 +29,6 @@ public class TodoEntity {
   @GeneratedValue(strategy = GenerationType.IDENTITY)
   private Long id;
 
-  @ToString.Exclude
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "member_id")
   private MemberEntity member;

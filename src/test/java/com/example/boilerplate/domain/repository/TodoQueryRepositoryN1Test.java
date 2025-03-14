@@ -21,7 +21,7 @@ import org.springframework.test.context.ActiveProfiles;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SpringBootTest
 @ActiveProfiles("local")
-class TodoRepositoryN1Test {
+class TodoQueryRepositoryN1Test {
 
   @Autowired
   TodoRepository todoRepository;

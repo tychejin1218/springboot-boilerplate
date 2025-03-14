@@ -1,4 +1,4 @@
-package com.example.boilerplate.sample.dto;
+package com.example.boilerplate.member.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;

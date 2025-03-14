@@ -1,4 +1,4 @@
-package com.example.boilerplate.sample.dto;
+package com.example.boilerplate.member.dto;
 
 import com.example.boilerplate.common.dto.PageDto;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -34,7 +34,7 @@ public class MemberDto {
     @Schema(name = "email", example = "hong@daekyo.com", description = "회원의 이메일")
     private String email;
 
-    public static Request of(Long id) {
+    public static MemberDto.Request of(Long id) {
       return MemberDto.Request.builder()
           .id(id)
           .build();
@@ -62,7 +62,7 @@ public class MemberDto {
     private String email;
 
     @Schema(description = "회원이 관련된 할 일 목록")
-    List<Todo> todos;
+    List<MemberDto.Todo> todos;
   }
 
   @Schema(description = "할 일 정보 DTO")

@@ -1,4 +1,4 @@
-package com.example.boilerplate.sample.dto;
+package com.example.boilerplate.todo.dto;
 
 import com.example.boilerplate.common.dto.PageDto;
 import jakarta.validation.constraints.NotBlank;
@@ -45,7 +45,7 @@ public class TodoDto {
     private String title;
     private String description;
     private Boolean completed;
-    private Member member;
+    private TodoDto.Member member;
   }
 
   @Getter

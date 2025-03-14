@@ -1,13 +1,13 @@
-package com.example.boilerplate.sample.mapper;
+package com.example.boilerplate.member.mapper;
 
-import com.example.boilerplate.sample.dto.SampleDto;
+import com.example.boilerplate.member.dto.SampleDto;
 import java.util.List;
 import org.apache.ibatis.annotations.Mapper;
 import org.springframework.stereotype.Repository;
 
 @Mapper
 @Repository
-public interface SampleMapper {
+public interface MemberMapper {
 
   /**
    * 이름과 이메일을 조건으로 회원을 조회한 후 아이디를 조건으로 내림차순 정렬 후 회원을 조회

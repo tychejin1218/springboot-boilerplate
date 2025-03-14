@@ -1,4 +1,4 @@
-package com.example.boilerplate.sample.repository;
+package com.example.boilerplate.todo.repository;
 
 import com.example.boilerplate.domain.entity.QMemberEntity;
 import com.example.boilerplate.domain.entity.QTodoEntity;
@@ -19,7 +19,7 @@ import org.springframework.util.StringUtils;
 @Slf4j
 @RequiredArgsConstructor
 @Repository
-public class SampleRepository {
+public class TodoQueryRepository {
 
   private final JPAQueryFactory jpaQueryFactory;
 

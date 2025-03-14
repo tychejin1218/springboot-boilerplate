@@ -1,7 +1,7 @@
 package com.example.boilerplate.sign.controller;
 
 import com.example.boilerplate.common.response.BaseResponse;
-import com.example.boilerplate.sample.dto.MemberDto;
+import com.example.boilerplate.member.dto.MemberDto;
 import com.example.boilerplate.sign.dto.SignDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -12,7 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
 @SuppressWarnings("all")
-@Tag(name = "Sign API", description = "회원 가입 및 로그인 API")
+@Tag(name = "인증 API", description = "인증 관련 API")
 public interface SignControllerApiDocs {
 
   @Operation(summary = "회원가입")
