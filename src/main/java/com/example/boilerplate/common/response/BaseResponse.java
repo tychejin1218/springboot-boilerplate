@@ -1,6 +1,7 @@
 package com.example.boilerplate.common.response;
 
 import com.example.boilerplate.common.type.ApiStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

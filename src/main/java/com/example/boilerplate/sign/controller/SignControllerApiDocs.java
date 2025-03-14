@@ -10,9 +10,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @SuppressWarnings("all")
-@Tag(name = "Sign API", description = "회원 인증 및 로그인 API")
+@Tag(name = "Sign API", description = "회원 가입 및 로그인 API")
 public interface SignControllerApiDocs {
 
   @Operation(summary = "회원가입")
@@ -37,12 +38,12 @@ public interface SignControllerApiDocs {
               schema = @Schema(implementation = MemberDto.Request.class),
               examples = @ExampleObject(
                   value = """
-                      {"name": "test10","password": "password1!","email": "test10@gmail.com"}
+                      {"name": "홍길동", "password": "password1!", "email": "gildong_hong@example.com"}
                       """
               )
           )
       )
-      MemberDto.Request memberRequest);
+      MemberDto.Request signUpRequest);
 
   @Operation(summary = "로그인")
   @ApiResponse(

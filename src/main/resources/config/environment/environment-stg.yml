@@ -20,8 +20,6 @@ springdoc:
     groups-order: asc
     tags-sorter: alpha
     operations-sorter: alpha
-    disable-swagger-default-url: true
-    deep-linking: true
     filter: true
     display-request-duration: true
     doc-expansion: none
@@ -30,3 +28,4 @@ springdoc:
   override-with-generic-response: false
   default-consumes-media-type: application/json;charset=UTF-8
   default-produces-media-type: application/json;charset=UTF-8
+

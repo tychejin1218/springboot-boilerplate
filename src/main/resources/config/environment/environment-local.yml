@@ -20,8 +20,6 @@ springdoc:
     groups-order: asc
     tags-sorter: alpha
     operations-sorter: alpha
-    disable-swagger-default-url: true
-    deep-linking: true
     filter: true
     display-request-duration: true
     doc-expansion: none
