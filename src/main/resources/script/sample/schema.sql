@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS todo;
 DROP TABLE IF EXISTS member;
 
 CREATE TABLE member (
-    id INT PRIMARY KEY AUTO_INCREMENT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
     password VARCHAR(100),
     name VARCHAR(50),
     email VARCHAR(50) UNIQUE,
@@ -14,8 +14,8 @@ CREATE TABLE member (
 );
 
 CREATE TABLE todo (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    member_id INT,
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    member_id BIGINT,
     title VARCHAR(255),
     description VARCHAR(255),
     completed BOOLEAN,

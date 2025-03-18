@@ -48,12 +48,12 @@ public class TodoService {
   /**
    * 할 일 조회
    *
-   * @param todoRequest ID 정보가 포함된 TodoDto.Request 객체
-   * @return TodoDto.Response 조회된 할 일의 정보
+   * @param id 설명
+   * @return 설명
    */
   @Transactional(readOnly = true)
-  public TodoDto.Response getTodo(TodoDto.Request todoRequest) {
-    TodoEntity todo = todoRepository.findById(todoRequest.getId())
+  public TodoDto.Response getTodo(Long id) {
+    TodoEntity todo = todoRepository.findById(id)
         .orElseThrow(() -> new ApiException(ApiStatus.TODO_NOT_FOUND));
     return modelMapper.map(todo, TodoDto.Response.class);
   }

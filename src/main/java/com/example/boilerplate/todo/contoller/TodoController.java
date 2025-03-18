@@ -43,7 +43,7 @@ public class TodoController implements TodoControllerApiDocs {
   @GetMapping("/sample/todo/{id}")
   @Override
   public BaseResponse<TodoDto.Response> getTodo(@PathVariable Long id) {
-    return BaseResponse.ok(todoService.getTodo(TodoDto.Request.of(id)));
+    return BaseResponse.ok(todoService.getTodo(id));
   }
 
   /**
