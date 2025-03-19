@@ -2,16 +2,19 @@ package com.example.boilerplate.todo.service;
 
 import com.example.boilerplate.common.exception.ApiException;
 import com.example.boilerplate.common.type.ApiStatus;
+import com.example.boilerplate.domain.entity.MemberEntity;
 import com.example.boilerplate.domain.entity.TodoDynamicEntity;
 import com.example.boilerplate.domain.entity.TodoEntity;
+import com.example.boilerplate.domain.repository.MemberRepository;
 import com.example.boilerplate.domain.repository.TodoDynamicRepository;
 import com.example.boilerplate.domain.repository.TodoRepository;
 import com.example.boilerplate.todo.dto.TodoDto;
+import com.example.boilerplate.todo.repository.TodoQueryRepository;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -22,90 +25,105 @@ import org.springframework.util.StringUtils;
 public class TodoService {
 
   private final TodoRepository todoRepository;
+  private final TodoQueryRepository todoQueryRepository;
   private final TodoDynamicRepository todoDynamicRepository;
+  private final MemberRepository memberRepository;
   private final ModelMapper modelMapper;
 
   /**
    * 할 일 목록 조회
    *
-   * @param todoRequest 검색 조건이 포함된 TodoDto.Request 객체
-   * @return List&lt;TodoDto.Response&gt; 검색 결과에 따른 할 일 목록
+   * @param todoRequest 검색 조건
+   * @return 할 일 목록
    */
   @Transactional(readOnly = true)
   public List<TodoDto.Response> getTodoList(TodoDto.Request todoRequest) {
-    List<TodoEntity> todoList =
-        todoRepository
-            .findAllByTitleContainingIgnoreCaseAndDescriptionContainingIgnoreCaseAndCompletedOrderByIdDesc(
-                todoRequest.getTitle(),
-                todoRequest.getDescription(),
-                todoRequest.getCompleted()
-            );
-    return todoList.stream()
-        .map(todo -> modelMapper.map(todo, TodoDto.Response.class))
-        .toList();
+    return todoQueryRepository.getTodoList(todoRequest);
   }
 
   /**
-   * 할 일 조회
+   * 특정 할 일 조회
    *
-   * @param id 설명
-   * @return 설명
+   * @param id 할 일 ID
+   * @return 할 일 상세 정보
    */
   @Transactional(readOnly = true)
   public TodoDto.Response getTodo(Long id) {
-    TodoEntity todo = todoRepository.findById(id)
-        .orElseThrow(() -> new ApiException(ApiStatus.TODO_NOT_FOUND));
-    return modelMapper.map(todo, TodoDto.Response.class);
+    TodoEntity todoEntity = todoRepository.findById(id)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiStatus.TODO_NOT_FOUND));
+    return modelMapper.map(todoEntity, TodoDto.Response.class);
   }
 
   /**
-   * 할 일 저장
+   * 할 일 추가
    *
-   * @param todoRequest 저장할 할 일 정보가 포함된 TodoDto.Request 객체
-   * @return TodoDto.Response 저장된 할 일의 정보
+   * @param insertTodoRequest 추가할 할 일 정보
+   * @return 추가된 할 일 정보
    */
   @Transactional
-  public TodoDto.Response insertTodo(TodoDto.Request todoRequest) {
-    TodoEntity todoEntity = modelMapper.map(todoRequest, TodoEntity.class);
+  public TodoDto.Response insertTodo(TodoDto.InsertRequest insertTodoRequest) {
+
+    // 1. MemberEntity 조회: 없는 경우 예외 처리
+    MemberEntity memberEntity = memberRepository.findById(insertTodoRequest.getMemberId())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiStatus.MEMBER_NOT_FOUND));
+
+    // 2. InsertRequest -> TodoEntity 매핑
+    TodoEntity todoEntity = modelMapper.map(insertTodoRequest, TodoEntity.class);
+    todoEntity.setMember(memberEntity); // Member 설정
+
+    // 3. TodoEntity 저장
     TodoEntity savedEntity = todoRepository.save(todoEntity);
+
+    // 4. 저장된 엔티티를 TodoDto.Response로 매핑하여 반환
     return modelMapper.map(savedEntity, TodoDto.Response.class);
   }
 
   /**
    * 할 일 수정
    *
-   * @param todoRequest 수정할 정보가 포함된 TodoDto.Request 객체
-   * @return TodoDto.Response 수정된 할 일의 정보
+   * @param updateTodoRequest 수정할 할 일 정보
+   * @return 수정된 할 일 정보
    */
   @Transactional
-  public TodoDto.Response updateTodo(TodoDto.Request todoRequest) {
+  public TodoDto.Response updateTodo(TodoDto.UpdateRequest updateTodoRequest) {
 
-    // 할 일의 정보를 조회
-    TodoEntity todo = todoRepository.findById(todoRequest.getId())
-        .orElseThrow(() -> new ApiException(ApiStatus.TODO_NOT_FOUND));
+    TodoEntity todoEntity = todoRepository.findById(updateTodoRequest.getId())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiStatus.TODO_NOT_FOUND));
 
-    // 제목, 상세한 설명, 완료 여부를 요청받은 정보로 수정
-    Optional.ofNullable(todoRequest.getTitle())
-        .filter(StringUtils::hasText)
-        .ifPresent(todo::setTitle);
+    if (StringUtils.hasText(updateTodoRequest.getTitle())) {
+      todoEntity.setTitle(updateTodoRequest.getTitle());
+    }
+    if (StringUtils.hasText(updateTodoRequest.getDescription())) {
+      todoEntity.setDescription(updateTodoRequest.getDescription());
+    }
+    if (updateTodoRequest.getCompleted() != null) {
+      todoEntity.setCompleted(updateTodoRequest.getCompleted());
+    }
 
-    Optional.ofNullable(todoRequest.getDescription())
-        .filter(StringUtils::hasText)
-        .ifPresent(todo::setDescription);
-
-    Optional.ofNullable(todoRequest.getCompleted())
-        .ifPresent(todo::setCompleted);
-
-    // 수정된 할 일 정보를 저장
-    todoRepository.save(todo);
-
-    return modelMapper.map(todo, TodoDto.Response.class);
+    TodoEntity updatedEntity = todoRepository.save(todoEntity);
+    return modelMapper.map(updatedEntity, TodoDto.Response.class);
   }
 
   /**
-   * 할 일 수정 - @DynamicUpdate - completed만 수정
+   * 할 일 삭제
    *
-   * @param todoRequest 수정할 정보가 포함된 TodoDto.Request 객체
+   * @param id 삭제할 할 일의 아이디
+   * @return 삭제된 할 일 정보
+   */
+  @Transactional
+  public TodoDto.Response deleteTodo(Long id) {
+    TodoEntity todoEntity = todoRepository.findById(id)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiStatus.TODO_NOT_FOUND));
+    todoRepository.deleteById(id);
+    return modelMapper.map(todoEntity, TodoDto.Response.class);
+  }
+
+  // TODO : 페이징 조회, 다이나믹 Entity
+
+  /**
+   * 할 일 완료 상태 변경
+   *
+   * @param todoRequest 변경할 할 일 정보
    */
   @Transactional
   public void updateTodoCompleted(TodoDto.Request todoRequest) {

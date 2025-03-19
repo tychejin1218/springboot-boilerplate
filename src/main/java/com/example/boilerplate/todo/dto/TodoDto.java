@@ -65,6 +65,9 @@ public class TodoDto {
   @ToString
   public static class InsertRequest {
 
+    @Schema(description = "회원 아이디", example = "1L")
+    private Long memberId;
+
     @Schema(description = "할 일 제목", example = "Spring Boot 기초 학습")
     private String title;
 
@@ -75,10 +78,21 @@ public class TodoDto {
     @Builder.Default
     private Boolean completed = false;
 
-    public static TodoDto.InsertRequest of(String title, String description) {
-      return TodoDto.InsertRequest.builder()
+    public static TodoDto.InsertRequest of(long memberId, String title, String description) {
+      return InsertRequest.builder()
+          .memberId(memberId)
           .title(title)
           .description(description)
+          .build();
+    }
+
+    public static TodoDto.InsertRequest of(long memberId, String title, String description,
+        boolean completed) {
+      return InsertRequest.builder()
+          .memberId(memberId)
+          .title(title)
+          .description(description)
+          .completed(completed)
           .build();
     }
   }
@@ -105,9 +119,8 @@ public class TodoDto {
   }
 
   @Getter
-  @Setter
   @Builder
-  @AllArgsConstructor
+  @AllArgsConstructor(staticName = "of")
   @NoArgsConstructor
   @ToString
   public static class Response {
@@ -120,15 +133,19 @@ public class TodoDto {
   }
 
   @Getter
-  @Setter
   @Builder
-  @AllArgsConstructor
+  @AllArgsConstructor(staticName = "of")
   @NoArgsConstructor
   @ToString
   public static class Member {
 
+    @Schema(name = "id", example = "1", description = "회원 아이디", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Long id;
+
+    @Schema(name = "name", example = "테스터", description = "회원 이름", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String name;
+
+    @Schema(name = "email", example = "tester@example.com", description = "회원 이메일", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String email;
   }
 }

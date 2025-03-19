@@ -82,22 +82,42 @@
   <springProfile name="logging-level-local">
     <!-- local 환경에서의 로그 레벨 설정 -->
     <property name="LOG_LEVEL_root" value="DEBUG"/>
-    <property name="LOG_LEVEL_com.example.boilerplate" value="DEBUG"/>
+    <property name="LOG_LEVEL_com.daekyo.dl" value="DEBUG"/>
     <property name="LOG_LEVEL_org.springframework" value="DEBUG"/>
-    <property name="LOG_LEVEL_com.zaxxer.hikari" value="INFO"/>
-    <property name="LOG_LEVEL_org.hibernate" value="INFO"/>
+    <property name="LOG_LEVEL_com.zaxxer.hikari" value="DEBUG"/>
+    <property name="LOG_LEVEL_org.hibernate" value="DEBUG"/>
     <property name="LOG_LEVEL_org.hibernate.SQL" value="DEBUG"/>
-    <property name="LOG_LEVEL_org.hibernate.type.descriptor.sql.BasicBinder" value="TRACE"/>
+    <property name="LOG_LEVEL_org.hibernate.orm.jdbc.bind" value="TRACE"/>
   </springProfile>
   <springProfile name="logging-level-dev">
     <!-- dev 환경에서의 로그 레벨 설정 -->
-    <property name="LOG_LEVEL_root" value="INFO"/>
-    <property name="LOG_LEVEL_com.example.boilerplate" value="INFO"/>
-    <property name="LOG_LEVEL_org.springframework" value="INFO"/>
+    <property name="LOG_LEVEL_root" value="DEBUG"/>
+    <property name="LOG_LEVEL_com.daekyo.dl" value="DEBUG"/>
+    <property name="LOG_LEVEL_org.springframework" value="DEBUG"/>
     <property name="LOG_LEVEL_com.zaxxer.hikari" value="INFO"/>
-    <property name="LOG_LEVEL_org.hibernate" value="INFO"/>
+    <property name="LOG_LEVEL_org.hibernate" value="DEBUG"/>
     <property name="LOG_LEVEL_org.hibernate.SQL" value="DEBUG"/>
-    <property name="LOG_LEVEL_org.hibernate.type.descriptor.sql.BasicBinder" value="TRACE"/>
+    <property name="LOG_LEVEL_org.hibernate.orm.jdbc.bind" value="TRACE"/>
+  </springProfile>
+  <springProfile name="logging-level-stg">
+    <!-- stg 환경에서의 로그 레벨 설정 -->
+    <property name="LOG_LEVEL_root" value="WARN"/>
+    <property name="LOG_LEVEL_com.daekyo.dl" value="INFO"/>
+    <property name="LOG_LEVEL_org.springframework" value="WARN"/>
+    <property name="LOG_LEVEL_com.zaxxer.hikari" value="WARN"/>
+    <property name="LOG_LEVEL_org.hibernate" value="WARN"/>
+    <property name="LOG_LEVEL_org.hibernate.SQL" value="INFO"/>
+    <property name="LOG_LEVEL_org.hibernate.orm.jdbc.bind" value="INFO"/>
+  </springProfile>
+  <springProfile name="logging-level-prd">
+    <!-- prd 환경에서의 로그 레벨 설정 -->
+    <property name="LOG_LEVEL_root" value="INFO"/>
+    <property name="LOG_LEVEL_com.daekyo.dl" value="INFO"/>
+    <property name="LOG_LEVEL_org.springframework" value="INFO"/>
+    <property name="LOG_LEVEL_com.zaxxer.hikari" value="ERROR"/>
+    <property name="LOG_LEVEL_org.hibernate" value="ERROR"/>
+    <property name="LOG_LEVEL_org.hibernate.SQL" value="ERROR"/>
+    <property name="LOG_LEVEL_org.hibernate.orm.jdbc.bind" value="ERROR"/>
   </springProfile>
 
   <!-- 공통 Logger 설정 -->
@@ -127,12 +147,12 @@
     <appender-ref ref="PROFILE-APPENDER"/>
   </logger>
   <logger name="org.hibernate.SQL"
-    level="${LOG_LEVEL_org.hibernate.sql}"
+    level="${LOG_LEVEL_org.hibernate.SQL}"
     additivity="false">
     <appender-ref ref="PROFILE-APPENDER"/>
   </logger>
-  <logger name="org.hibernate.type.descriptor.sql.BasicBinder"
-    level="${LOG_LEVEL_org.hibernate.type.descriptor.sql.BasicBinder}"
+  <logger name="org.hibernate.orm.jdbc.bind"
+    level="${LOG_LEVEL_org.hibernate.orm.jdbc.bind}"
     additivity="false">
     <appender-ref ref="PROFILE-APPENDER"/>
   </logger>

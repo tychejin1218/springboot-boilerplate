@@ -12,7 +12,7 @@ public class SignDto {
   @Schema(name = "signRequest", description = "로그인 요청")
   @Getter
   @SuperBuilder
-  @AllArgsConstructor
+  @AllArgsConstructor(staticName = "of")
   @NoArgsConstructor
   @ToString
   public static class Request {

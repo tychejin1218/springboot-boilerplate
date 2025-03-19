@@ -3,6 +3,7 @@ package com.example.boilerplate.common.component;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -142,5 +143,38 @@ public class RedisComponent {
       log.error("deleteKey key : {}", key, e);
       return false;
     }
+  }
+
+  /**
+   * Redis 캐시에서 데이터를 가져오거나, 캐시가 없을 경우 DB에서 조회 후 캐싱
+   *
+   * @param cacheKey      Redis 캐시 키
+   * @param typeReference 반환할 객체의 타입 정보를 포함한 {@code TypeReference}
+   * @param dbCallback    캐시에 데이터가 없는 경우 DB에서 데이터를 조회하는 콜백
+   * @param ttl           캐시 만료 시간(Time-To-Live)
+   * @param timeUnit      캐시 만료 시간 단위
+   * @param <T>           반환 데이터의 타입
+   * @return 캐시 데이터 또는 DB 조회 데이터를 반환
+   */
+  public <T> T getCacheOrDefault(
+      String cacheKey,
+      TypeReference<T> typeReference,
+      Supplier<T> dbCallback,
+      long ttl,
+      TimeUnit timeUnit) {
+
+    try {
+      T cachedValue = getObjectValue(cacheKey, typeReference);
+      if (cachedValue != null) {
+        return cachedValue;
+      }
+    } catch (Exception e) {
+      log.warn("Redis is unavailable. Falling back to DB. Error: {}", e.getMessage());
+    }
+
+    // 캐시에 값이 없거나 예외 발생 시 DB에서 값을 가져오고 Redis에 저장
+    T value = dbCallback.get();
+    setObjectValue(cacheKey, value, ttl, timeUnit);
+    return value;
   }
 }

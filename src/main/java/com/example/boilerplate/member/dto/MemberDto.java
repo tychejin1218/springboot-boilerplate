@@ -49,19 +49,19 @@ public class MemberDto {
   @ToString
   public static class Response {
 
-    @Schema(name = "id", example = "1", description = "회원의 아이디", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(name = "id", example = "1", description = "회원 아이디", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private Long id;
 
     @Schema(name = "password", example = "$2a$10$Lwhekcxdlct9AJXV1JD3DO8/EIP7a73fqq80Lm9sbMbI.wQegv2ee", description = "회원의 암호화된 비밀번호", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String password;
 
-    @Schema(name = "name", example = "홍길동", description = "회원의 이름", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(name = "name", example = "테스터", description = "회원 이름", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String name;
 
-    @Schema(name = "email", example = "hong@daekyo.com", description = "회원의 이메일", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    @Schema(name = "email", example = "tester@example.com", description = "회원 이메일", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private String email;
 
-    @Schema(description = "회원이 관련된 할 일 목록")
+    @Schema(description = "회원의 할 일 목록")
     List<MemberDto.Todo> todos;
   }
 
