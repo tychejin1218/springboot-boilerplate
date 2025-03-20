@@ -2,6 +2,7 @@ package com.example.boilerplate.todo.dto;
 
 import com.example.boilerplate.common.dto.PageDto;
 import io.swagger.v3.oas.annotations.media.Schema;
+import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -50,11 +51,32 @@ public class TodoDto {
   @ToString(callSuper = true)
   public static class PageRequest extends PageDto {
 
-    private Long id;
-    private Long memberId;
     private String title;
     private String description;
     private Boolean completed;
+
+    public static TodoDto.PageRequest of(String title, String description,
+        Boolean completed, int page, int size) {
+      return TodoDto.PageRequest.builder()
+          .title(title)
+          .description(description)
+          .completed(completed)
+          .page(page)
+          .size(size)
+          .build();
+    }
+
+    public static TodoDto.PageRequest of(String title, String description,
+        Boolean completed, int page, int size, List<String> sorts) {
+      return TodoDto.PageRequest.builder()
+          .title(title)
+          .description(description)
+          .completed(completed)
+          .page(page)
+          .size(size)
+          .sorts(sorts)
+          .build();
+    }
   }
 
   @Schema(description = "할 일 추가 요청 DTO")

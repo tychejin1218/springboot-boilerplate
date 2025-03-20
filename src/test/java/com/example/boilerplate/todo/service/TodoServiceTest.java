@@ -25,6 +25,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,6 +35,7 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 class TodoServiceTest {
 
+  private static final long MEMBER_ID = 3L;
   private static final String TODO_TITLE = "할 일 제목";
   private static final String TODO_DESCRIPTION = "할 일 내용";
 
@@ -74,6 +76,67 @@ class TodoServiceTest {
       // Then
       log.debug("todoList: {}", objectMapper.writeValueAsString(todoList));
       assertFalse(todoList.isEmpty());
+    }
+  }
+
+  @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+  @DisplayName("getPagedTodoList - 페이징 처리된 할 일 목록 조회")
+  @Nested
+  class TestGetPagedTodoList {
+
+    @Order(1)
+    @DisplayName("getPagedTodoList - 페이징 처리된 할 일 목록 조회 성공")
+    @Transactional
+    @Test
+    void testGetPagedTodoListSuccess() throws Exception {
+
+      // Given
+      setUpTodoList();
+      clearPersistenceContext();
+
+      int page = 0;
+      int size = 3;
+      TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(
+          TODO_TITLE, TODO_DESCRIPTION, true, page, size
+      );
+
+      // When
+      Page<TodoDto.Response> pagedTodoList = todoService.getPagedTodoList(pageRequest);
+
+      // Then
+      log.debug("pagedTodoList: {}", objectMapper.writeValueAsString(pagedTodoList));
+      assertAll(
+          () -> assertEquals(size, pagedTodoList.getSize()),
+          () -> assertTrue(pagedTodoList.stream().allMatch(TodoDto.Response::getCompleted))
+      );
+    }
+
+    @Order(2)
+    @DisplayName("getPagedTodoList - 페이징 및 정렬 조건이 포함된 할 일 목록 조회 성공")
+    @Transactional
+    @Test
+    void testGetPagedTodoListWithSorting() throws Exception {
+
+      // Given
+      setUpTodoList();
+      clearPersistenceContext();
+
+      int page = 0;
+      int size = 3;
+      List<String> sorts = List.of("title,desc", "id,asc");
+      TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(
+          TODO_TITLE, TODO_DESCRIPTION, true, page, size, sorts
+      );
+
+      // When
+      Page<TodoDto.Response> pagedTodoList = todoService.getPagedTodoList(pageRequest);
+
+      // Then
+      log.debug("pagedTodoList: {}", objectMapper.writeValueAsString(pagedTodoList));
+      assertAll(
+          () -> assertEquals(size, pagedTodoList.getSize()),
+          () -> assertTrue(pagedTodoList.stream().allMatch(TodoDto.Response::getCompleted))
+      );
     }
   }
 
@@ -126,7 +189,7 @@ class TodoServiceTest {
   }
 
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-  @DisplayName("insertTodo_할 일 추가")
+  @DisplayName("insertTodo - 할 일 추가")
   @Nested
   class TestInsertTodo {
 
@@ -266,7 +329,7 @@ class TodoServiceTest {
 
   @Disabled
   private void setUpTodoList() {
-    for (int i = 1; i <= 5; i++) {
+    for (int i = 1; i <= 10; i++) {
       String title = TODO_TITLE + " " + i;
       String description = TODO_DESCRIPTION + " " + i;
       boolean completed = i % 2 == 0;

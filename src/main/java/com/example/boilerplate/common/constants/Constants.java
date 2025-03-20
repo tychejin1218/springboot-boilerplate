@@ -3,6 +3,9 @@ package com.example.boilerplate.common.constants;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+@SuppressWarnings({
+    "PMD.DataClass"
+})
 public final class Constants {
 
   /**

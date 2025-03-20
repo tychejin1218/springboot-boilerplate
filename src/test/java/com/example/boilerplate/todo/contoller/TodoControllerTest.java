@@ -126,6 +126,44 @@ class TodoControllerTest {
   }
 
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+  @DisplayName("getPagedTodos - 페이징된 할 일 목록 조회")
+  @Nested
+  class TestGetTodoLis {
+
+    @Order(1)
+    @DisplayName("getPagedTodos - 페이징된 할 일 목록 조회 성공")
+    @Transactional
+    @Test
+    void testGetPagedTodosSuccess() throws Exception {
+
+      // Given
+      setUpTodoList();
+      clearPersistenceContext();
+
+      // When
+      ResultActions resultActions = mockMvc.perform(
+          get(TODOS_BASE_URL + "/paged")
+              .header(AUTHORIZATION_HEADER, BEARER_TOKEN_PREFIX + token)
+              .param("title", CONTAINS_TODO_TITLE)
+              .param("description", CONTAINS_TODO_DESCRIPTION)
+              .param("completed", "true")
+              .param("page", "0")
+              .param("size", "3")
+              .param("sorts", "title,desc")
+      );
+
+      // Then
+      resultActions
+          .andExpect(status().isOk())
+          .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+          .andExpect(jsonPath(PATH_STATUS_CODE).value(ApiStatus.OK.getCode()))
+          .andExpect(jsonPath(PATH_MESSAGE).value(ApiStatus.OK.getMessage()))
+          .andExpect(jsonPath("$.data").isNotEmpty())
+          .andDo(print());
+    }
+  }
+
+  @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
   @DisplayName("getTodo - 특정 할 일 조회")
   @Nested
   class TestGetTodo {

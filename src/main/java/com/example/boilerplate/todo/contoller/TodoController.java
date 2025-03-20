@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -42,6 +43,27 @@ public class TodoController implements TodoControllerDocs {
       @RequestParam(value = "completed", required = false) Boolean completed) {
     return BaseResponse.ok(
         todoService.getTodoList(TodoDto.Request.of(title, description, completed)));
+  }
+
+  /**
+   * 페이징 처리된 할 일 목록 조회
+   *
+   * @return 페이징 처리된 할 일 목록
+   */
+  @GetMapping("/todos/paged")
+  public BaseResponse<Page<TodoDto.Response>> getPagedTodos(
+      @RequestParam(value = "title", required = false) String title,
+      @RequestParam(value = "description", required = false) String description,
+      @RequestParam(value = "completed", required = false) Boolean completed,
+      @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+      @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+      @RequestParam(value = "sorts", required = false) List<String> sorts
+  ) {
+    // TODO : sorts 조건 하나일때
+    TodoDto.PageRequest pageRequest =
+        TodoDto.PageRequest.of(title, description, completed, page, size, sorts);
+    Page<TodoDto.Response> pagedTodoList = todoService.getPagedTodoList(pageRequest);
+    return BaseResponse.ok(pagedTodoList);
   }
 
   /**

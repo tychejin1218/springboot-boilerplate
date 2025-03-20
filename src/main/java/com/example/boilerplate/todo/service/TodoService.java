@@ -14,6 +14,7 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,6 +40,17 @@ public class TodoService {
   @Transactional(readOnly = true)
   public List<TodoDto.Response> getTodoList(TodoDto.Request todoRequest) {
     return todoQueryRepository.getTodoList(todoRequest);
+  }
+
+  /**
+   * 페이징 처리된 할 일 목록 조회
+   *
+   * @param pageRequest 검색 및 페이징 조건
+   * @return 할 일 목록
+   */
+  @Transactional(readOnly = true)
+  public Page<TodoDto.Response> getPagedTodoList(TodoDto.PageRequest pageRequest) {
+    return todoQueryRepository.getPagedTodoList(pageRequest);
   }
 
   /**
