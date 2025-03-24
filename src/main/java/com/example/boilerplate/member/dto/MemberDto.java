@@ -13,30 +13,52 @@ import lombok.experimental.SuperBuilder;
 
 public class MemberDto {
 
-  @Schema(description = "회원 검색 조건 요청 DTO")
+  @Getter
+  @Setter
+  @SuperBuilder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @ToString
+  public static class Request {
+
+    private Long id;
+    private String password;
+    private String name;
+    private String email;
+
+    public static MemberDto.Request of(Long id) {
+      return MemberDto.Request.builder()
+          .id(id)
+          .build();
+    }
+  }
+
   @Getter
   @Setter
   @SuperBuilder
   @AllArgsConstructor
   @NoArgsConstructor
   @ToString(callSuper = true)
-  public static class Request extends PageDto {
+  public static class PageRequest extends PageDto {
 
-    @Schema(name = "id", example = "1", description = "회원의 아이디")
-    private Long id;
-
-    @Schema(name = "password", example = "password1!", description = "회원의 비밀번호")
-    private String password;
-
-    @Schema(name = "name", example = "홍길동", description = "회원의 이름")
     private String name;
-
-    @Schema(name = "email", example = "hong@daekyo.com", description = "회원의 이메일")
     private String email;
 
-    public static MemberDto.Request of(Long id) {
-      return MemberDto.Request.builder()
-          .id(id)
+    public static MemberDto.PageRequest of(String name, String email) {
+      return MemberDto.PageRequest.builder()
+          .name(name)
+          .email(email)
+          .build();
+    }
+
+    public static MemberDto.PageRequest of(String name, String email,
+        int page, int size, List<String> sorts) {
+      return MemberDto.PageRequest.builder()
+          .name(name)
+          .email(email)
+          .page(page)
+          .size(size)
+          .sorts(sorts)
           .build();
     }
   }

@@ -45,7 +45,7 @@ class TodoQueryRepositoryTest {
   class TestGetTodoList {
 
     @Order(1)
-    @DisplayName("getTodoList - 조건 없이 할 일 목록 조회")
+    @DisplayName("조건 없이 할 일 목록 조회")
     @Transactional
     @Test
     void testGetTodoList() {
@@ -63,7 +63,7 @@ class TodoQueryRepositoryTest {
     }
 
     @Order(2)
-    @DisplayName("getTodoList - 제목 조건으로 조회")
+    @DisplayName("제목 조건으로 조회")
     @Transactional
     @Test
     void testGetTodoListByTitle() {
@@ -81,7 +81,7 @@ class TodoQueryRepositoryTest {
     }
 
     @Order(3)
-    @DisplayName("getTodoList - 설명 조건으로 조회")
+    @DisplayName("설명 조건으로 조회")
     @Transactional
     @Test
     void testGetTodoListByDescription() {
@@ -99,7 +99,7 @@ class TodoQueryRepositoryTest {
     }
 
     @Order(4)
-    @DisplayName("getTodoList - 완료 여부 조건으로 조회")
+    @DisplayName("완료 여부 조건으로 조회")
     @Transactional
     @Test
     void testGetTodoListByCompleted() {
@@ -117,7 +117,7 @@ class TodoQueryRepositoryTest {
     }
 
     @Order(5)
-    @DisplayName("getTodoList - 제목, 설명, 완료 여부로 조회")
+    @DisplayName("제목, 설명, 완료 여부로 조회")
     @Transactional
     @Test
     void testGetTodoListByTitleAndDescriptionAndCompleted() {
@@ -146,7 +146,7 @@ class TodoQueryRepositoryTest {
   class TestGetPagedTodoList {
 
     @Order(1)
-    @DisplayName("getPagedTodoList - 페이징 조건이 포함된 할 일 목록 조회")
+    @DisplayName("페이징 조건이 포함된 할 일 목록 조회")
     @Transactional
     @Test
     void testGetPagedTodoList() {
@@ -172,7 +172,7 @@ class TodoQueryRepositoryTest {
     }
 
     @Order(2)
-    @DisplayName("getPagedTodoList - 페이징 및 정렬 조건이 포함된 할 일 목록 조회")
+    @DisplayName("페이징 및 정렬 조건이 포함된 할 일 목록 조회")
     @Transactional
     @Test
     void testGetPagedTodoListWithSorting() {

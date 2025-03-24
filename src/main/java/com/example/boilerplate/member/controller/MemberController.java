@@ -2,12 +2,13 @@ package com.example.boilerplate.member.controller;
 
 import com.example.boilerplate.common.response.BaseResponse;
 import com.example.boilerplate.member.dto.MemberDto;
+import com.example.boilerplate.member.dto.MemberDto.Request;
+import com.example.boilerplate.member.dto.MemberDto.Response;
 import com.example.boilerplate.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -27,11 +28,16 @@ public class MemberController implements MemberControllerApiDocs {
    * @param memberRequest 검색 조건이 포함된 MemberDto.Request 객체
    * @return 페이징 처리된 회원 목록
    */
-  @GetMapping("/sample/members")
+  /*@GetMapping("/sample/members")
   @Override
   public BaseResponse<Page<MemberDto.Response>> getMemberList(
       @ModelAttribute MemberDto.Request memberRequest) {
     return BaseResponse.ok(memberService.getMemberList(memberRequest));
+  }*/
+
+  @Override
+  public BaseResponse<Page<Response>> getMemberList(Request memberRequest) {
+    return null;
   }
 
   /**

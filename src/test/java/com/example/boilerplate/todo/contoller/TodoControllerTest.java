@@ -28,6 +28,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -312,6 +313,8 @@ class TodoControllerTest {
           .andExpect(content().contentType(MediaType.APPLICATION_JSON))
           .andExpect(jsonPath(PATH_STATUS_CODE).value(ApiStatus.TODO_NOT_FOUND.getCode()))
           .andExpect(jsonPath(PATH_MESSAGE).value(ApiStatus.TODO_NOT_FOUND.getMessage()))
+          .andExpect(jsonPath("$.method").value(HttpMethod.DELETE.toString()))
+          .andExpect(jsonPath("$.timestamp").isNotEmpty())
           .andDo(print());
     }
   }

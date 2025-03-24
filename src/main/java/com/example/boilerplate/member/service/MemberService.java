@@ -6,6 +6,7 @@ import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.domain.entity.MemberEntity;
 import com.example.boilerplate.domain.repository.MemberRepository;
 import com.example.boilerplate.member.dto.MemberDto;
+import com.example.boilerplate.member.repository.MemberQueryRepository;
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -24,23 +25,19 @@ import org.springframework.util.StringUtils;
 public class MemberService {
 
   private final MemberRepository memberRepository;
+  private final MemberQueryRepository memberQueryRepository;
   private final RedisComponent redisComponent;
   private final ModelMapper modelMapper;
 
   /**
-   * 회원 목록 조회
+   * 페이징 처리된 회원 목록 조회
    *
-   * @param memberRequest 검색 조건이 포함된 MemberDto.Request 객체
-   * @return Page&lt;MemberDto.Response&gt; 페이징 처리된 회원 목록
+   * @param pageRequest 검색 및 페이징 조건
+   * @return 회원 목록
    */
   @Transactional(readOnly = true)
-  public Page<MemberDto.Response> getMemberList(MemberDto.Request memberRequest) {
-    Page<MemberEntity> memberPage =
-        memberRepository.findAllByNameContainsAndEmailContains(
-            memberRequest.getName(),
-            memberRequest.getEmail(),
-            memberRequest.pageRequest());
-    return memberPage.map(member -> modelMapper.map(member, MemberDto.Response.class));
+  public Page<MemberDto.Response> getMemberList(MemberDto.PageRequest pageRequest) {
+    return memberQueryRepository.getPagedMemberList(pageRequest);
   }
 
   /**

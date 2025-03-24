@@ -44,7 +44,7 @@
         <fileNamePattern>${RELATIVE_LOG_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}_%i.log.gz
         </fileNamePattern>
         <timeBasedFileNamingAndTriggeringPolicy
-          class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+          class="ch.qos.logback.core.rolling.SizeAndTimeBasedFileNamingAndTriggeringPolicy">
           <!-- 로그 파일 하나당 최대 크기 설정 -->
           <maxFileSize>100MB</maxFileSize>
         </timeBasedFileNamingAndTriggeringPolicy>
@@ -68,7 +68,7 @@
         <fileNamePattern>${ABSOLUTE_LOG_PATH}/${LOG_FILE_NAME}.%d{yyyy-MM-dd}_%i.log.gz
         </fileNamePattern>
         <timeBasedFileNamingAndTriggeringPolicy
-          class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+          class="ch.qos.logback.core.rolling.SizeAndTimeBasedFileNamingAndTriggeringPolicy">
           <!-- 로그 파일 하나당 최대 크기 설정 -->
           <maxFileSize>100MB</maxFileSize>
         </timeBasedFileNamingAndTriggeringPolicy>
