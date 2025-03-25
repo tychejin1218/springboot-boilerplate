@@ -15,6 +15,7 @@ import jakarta.persistence.EntityManager;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -36,8 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 class TodoServiceTest {
 
   private static final long MEMBER_ID = 3L;
-  private static final String TODO_TITLE = "할 일 제목";
-  private static final String TODO_DESCRIPTION = "할 일 내용";
+  private static final String TODO_TITLE_PREFIX = "할 일 제목";
+  private static final String TODO_DESCRIPTION_PREFIX = "할 일 내용";
 
   @Autowired
   TodoService todoService;
@@ -59,16 +60,21 @@ class TodoServiceTest {
   @Nested
   class TestGetTodoList {
 
+    @BeforeEach
+    void setUp() {
+      setUpTodoList();
+      clearPersistenceContext();
+    }
+
     @Order(1)
-    @DisplayName("getTodoList - 할 일 목록 조회 성공")
+    @DisplayName("할 일 목록 조회 성공")
     @Transactional
     @Test
     void testGetTodoListSuccess() throws Exception {
 
       // Given
-      setUpTodoList();
-      clearPersistenceContext();
-      TodoDto.Request todoRequest = TodoDto.Request.of(TODO_TITLE, TODO_DESCRIPTION, true);
+      TodoDto.Request todoRequest = TodoDto.Request.of(TODO_TITLE_PREFIX, TODO_DESCRIPTION_PREFIX,
+          true);
 
       // When
       List<TodoDto.Response> todoList = todoService.getTodoList(todoRequest);
@@ -85,7 +91,7 @@ class TodoServiceTest {
   class TestGetPagedTodoList {
 
     @Order(1)
-    @DisplayName("getPagedTodoList - 페이징 처리된 할 일 목록 조회 성공")
+    @DisplayName("페이징 처리된 할 일 목록 조회 성공")
     @Transactional
     @Test
     void testGetPagedTodoListSuccess() throws Exception {
@@ -97,7 +103,7 @@ class TodoServiceTest {
       int page = 0;
       int size = 3;
       TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(
-          TODO_TITLE, TODO_DESCRIPTION, true, page, size
+          TODO_TITLE_PREFIX, TODO_DESCRIPTION_PREFIX, true, page, size
       );
 
       // When
@@ -112,7 +118,7 @@ class TodoServiceTest {
     }
 
     @Order(2)
-    @DisplayName("getPagedTodoList - 페이징 및 정렬 조건이 포함된 할 일 목록 조회 성공")
+    @DisplayName("페이징 및 정렬 조건이 포함된 할 일 목록 조회 성공")
     @Transactional
     @Test
     void testGetPagedTodoListWithSorting() throws Exception {
@@ -125,7 +131,7 @@ class TodoServiceTest {
       int size = 3;
       List<String> sorts = List.of("title,desc", "id,asc");
       TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(
-          TODO_TITLE, TODO_DESCRIPTION, true, page, size, sorts
+          TODO_TITLE_PREFIX, TODO_DESCRIPTION_PREFIX, true, page, size, sorts
       );
 
       // When
@@ -146,13 +152,13 @@ class TodoServiceTest {
   class TestGetTodo {
 
     @Order(1)
-    @DisplayName("getTodo - 특정 할 일 조회 성공")
+    @DisplayName("특정 할 일 조회 성공")
     @Transactional
     @Test
     void testGetTodoSuccess() throws Exception {
 
       // Given
-      Long todoId = saveTodoAndReturnId(TODO_TITLE, TODO_DESCRIPTION);
+      Long todoId = saveTodoAndReturnId(TODO_TITLE_PREFIX, TODO_DESCRIPTION_PREFIX);
       clearPersistenceContext();
 
       // When
@@ -161,13 +167,13 @@ class TodoServiceTest {
       // Then
       log.debug("todoResponse: {}", objectMapper.writeValueAsString(todoResponse));
       assertAll(
-          () -> assertEquals(TODO_TITLE, todoResponse.getTitle()),
-          () -> assertEquals(TODO_DESCRIPTION, todoResponse.getDescription())
+          () -> assertEquals(TODO_TITLE_PREFIX, todoResponse.getTitle()),
+          () -> assertEquals(TODO_DESCRIPTION_PREFIX, todoResponse.getDescription())
       );
     }
 
     @Order(2)
-    @DisplayName("getTodo - 특정 할 일 조회 - 존재하지 않는 ID 조회")
+    @DisplayName("특정 할 일 조회 - 존재하지 않는 할 일 아이디로 조회 실패")
     @Transactional
     @Test
     void testGetTodoNotFoundId() {
@@ -183,7 +189,8 @@ class TodoServiceTest {
       assertAll(
           () -> assertEquals(ApiStatus.TODO_NOT_FOUND.getCode(),
               apiException.getStatus().getCode()),
-          () -> assertEquals(ApiStatus.TODO_NOT_FOUND.getCode(), apiException.getStatus().getCode())
+          () -> assertEquals(ApiStatus.TODO_NOT_FOUND.getMessage(),
+              apiException.getStatus().getMessage())
       );
     }
   }
@@ -194,14 +201,14 @@ class TodoServiceTest {
   class TestInsertTodo {
 
     @Order(1)
-    @DisplayName("insertTodo - 할 일 추가 성공")
+    @DisplayName("할 일 추가 성공")
     @Transactional
     @Test
     void testInsertTodoSuccess() {
 
       // Given
       TodoDto.InsertRequest insertTodoRequest = TodoDto.InsertRequest.of(
-          1L, TODO_TITLE, TODO_DESCRIPTION);
+          MEMBER_ID, TODO_TITLE_PREFIX, TODO_DESCRIPTION_PREFIX);
 
       // When
       TodoDto.Response todoResponse = todoService.insertTodo(insertTodoRequest);
@@ -222,14 +229,14 @@ class TodoServiceTest {
   class TestUpdateTodo {
 
     @Order(1)
-    @DisplayName("updateTodo - 할 일 수정 성공")
+    @DisplayName("할 일 수정 성공")
     @Transactional
     @Test
     void testUpdateTodoSuccess() throws Exception {
 
       // Given
-      TodoDto.Response existingTodoResponse = saveTodoAndReturnResponse(TODO_TITLE,
-          TODO_DESCRIPTION);
+      TodoDto.Response existingTodoResponse = saveTodoAndReturnResponse(TODO_TITLE_PREFIX,
+          TODO_DESCRIPTION_PREFIX);
       clearPersistenceContext();
 
       TodoDto.UpdateRequest updateTodoRequest = TodoDto.UpdateRequest.of(
@@ -250,7 +257,7 @@ class TodoServiceTest {
     }
 
     @Order(2)
-    @DisplayName("updateTodo - 할 일 수정 실패 - 존재하지 않는 ID 조회")
+    @DisplayName("존재하지 않는 할 일 아이디로 수정 시 실패")
     @Transactional
     @Test
     void testUpdateTodoNotFoundId() {
@@ -283,13 +290,13 @@ class TodoServiceTest {
   class TestDeleteTodo {
 
     @Order(1)
-    @DisplayName("deleteTodo - 할 일 삭제 성공")
+    @DisplayName("할 일 삭제 성공")
     @Transactional
     @Test
     void testDeleteTodoSuccess() {
 
       // Given
-      Long todoId = saveTodoAndReturnId(TODO_TITLE, TODO_DESCRIPTION);
+      Long todoId = saveTodoAndReturnId(TODO_TITLE_PREFIX, TODO_DESCRIPTION_PREFIX);
       clearPersistenceContext();
 
       // When
@@ -300,7 +307,7 @@ class TodoServiceTest {
     }
 
     @Order(2)
-    @DisplayName("deleteTodo - 할 일 삭제 실패 - 존재하지 않는 ID 조회")
+    @DisplayName("존재하지 않는 할 일 아이디 삭제 시 실패")
     @Transactional
     @Test
     void testDeleteTodoNotFoundId() {
@@ -330,8 +337,8 @@ class TodoServiceTest {
   @Disabled
   private void setUpTodoList() {
     for (int i = 1; i <= 10; i++) {
-      String title = TODO_TITLE + " " + i;
-      String description = TODO_DESCRIPTION + " " + i;
+      String title = TODO_TITLE_PREFIX + " " + i;
+      String description = TODO_DESCRIPTION_PREFIX + " " + i;
       boolean completed = i % 2 == 0;
       todoRepository.save(
           TodoEntity.builder()

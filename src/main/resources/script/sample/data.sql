@@ -1,10 +1,10 @@
 insert
-  into member (name, password, email, role)
-values ('관리자', '$2a$10$Lwhekcxdlct9AJXV1JD3DO8/EIP7a73fqq80Lm9sbMbI.wQegv2ee', 'admin@example.com',
+into member (email, name, password, role)
+values ('admin@example.com', '관리자', '$2a$10$Lwhekcxdlct9AJXV1JD3DO8/EIP7a73fqq80Lm9sbMbI.wQegv2ee',
         'ROLE_ADMIN'),
-       ('사용자', '$2a$10$Lwhekcxdlct9AJXV1JD3DO8/EIP7a73fqq80Lm9sbMbI.wQegv2ee', 'user@example.com',
+       ('user@example.com', '사용자', '$2a$10$Lwhekcxdlct9AJXV1JD3DO8/EIP7a73fqq80Lm9sbMbI.wQegv2ee',
         'ROLE_USER'),
-       ('테스터', '$2a$10$Lwhekcxdlct9AJXV1JD3DO8/EIP7a73fqq80Lm9sbMbI.wQegv2ee', 'tester@example.com',
+       ('tester@example.com', '테스터', '$2a$10$Lwhekcxdlct9AJXV1JD3DO8/EIP7a73fqq80Lm9sbMbI.wQegv2ee',
         'ROLE_USER');
 
 insert

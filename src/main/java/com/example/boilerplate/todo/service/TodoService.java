@@ -56,7 +56,7 @@ public class TodoService {
   /**
    * 특정 할 일 조회
    *
-   * @param id 할 일 ID
+   * @param id 할 일 아이디
    * @return 할 일 상세 정보
    */
   @Transactional(readOnly = true)

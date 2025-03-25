@@ -15,20 +15,67 @@ public class MemberDto {
 
   @Getter
   @Setter
-  @SuperBuilder
+  @Builder
   @AllArgsConstructor
   @NoArgsConstructor
   @ToString
   public static class Request {
 
     private Long id;
-    private String password;
-    private String name;
     private String email;
+    private String name;
+    private String password;
 
     public static MemberDto.Request of(Long id) {
       return MemberDto.Request.builder()
           .id(id)
+          .build();
+    }
+
+    public static MemberDto.Request of(String email, String name) {
+      return MemberDto.Request.builder()
+          .email(email)
+          .name(name)
+          .build();
+    }
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @ToString
+  public static class InsertRequest {
+
+    private String email;
+    private String name;
+    private String password;
+
+    public static MemberDto.InsertRequest of(String email, String name, String password) {
+      return InsertRequest.builder()
+          .email(email)
+          .name(name)
+          .password(password)
+          .build();
+    }
+  }
+
+  @Getter
+  @Builder
+  @AllArgsConstructor
+  @NoArgsConstructor
+  @ToString
+  public static class UpdateRequest {
+
+    private Long id;
+    private String email;
+    private String name;
+
+    public static MemberDto.UpdateRequest of(long id, String email, String name) {
+      return UpdateRequest.builder()
+          .id(id)
+          .email(email)
+          .name(name)
           .build();
     }
   }

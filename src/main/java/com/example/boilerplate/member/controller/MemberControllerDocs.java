@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @SuppressWarnings("all")
 @Tag(name = "회원 API", description = "회원 관련 API")
-public interface MemberControllerApiDocs {
+public interface MemberControllerDocs {
 
   @Operation(summary = "회원 목록 조회")
   @ApiResponse(
@@ -89,7 +89,7 @@ public interface MemberControllerApiDocs {
           required = true,
           content = @Content(
               mediaType = "application/json",
-              schema = @Schema(implementation = MemberDto.Request.class),
+              schema = @Schema(implementation = MemberDto.InsertRequest.class),
               examples = @ExampleObject(
                   value = """
                       {
@@ -101,7 +101,7 @@ public interface MemberControllerApiDocs {
               )
           )
       )
-      MemberDto.Request memberRequest);
+      MemberDto.InsertRequest insertMemberRequest);
 
   @Operation(summary = "회원 수정")
   @ApiResponse(
@@ -130,7 +130,7 @@ public interface MemberControllerApiDocs {
           required = true,
           content = @Content(
               mediaType = "application/json",
-              schema = @Schema(implementation = MemberDto.Request.class),
+              schema = @Schema(implementation = MemberDto.UpdateRequest.class),
               examples = @ExampleObject(
                   value = """
                       {
@@ -143,5 +143,5 @@ public interface MemberControllerApiDocs {
               )
           )
       )
-      MemberDto.Request memberRequest);
+      MemberDto.UpdateRequest updateMemberRequest);
 }
