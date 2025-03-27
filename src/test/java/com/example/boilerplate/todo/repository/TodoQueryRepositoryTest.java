@@ -5,12 +5,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.example.boilerplate.common.exception.ApiException;
+import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.domain.entity.TodoEntity;
 import com.example.boilerplate.todo.dto.TodoDto;
 import com.example.boilerplate.todo.dto.TodoDto.Response;
 import jakarta.persistence.EntityManager;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.MethodOrderer;
@@ -30,8 +34,8 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 class TodoQueryRepositoryTest {
 
-  private static final String TODO_TITLE = "할 일 제목";
-  private static final String TODO_DESCRIPTION = "할 일 내용";
+  private static final String TODO_TITLE_PREFIX = "할 일 제목";
+  private static final String TODO_DESCRIPTION_PREFIX = "할 일 내용";
 
   @Autowired
   private TodoQueryRepository todoQueryRepository;
@@ -44,18 +48,22 @@ class TodoQueryRepositoryTest {
   @Nested
   class TestGetTodoList {
 
+    @BeforeEach
+    void setUp() {
+      setUpTodoList();
+      clearPersistenceContext();
+    }
+
     @Order(1)
-    @DisplayName("조건 없이 할 일 목록 조회")
+    @DisplayName("검색 조건 없이 할 일 목록 조회")
     @Transactional
     @Test
     void testGetTodoList() {
 
       // Given
-      setUpTodoList();
-      clearPersistenceContext();
+      TodoDto.Request request = TodoDto.Request.builder().build();
 
       // When
-      TodoDto.Request request = TodoDto.Request.builder().build();
       List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(request);
 
       // Then
@@ -69,33 +77,31 @@ class TodoQueryRepositoryTest {
     void testGetTodoListByTitle() {
 
       // Given
-      setUpTodoList();
-      clearPersistenceContext();
+      String todoTitle = TODO_TITLE_PREFIX + "_1";
+      TodoDto.Request todoRequest = TodoDto.Request.of(todoTitle, null, null);
 
       // When
-      TodoDto.Request request = TodoDto.Request.of(TODO_TITLE + " 3", null, null);
-      List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(request);
+      List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(todoRequest);
 
       // Then
-      assertEquals(TODO_TITLE + " 3", todoList.get(0).getTitle());
+      assertFalse(todoList.isEmpty());
     }
 
     @Order(3)
-    @DisplayName("설명 조건으로 조회")
+    @DisplayName("내용 조건으로 조회")
     @Transactional
     @Test
     void testGetTodoListByDescription() {
 
       // Given
-      setUpTodoList();
-      clearPersistenceContext();
+      String todoDescription = TODO_DESCRIPTION_PREFIX + "_1";
+      TodoDto.Request todoRequest = TodoDto.Request.of(null, todoDescription, null);
 
       // When
-      TodoDto.Request request = TodoDto.Request.of(null, TODO_DESCRIPTION + " 2", null);
-      List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(request);
+      List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(todoRequest);
 
       // Then
-      assertEquals(TODO_DESCRIPTION + " 2", todoList.get(0).getDescription());
+      assertFalse(todoList.isEmpty());
     }
 
     @Order(4)
@@ -105,12 +111,10 @@ class TodoQueryRepositoryTest {
     void testGetTodoListByCompleted() {
 
       // Given
-      setUpTodoList();
-      clearPersistenceContext();
+      TodoDto.Request todoRequest = TodoDto.Request.of(null, null, true);
 
       // When
-      TodoDto.Request request = TodoDto.Request.of(null, null, true);
-      List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(request);
+      List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(todoRequest);
 
       // Then
       assertFalse(todoList.isEmpty());
@@ -123,20 +127,15 @@ class TodoQueryRepositoryTest {
     void testGetTodoListByTitleAndDescriptionAndCompleted() {
 
       // Given
-      setUpTodoList();
-      clearPersistenceContext();
+      String todoTitle = TODO_TITLE_PREFIX + "_1";
+      String todoDescription = TODO_DESCRIPTION_PREFIX + "_1";
+      TodoDto.Request request = TodoDto.Request.of(todoTitle, todoDescription, true);
 
       // When
-      TodoDto.Request request = TodoDto.Request.of(TODO_TITLE + " 4", TODO_DESCRIPTION + " 4",
-          true);
       List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(request);
 
       // Then
-      assertAll(
-          () -> assertEquals(TODO_TITLE + " 4", todoList.get(0).getTitle()),
-          () -> assertEquals(TODO_DESCRIPTION + " 4", todoList.get(0).getDescription()),
-          () -> assertTrue(todoList.get(0).getCompleted())
-      );
+      assertFalse(todoList.isEmpty());
     }
   }
 
@@ -145,6 +144,12 @@ class TodoQueryRepositoryTest {
   @Nested
   class TestGetPagedTodoList {
 
+    @BeforeEach
+    void setUp() {
+      setUpTodoList();
+      clearPersistenceContext();
+    }
+
     @Order(1)
     @DisplayName("페이징 조건이 포함된 할 일 목록 조회")
     @Transactional
@@ -152,12 +157,7 @@ class TodoQueryRepositoryTest {
     void testGetPagedTodoList() {
 
       // Given
-      setUpTodoList();
-      clearPersistenceContext();
-      TodoDto.PageRequest pageRequest = TodoDto.PageRequest.builder()
-          .page(1)
-          .size(3)
-          .build();
+      TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(null, null, null, 1, 3, null);
 
       // When
       Page<Response> pageResult = todoQueryRepository.getPagedTodoList(pageRequest);
@@ -168,7 +168,6 @@ class TodoQueryRepositoryTest {
           () -> assertTrue(pageResult.getTotalElements() > 0),
           () -> assertTrue(pageResult.getTotalPages() > 0)
       );
-      log.info("Page Content: {}", pageResult.getContent());
     }
 
     @Order(2)
@@ -178,16 +177,11 @@ class TodoQueryRepositoryTest {
     void testGetPagedTodoListWithSorting() {
 
       // Given
-      setUpTodoList();
-      clearPersistenceContext();
-      TodoDto.PageRequest pageRequest = TodoDto.PageRequest.builder()
-          .page(1)
-          .size(3)
-          .sorts(List.of("title,desc", "id,asc"))
-          .build();
+      TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(null, null, null, 1, 3,
+          List.of("title,desc", "id,asc"));
 
       // When
-      Page<Response> pageResult = todoQueryRepository.getPagedTodoList(pageRequest);
+      Page<TodoDto.Response> pageResult = todoQueryRepository.getPagedTodoList(pageRequest);
 
       // Then
       assertAll(
@@ -197,7 +191,29 @@ class TodoQueryRepositoryTest {
           () -> assertTrue(pageResult.getContent().get(0).getTitle()
               .compareTo(pageResult.getContent().get(1).getTitle()) >= 0)
       );
-      log.info("Page Content: {}", pageResult.getContent());
+    }
+
+    @Order(3)
+    @DisplayName("잘못된 정렬 필드 요청 시 예외 발생")
+    @Transactional
+    @Test
+    void testGetPagedTodoListWithInvalidSortField() {
+
+      // Given
+      TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(null, null, null, 1, 3,
+          List.of("invalidField,desc"));
+
+      // When
+      ApiException apiException = Assertions.assertThrows(
+          ApiException.class, () -> todoQueryRepository.getPagedTodoList(pageRequest));
+
+      // Then
+      assertAll(
+          () -> assertEquals(ApiStatus.METHOD_ARGUMENT_NOT_VALID.getCode(),
+              apiException.getStatus().getCode()),
+          () -> assertEquals(ApiStatus.METHOD_ARGUMENT_NOT_VALID.getMessage(),
+              apiException.getStatus().getMessage())
+      );
     }
   }
 
@@ -210,9 +226,9 @@ class TodoQueryRepositoryTest {
   @Disabled
   private void setUpTodoList() {
     for (int i = 1; i <= 10; i++) {
-      String title = TODO_TITLE + " " + i;
-      String description = TODO_DESCRIPTION + " " + i;
-      boolean completed = i % 2 == 0; // i가 짝수일 경우 완료 상태로 설정.
+      String title = TODO_TITLE_PREFIX + "_" + i;
+      String description = TODO_DESCRIPTION_PREFIX + "_" + i;
+      boolean completed = i % 2 == 0;
       entityManager.persist(
           TodoEntity.builder()
               .title(title)

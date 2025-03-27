@@ -1,5 +1,7 @@
 package com.example.boilerplate.member.repository;
 
+import com.example.boilerplate.common.exception.ApiException;
+import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.domain.entity.MemberEntity;
 import com.example.boilerplate.domain.entity.QMemberEntity;
 import com.example.boilerplate.domain.entity.QTodoEntity;
@@ -105,7 +107,8 @@ public class MemberQueryRepository {
   }
 
   /**
-   * 페이징 요청에 따라 QueryDSL 정렬 조건(OrderSpecifier)을 생성합니다. 요청된 정렬 필드가 존재하지 않을 경우 예외가 발생할 수 있습니다.
+   * 페이징 요청에 따라 QueryDSL 정렬 조건(OrderSpecifier)을 생성
+   * <p>요청된 정렬 필드가 존재하지 않을 경우 예외가 발생
    *
    * @param pageRequest  페이징 및 정렬 조건이 포함된 {@link MemberDto.PageRequest} 객체
    * @param memberEntity 정렬 기준이 될 {@link QTodoEntity} 객체
@@ -132,15 +135,16 @@ public class MemberQueryRepository {
 
           // 필드 매핑 (타입 명시적으로 캐스팅)
           return switch (order.getProperty()) {
-            case "name" -> new OrderSpecifier<>(queryOrder, memberEntity.name);
             case "email" -> new OrderSpecifier<>(queryOrder, memberEntity.email);
-            default ->
-                throw new IllegalArgumentException("Invalid sort field: " + order.getProperty());
+            case "name" -> new OrderSpecifier<>(queryOrder, memberEntity.name);
+            default -> {
+              log.error("Invalid sort field: {}", order.getProperty());
+              throw new ApiException(ApiStatus.METHOD_ARGUMENT_NOT_VALID);
+            }
           };
         })
         .toArray(OrderSpecifier[]::new);
   }
-
 
   /**
    * 회원 엔티티 리스트를 Response DTO 리스트로 변환

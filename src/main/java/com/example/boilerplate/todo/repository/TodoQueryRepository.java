@@ -1,5 +1,7 @@
 package com.example.boilerplate.todo.repository;
 
+import com.example.boilerplate.common.exception.ApiException;
+import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.domain.entity.QMemberEntity;
 import com.example.boilerplate.domain.entity.QTodoEntity;
 import com.example.boilerplate.domain.entity.TodoEntity;
@@ -111,8 +113,8 @@ public class TodoQueryRepository {
   }
 
   /**
-   * 페이징 요청에 따라 QueryDSL 정렬 조건(OrderSpecifier)을 생성합니다.
-   * 요청된 정렬 필드가 존재하지 않을 경우 예외가 발생할 수 있습니다.
+   * 페이징 요청에 따라 QueryDSL 정렬 조건(OrderSpecifier)을 생성
+   * <p>요청된 정렬 필드가 존재하지 않을 경우 예외가 발생
    *
    * @param pageRequest 페이징 및 정렬 조건이 포함된 {@link TodoDto.PageRequest} 객체
    * @param todoEntity  정렬 기준이 될 {@link QTodoEntity} 객체
@@ -142,8 +144,10 @@ public class TodoQueryRepository {
             case "id" -> new OrderSpecifier<>(queryOrder, todoEntity.id);
             case "title" -> new OrderSpecifier<>(queryOrder, todoEntity.title);
             case "description" -> new OrderSpecifier<>(queryOrder, todoEntity.description);
-            default ->
-                throw new IllegalArgumentException("Invalid sort field: " + order.getProperty());
+            default -> {
+              log.error("Invalid sort field: {}", order.getProperty());
+              throw new ApiException(ApiStatus.METHOD_ARGUMENT_NOT_VALID);
+            }
           };
         })
         .toArray(OrderSpecifier[]::new);
