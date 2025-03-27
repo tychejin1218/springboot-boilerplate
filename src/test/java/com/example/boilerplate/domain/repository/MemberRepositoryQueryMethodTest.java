@@ -178,7 +178,7 @@ class MemberRepositoryQueryMethodTest {
       String description = "할 일 설명 " + i;
       todoRepository.save(
           TodoEntity.builder()
-              .member(member)
+              .memberId(member.getId())
               .title(title)
               .description(description)
               .completed(i % 2 == 0)

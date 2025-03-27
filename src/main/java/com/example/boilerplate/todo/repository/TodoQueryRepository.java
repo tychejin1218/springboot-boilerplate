@@ -56,7 +56,8 @@ public class TodoQueryRepository {
     // QueryDSL로 목록 조회
     List<TodoEntity> todoEntityList = jpaQueryFactory
         .selectFrom(todoEntity)
-        .leftJoin(todoEntity.member, memberEntity)
+        .leftJoin(memberEntity)
+        .on(todoEntity.memberId.eq(memberEntity.id))
         .where(builder)
         .orderBy(todoEntity.id.desc())
         .fetch();
@@ -91,7 +92,8 @@ public class TodoQueryRepository {
     // QueryDSL로 목록 조회
     List<TodoEntity> todoEntityList = jpaQueryFactory
         .selectFrom(todoEntity)
-        .leftJoin(todoEntity.member, memberEntity)
+        .leftJoin(memberEntity)
+        .on(todoEntity.memberId.eq(memberEntity.id))
         .where(builder)
         .offset(pageRequest.pageRequest().getOffset())
         .limit(pageRequest.pageRequest().getPageSize())
@@ -102,6 +104,8 @@ public class TodoQueryRepository {
     long totalCount = jpaQueryFactory
         .select(todoEntity.count())
         .from(todoEntity)
+        .leftJoin(memberEntity)
+        .on(todoEntity.memberId.eq(memberEntity.id))
         .where(builder)
         .fetchOne();
 
@@ -114,6 +118,7 @@ public class TodoQueryRepository {
 
   /**
    * 페이징 요청에 따라 QueryDSL 정렬 조건(OrderSpecifier)을 생성
+   *
    * <p>요청된 정렬 필드가 존재하지 않을 경우 예외가 발생
    *
    * @param pageRequest 페이징 및 정렬 조건이 포함된 {@link TodoDto.PageRequest} 객체

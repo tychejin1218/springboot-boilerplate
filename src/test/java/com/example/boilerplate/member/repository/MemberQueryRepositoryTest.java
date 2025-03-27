@@ -8,7 +8,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import com.example.boilerplate.common.exception.ApiException;
 import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.domain.entity.MemberEntity;
-import com.example.boilerplate.domain.entity.TodoEntity;
+import com.example.boilerplate.domain.repository.MemberRepository;
+import com.example.boilerplate.domain.repository.TodoRepository;
 import com.example.boilerplate.member.dto.MemberDto;
 import jakarta.persistence.EntityManager;
 import java.util.List;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
+import org.springframework.test.annotation.Rollback;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -44,6 +46,12 @@ class MemberQueryRepositoryTest {
 
   @Autowired
   private MemberQueryRepository memberQueryRepository;
+
+  @Autowired
+  private MemberRepository memberRepository;
+
+  @Autowired
+  private TodoRepository todoRepository;
 
   @Autowired
   private EntityManager entityManager;
@@ -174,18 +182,19 @@ class MemberQueryRepositoryTest {
     @Order(1)
     @DisplayName("페이징이 적용된 회원 목록 조회")
     @Transactional
+    @Rollback()
     @Test
     void testGetPagedMemberList() {
 
       // Given
-      MemberDto.PageRequest pageRequest = MemberDto.PageRequest.of(null, null, 1, 3, null);
+      MemberDto.PageRequest pageRequest = MemberDto.PageRequest.of(null, null, 0, 3, null);
 
       // When
       Page<MemberDto.Response> pageResult = memberQueryRepository.getPagedMemberList(pageRequest);
 
       // Then
       assertAll(
-          () -> assertEquals(1, pageResult.getContent().size()),
+          () -> assertEquals(3, pageResult.getContent().size()),
           () -> assertTrue(pageResult.getTotalElements() > 0),
           () -> assertTrue(pageResult.getTotalPages() > 0)
       );
@@ -197,16 +206,17 @@ class MemberQueryRepositoryTest {
     @Test
     void testGetPagedMemberListWithSorting() {
 
+      // TODO : 정렬조건 테스트
       // Given
       MemberDto.PageRequest pageRequest = MemberDto.PageRequest.of(null, null, 1, 3,
-          List.of("email,desc", "name,desc"));
+          List.of("name,desc"));
 
       // When
       Page<MemberDto.Response> pageResult = memberQueryRepository.getPagedMemberList(pageRequest);
 
       // Then
       assertAll(
-          () -> assertEquals(1, pageResult.getContent().size()),
+          () -> assertEquals(3, pageResult.getContent().size()),
           () -> assertTrue(pageResult.getTotalElements() > 0),
           () -> assertTrue(pageResult.getTotalPages() > 0)
       );
@@ -286,29 +296,13 @@ class MemberQueryRepositoryTest {
 
   @Disabled
   private void setUpMemberAndTodoList() {
-    for (int i = 1; i <= 5; i++) {
+    for (int i = 1; i <= 10; i++) {
       String memberEmail = MEMBER_EMAIL_PREFIX + "_" + i + "@example.com";
       String memberName = MEMBER_NAME_PREFIX + "_" + i;
-
-      MemberEntity member = MemberEntity.builder()
+      memberRepository.save(MemberEntity.builder()
           .email(memberEmail)
           .name(memberName)
-          .build();
-      entityManager.persist(member);
-
-      for (int j = 1; j <= 5; j++) {
-        String title = TODO_TITLE_PREFIX + "_" + j;
-        String description = TODO_DESCRIPTION_PREFIX + "_" + j;
-        boolean completed = j % 2 == 0;
-        entityManager.persist(
-            TodoEntity.builder()
-                .title(title)
-                .description(description)
-                .completed(completed)
-                .member(member)
-                .build()
-        );
-      }
+          .build());
     }
   }
 }

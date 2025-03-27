@@ -53,7 +53,8 @@ public class MemberQueryRepository {
     // QueryDSL로 목록 조회
     List<MemberEntity> memberEntityList = jpaQueryFactory
         .selectFrom(memberEntity)
-        .leftJoin(memberEntity.todos, todoEntity)
+        .leftJoin(todoEntity)
+        .on(memberEntity.id.eq(todoEntity.memberId))
         .where(builder)
         .orderBy(memberEntity.id.desc())
         .fetch();
@@ -75,17 +76,18 @@ public class MemberQueryRepository {
 
     // 동적 조회 조건 생성
     BooleanBuilder builder = new BooleanBuilder();
-    if (StringUtils.hasText(pageRequest.getName())) {
-      builder.and(memberEntity.name.contains(pageRequest.getName()));
-    }
     if (StringUtils.hasText(pageRequest.getEmail())) {
       builder.and(memberEntity.email.contains(pageRequest.getEmail()));
+    }
+    if (StringUtils.hasText(pageRequest.getName())) {
+      builder.and(memberEntity.name.contains(pageRequest.getName()));
     }
 
     // QueryDSL로 목록 조회
     List<MemberEntity> memberEntityList = jpaQueryFactory
         .selectFrom(memberEntity)
-        .leftJoin(memberEntity.todos, todoEntity)
+        .leftJoin(todoEntity)
+        .on(memberEntity.id.eq(todoEntity.memberId))
         .where(builder)
         .offset(pageRequest.pageRequest().getOffset())
         .limit(pageRequest.pageRequest().getPageSize())
@@ -96,6 +98,8 @@ public class MemberQueryRepository {
     long totalCount = jpaQueryFactory
         .select(memberEntity.count())
         .from(memberEntity)
+        .leftJoin(todoEntity)
+        .on(memberEntity.id.eq(todoEntity.memberId))
         .where(builder)
         .fetchOne();
 
@@ -108,6 +112,7 @@ public class MemberQueryRepository {
 
   /**
    * 페이징 요청에 따라 QueryDSL 정렬 조건(OrderSpecifier)을 생성
+   *
    * <p>요청된 정렬 필드가 존재하지 않을 경우 예외가 발생
    *
    * @param pageRequest  페이징 및 정렬 조건이 포함된 {@link MemberDto.PageRequest} 객체
