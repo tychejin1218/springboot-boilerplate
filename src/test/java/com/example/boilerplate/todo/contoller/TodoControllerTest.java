@@ -41,9 +41,6 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest
 class TodoControllerTest {
 
-  private static final String PATH_STATUS_CODE = "$.statusCode";
-  private static final String PATH_MESSAGE = "$.message";
-
   private static final String TODO_BASE_URL = "/todo";
   private static final String TODOS_BASE_URL = "/todos";
 
@@ -62,6 +59,9 @@ class TodoControllerTest {
 
   private static final String AUTHORIZATION_HEADER = "Authorization";
   private static final String BEARER_TOKEN_PREFIX = "Bearer ";
+
+  private static final String PATH_STATUS_CODE = "$.statusCode";
+  private static final String PATH_MESSAGE = "$.message";
 
   @Autowired
   MockMvc mockMvc;

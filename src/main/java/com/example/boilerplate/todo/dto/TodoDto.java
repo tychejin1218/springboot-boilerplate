@@ -79,6 +79,17 @@ public class TodoDto {
     }
   }
 
+  @Getter
+  @Builder
+  @AllArgsConstructor(staticName = "of")
+  @NoArgsConstructor
+  @ToString
+  public static class DynamicRequest {
+
+    private Long id;
+    private Boolean completed;
+  }
+
   @Schema(description = "할 일 추가 요청 DTO")
   @Getter
   @Builder

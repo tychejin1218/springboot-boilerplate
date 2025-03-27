@@ -14,6 +14,7 @@ import com.example.boilerplate.member.dto.MemberDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -37,6 +39,9 @@ class MemberServiceTest {
   private static final String MEMBER_EMAIL_PREFIX = "tester";
   private static final String MEMBER_NAME_PREFIX = "테스터";
   private static final String MEMBER_PASSWORD = "password1!";
+
+  private static final String UPDATED_MEMBER_EMAIL = "tester2@example.com";
+  private static final String UPDATED_MEMBER_NAME = "테스터2";
 
   @Autowired
   private MemberService memberService;
@@ -65,18 +70,98 @@ class MemberServiceTest {
     @DisplayName("회원 목록 조회 성공")
     @Transactional
     @Test
-    void testGetMemberListSuccess() throws Exception {
+    void testGetMemberListSuccess() {
 
       // Given
-      MemberDto.Request memberRequest = MemberDto.Request.of(
-          MEMBER_EMAIL_PREFIX, MEMBER_NAME_PREFIX);
+      String memberEmail = MEMBER_EMAIL_PREFIX + "1";
+      String memberName = MEMBER_NAME_PREFIX + "1";
+      MemberDto.Request memberRequest = MemberDto.Request.of(memberEmail, memberName);
 
       // When
       List<MemberDto.Response> memberList = memberService.getMemberList(memberRequest);
 
       // Then
-      log.debug("memberList: {}", objectMapper.writeValueAsString(memberList));
       assertFalse(memberList.isEmpty());
+    }
+  }
+
+  @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+  @DisplayName("getPagedMemberList - 페이징이 적용된 회원 목록 조회")
+  @Nested
+  class TestGetPagedTodoList {
+
+    @BeforeEach
+    void setUp() {
+      setUpMemberList();
+      clearPersistenceContext();
+    }
+
+    @Order(1)
+    @DisplayName("페이징이 적용된 할 일 목록 조회")
+    @Transactional
+    @Test
+    void testGetPagedMemberListSuccess() {
+
+      // Given
+      MemberDto.PageRequest pageRequest = MemberDto.PageRequest.of(null, null, 1, 3, null);
+
+      // When
+      Page<MemberDto.Response> pageResult = memberService.getPagedMemberList(pageRequest);
+
+      // Then
+      assertAll(
+          () -> assertEquals(3, pageResult.getContent().size()),
+          () -> assertTrue(pageResult.getTotalElements() > 0),
+          () -> assertTrue(pageResult.getTotalPages() > 0)
+      );
+    }
+
+    @Order(2)
+    @DisplayName("페이징 및 정렬 조건이 포함된 회원 목록 조회")
+    @Transactional
+    @Test
+    void testGetPagedMemberListWithSorting() {
+
+      // Given
+      MemberDto.PageRequest pageRequest = MemberDto.PageRequest.of(null, null, 1, 3,
+          //List.of("email,desc", "name,desc"));
+          List.of("email,desc"));
+      //MemberDto.PageRequest pageRequest = MemberDto.PageRequest.of(null, null, 1, 3, null);
+
+      // When
+      Page<MemberDto.Response> pageResult = memberService.getPagedMemberList(pageRequest);
+
+      // Then
+      assertAll(
+          () -> assertEquals(3, pageResult.getContent().size()),
+          () -> assertTrue(pageResult.getTotalElements() > 0),
+          () -> assertTrue(pageResult.getTotalPages() > 0),
+          () -> assertTrue(pageResult.getContent().get(0).getEmail()
+              .compareTo(pageResult.getContent().get(1).getEmail()) >= 0)
+      );
+    }
+
+    @Order(3)
+    @DisplayName("잘못된 정렬 필드 요청 시 예외 발생")
+    @Transactional
+    @Test
+    void testGetPagedMemberListWithInvalidSortField() {
+
+      // Given
+      MemberDto.PageRequest pageRequest = MemberDto.PageRequest.of(null, null, 1, 3,
+          List.of("invalidField,desc"));
+
+      // When
+      ApiException apiException = assertThrows(
+          ApiException.class, () -> memberService.getPagedMemberList(pageRequest));
+
+      // Then
+      assertAll(
+          () -> assertEquals(ApiStatus.METHOD_ARGUMENT_NOT_VALID.getCode(),
+              apiException.getStatus().getCode()),
+          () -> assertEquals(ApiStatus.METHOD_ARGUMENT_NOT_VALID.getMessage(),
+              apiException.getStatus().getMessage())
+      );
     }
   }
 
@@ -89,18 +174,19 @@ class MemberServiceTest {
     @DisplayName("특정 회원 조회 성공")
     @Transactional
     @Test
-    void testGetMemberSuccess() throws Exception {
+    void testGetMemberSuccess() {
 
       // Given
-      Long memberId = saveMemberAndReturnId(MEMBER_EMAIL_PREFIX, MEMBER_NAME_PREFIX,
-          MEMBER_PASSWORD);
+      String uniqueId = UUID.randomUUID().toString().substring(0, 8);
+      String memberEmail = MEMBER_EMAIL_PREFIX + uniqueId;
+      String memberName = MEMBER_NAME_PREFIX + uniqueId;
+      Long memberId = saveMemberAndReturnId(memberEmail, memberName, MEMBER_PASSWORD);
       clearPersistenceContext();
 
       // When
       MemberDto.Response memberResponse = memberService.getMember(memberId);
 
       // Then
-      log.debug("memberResponse: {}", objectMapper.writeValueAsString(memberResponse));
       assertAll(
           () -> assertEquals(MEMBER_NAME_PREFIX, memberResponse.getName()),
           () -> assertEquals(MEMBER_EMAIL_PREFIX, memberResponse.getEmail())
@@ -117,8 +203,8 @@ class MemberServiceTest {
       Long notFoundId = 0L;
 
       // When
-      ApiException apiException = assertThrows(ApiException.class, () ->
-          memberService.getMember(notFoundId));
+      ApiException apiException = assertThrows(
+          ApiException.class, () -> memberService.getMember(notFoundId));
 
       // Then
       assertAll(
@@ -142,8 +228,11 @@ class MemberServiceTest {
     void testInsertMemberSuccess() {
 
       // Given
+      String uniqueId = UUID.randomUUID().toString().substring(0, 8);
+      String memberEmail = MEMBER_EMAIL_PREFIX + uniqueId;
+      String memberName = MEMBER_NAME_PREFIX + uniqueId;
       MemberDto.InsertRequest insertRequest = MemberDto.InsertRequest.of(
-          MEMBER_EMAIL_PREFIX, MEMBER_NAME_PREFIX, MEMBER_PASSWORD);
+          memberEmail, memberName, MEMBER_PASSWORD);
 
       // When
       MemberDto.Response memberResponse = memberService.insertMember(insertRequest);
@@ -164,10 +253,13 @@ class MemberServiceTest {
     void testInsertMemberEmailDuplicate() {
 
       // Given
-      saveMemberAndReturnId(MEMBER_EMAIL_PREFIX, MEMBER_NAME_PREFIX, MEMBER_PASSWORD);
+      String uniqueId = UUID.randomUUID().toString().substring(0, 8);
+      String memberEmail = MEMBER_EMAIL_PREFIX + uniqueId;
+      String memberName = MEMBER_NAME_PREFIX + uniqueId;
+      saveMemberAndReturnId(memberEmail, memberName, MEMBER_PASSWORD);
 
       MemberDto.InsertRequest duplicateRequest = MemberDto.InsertRequest.of(
-          MEMBER_EMAIL_PREFIX, MEMBER_NAME_PREFIX, MEMBER_PASSWORD);
+          memberEmail, memberName, MEMBER_PASSWORD);
 
       // When
       ApiException apiException = assertThrows(ApiException.class, () ->
@@ -195,12 +287,14 @@ class MemberServiceTest {
     void testUpdateMemberSuccess() {
 
       // Given
-      Long memberId = saveMemberAndReturnId(MEMBER_EMAIL_PREFIX, MEMBER_NAME_PREFIX,
-          MEMBER_PASSWORD);
+      String uniqueId = UUID.randomUUID().toString().substring(0, 8);
+      String memberEmail = MEMBER_EMAIL_PREFIX + uniqueId;
+      String memberName = MEMBER_NAME_PREFIX + uniqueId;
+      Long memberId = saveMemberAndReturnId(memberEmail, memberName, MEMBER_PASSWORD);
       clearPersistenceContext();
 
       MemberDto.UpdateRequest updateRequest = MemberDto.UpdateRequest.of(
-          memberId, MEMBER_EMAIL_PREFIX + "수정", MEMBER_NAME_PREFIX + "수정");
+          memberId, UPDATED_MEMBER_EMAIL, UPDATED_MEMBER_NAME);
 
       // When
       MemberDto.Response updatedResponse = memberService.updateMember(updateRequest);
@@ -282,12 +376,12 @@ class MemberServiceTest {
   @Disabled
   private void setUpMemberList() {
     for (int i = 1; i <= 5; i++) {
-      String email = "user" + i + "@example.com";
-      String name = "사용자 " + i;
+      String memberEmail = MEMBER_EMAIL_PREFIX + "_" + i + "@example.com";
+      String memberName = MEMBER_NAME_PREFIX + "_" + i;
       memberRepository.save(
           MemberEntity.builder()
-              .email(email)
-              .name(name)
+              .email(memberEmail)
+              .name(memberName)
               .password(MEMBER_PASSWORD)
               .build());
     }

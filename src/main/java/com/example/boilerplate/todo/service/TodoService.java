@@ -43,7 +43,7 @@ public class TodoService {
   }
 
   /**
-   * 페이징 처리된 할 일 목록 조회
+   * 페이징 적용된 할 일 목록 조회
    *
    * @param pageRequest 검색 및 페이징 조건
    * @return 할 일 목록
@@ -61,8 +61,7 @@ public class TodoService {
    */
   @Transactional(readOnly = true)
   public TodoDto.Response getTodo(Long id) {
-    TodoEntity todoEntity = todoRepository.findById(id)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiStatus.TODO_NOT_FOUND));
+    TodoEntity todoEntity = getTodoEntity(id);
     return modelMapper.map(todoEntity, TodoDto.Response.class);
   }
 
@@ -75,18 +74,14 @@ public class TodoService {
   @Transactional
   public TodoDto.Response insertTodo(TodoDto.InsertRequest insertTodoRequest) {
 
-    // 1. MemberEntity 조회: 없는 경우 예외 처리
     MemberEntity memberEntity = memberRepository.findById(insertTodoRequest.getMemberId())
         .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiStatus.MEMBER_NOT_FOUND));
 
-    // 2. InsertRequest -> TodoEntity 매핑
     TodoEntity todoEntity = modelMapper.map(insertTodoRequest, TodoEntity.class);
-    todoEntity.setMember(memberEntity); // Member 설정
+    todoEntity.setMemberId(memberEntity.getId());
 
-    // 3. TodoEntity 저장
     TodoEntity savedEntity = todoRepository.save(todoEntity);
 
-    // 4. 저장된 엔티티를 TodoDto.Response로 매핑하여 반환
     return modelMapper.map(savedEntity, TodoDto.Response.class);
   }
 
@@ -99,8 +94,7 @@ public class TodoService {
   @Transactional
   public TodoDto.Response updateTodo(TodoDto.UpdateRequest updateTodoRequest) {
 
-    TodoEntity todoEntity = todoRepository.findById(updateTodoRequest.getId())
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiStatus.TODO_NOT_FOUND));
+    TodoEntity todoEntity = getTodoEntity(updateTodoRequest.getId());
 
     if (StringUtils.hasText(updateTodoRequest.getTitle())) {
       todoEntity.setTitle(updateTodoRequest.getTitle());
@@ -124,23 +118,32 @@ public class TodoService {
    */
   @Transactional
   public TodoDto.Response deleteTodo(Long id) {
-    TodoEntity todoEntity = todoRepository.findById(id)
-        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiStatus.TODO_NOT_FOUND));
-    todoRepository.deleteById(id);
+    TodoEntity todoEntity = getTodoEntity(id);
+    todoRepository.delete(todoEntity);
     return modelMapper.map(todoEntity, TodoDto.Response.class);
   }
-
-  // TODO : 페이징 조회, 다이나믹 Entity
 
   /**
    * 할 일 완료 상태 변경
    *
-   * @param todoRequest 변경할 할 일 정보
+   * @param dynamicRequest 변경할 할 일 정보
    */
   @Transactional
-  public void updateTodoCompleted(TodoDto.Request todoRequest) {
-    TodoDynamicEntity todoDynamic = todoDynamicRepository.findById(todoRequest.getId())
+  public void updateTodoCompleted(TodoDto.DynamicRequest dynamicRequest) {
+    TodoDynamicEntity todoDynamic = todoDynamicRepository.findById(dynamicRequest.getId())
         .orElseThrow(() -> new ApiException(ApiStatus.TODO_NOT_FOUND));
-    todoDynamic.updateCompleted(todoRequest.getCompleted());
+    todoDynamic.updateCompleted(dynamicRequest.getCompleted());
+    todoDynamicRepository.save(todoDynamic);
+  }
+
+  /**
+   * 할 일 엔티티 조회
+   *
+   * @param todoId 할 일 아이디
+   * @return 할 일 엔티티
+   */
+  private TodoEntity getTodoEntity(Long todoId) {
+    return todoRepository.findById(todoId)
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiStatus.TODO_NOT_FOUND));
   }
 }

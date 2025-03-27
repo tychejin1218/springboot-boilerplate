@@ -140,7 +140,7 @@ class TodoQueryRepositoryTest {
   }
 
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-  @DisplayName("getPagedTodoList - 페이징 및 조건 검색 테스트")
+  @DisplayName("getPagedTodoList - 페이징이 적용된 할 일 목록 조회")
   @Nested
   class TestGetPagedTodoList {
 
@@ -151,7 +151,7 @@ class TodoQueryRepositoryTest {
     }
 
     @Order(1)
-    @DisplayName("페이징 조건이 포함된 할 일 목록 조회")
+    @DisplayName("페이징이 적용된 할 일 목록 조회")
     @Transactional
     @Test
     void testGetPagedTodoList() {
@@ -171,7 +171,7 @@ class TodoQueryRepositoryTest {
     }
 
     @Order(2)
-    @DisplayName("페이징 및 정렬 조건이 포함된 할 일 목록 조회")
+    @DisplayName("페이징 및 정렬 조건이 적용된 할 일 목록 조회")
     @Transactional
     @Test
     void testGetPagedTodoListWithSorting() {

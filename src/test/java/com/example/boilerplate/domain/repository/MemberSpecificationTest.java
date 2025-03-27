@@ -132,7 +132,7 @@ class MemberSpecificationTest {
     String description = "할 일 설명 " + index;
     boolean completed = index % 2 == 0;
     return TodoEntity.builder()
-        .member(MemberEntity.builder().id(memberId).build())
+        .memberId(memberId)
         .title(title)
         .description(description)
         .completed(completed)

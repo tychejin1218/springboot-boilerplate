@@ -88,21 +88,21 @@ public class MemberDto {
   @ToString(callSuper = true)
   public static class PageRequest extends PageDto {
 
-    private String name;
     private String email;
+    private String name;
 
-    public static MemberDto.PageRequest of(String name, String email) {
+    public static MemberDto.PageRequest of(String email, String name) {
       return MemberDto.PageRequest.builder()
-          .name(name)
           .email(email)
+          .name(name)
           .build();
     }
 
-    public static MemberDto.PageRequest of(String name, String email,
+    public static MemberDto.PageRequest of(String email, String name,
         int page, int size, List<String> sorts) {
       return MemberDto.PageRequest.builder()
-          .name(name)
           .email(email)
+          .name(name)
           .page(page)
           .size(size)
           .sorts(sorts)

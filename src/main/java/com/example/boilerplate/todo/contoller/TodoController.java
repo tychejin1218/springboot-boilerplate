@@ -69,7 +69,7 @@ public class TodoController implements TodoControllerDocs {
   /**
    * 특정 할 일 조회
    *
-   * @param id 할 일 ID
+   * @param id 할 일 아이디
    * @return 할 일 상세 정보
    */
   @GetMapping("/todo/{id}")
@@ -108,16 +108,16 @@ public class TodoController implements TodoControllerDocs {
   @Override
   public BaseResponse<TodoDto.Response> updateTodo(
       @RequestBody TodoDto.UpdateRequest updateTodoRequest) {
-    TodoDto.Response updatedTodo = todoService.updateTodo(updateTodoRequest);
-    redisComponent.deleteKey(Constants.BP_CACHE_PREFIX + TODO_CACHE_PREFIX + updatedTodo.getId());
+    TodoDto.Response todoResponse = todoService.updateTodo(updateTodoRequest);
+    redisComponent.deleteKey(Constants.BP_CACHE_PREFIX + TODO_CACHE_PREFIX + todoResponse.getId());
     redisComponent.deleteKey(Constants.BP_CACHE_PREFIX + TODO_LIST_CACHE_KEY);
-    return BaseResponse.ok(updatedTodo);
+    return BaseResponse.ok(todoResponse);
   }
 
   /**
    * 할 일 삭제
    *
-   * @param id 삭제할 할 일의 아이디
+   * @param id 삭제할 할 일 아이디
    * @return 삭제된 할 일 정보
    */
   @DeleteMapping("/todo/{id}")

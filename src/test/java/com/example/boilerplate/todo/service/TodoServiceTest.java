@@ -13,6 +13,7 @@ import com.example.boilerplate.todo.dto.TodoDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import java.util.List;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -67,81 +68,98 @@ class TodoServiceTest {
     }
 
     @Order(1)
-    @DisplayName("할 일 목록 조회 성공")
+    @DisplayName("할 일 목록 조회")
     @Transactional
     @Test
-    void testGetTodoListSuccess() throws Exception {
+    void testGetTodoList() {
 
       // Given
-      TodoDto.Request todoRequest = TodoDto.Request.of(TODO_TITLE_PREFIX, TODO_DESCRIPTION_PREFIX,
-          true);
+      String todoTitle = TODO_TITLE_PREFIX + "_1";
+      String todoDescription = TODO_DESCRIPTION_PREFIX + "_1";
+      TodoDto.Request todoRequest = TodoDto.Request.of(todoTitle, todoDescription, true);
 
       // When
       List<TodoDto.Response> todoList = todoService.getTodoList(todoRequest);
 
       // Then
-      log.debug("todoList: {}", objectMapper.writeValueAsString(todoList));
       assertFalse(todoList.isEmpty());
     }
   }
 
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-  @DisplayName("getPagedTodoList - 페이징 처리된 할 일 목록 조회")
+  @DisplayName("getPagedTodoList - 페이징이 적용된 할 일 목록 조회")
   @Nested
   class TestGetPagedTodoList {
 
-    @Order(1)
-    @DisplayName("페이징 처리된 할 일 목록 조회 성공")
-    @Transactional
-    @Test
-    void testGetPagedTodoListSuccess() throws Exception {
-
-      // Given
+    @BeforeEach
+    void setUp() {
       setUpTodoList();
       clearPersistenceContext();
+    }
 
-      int page = 0;
-      int size = 3;
-      TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(
-          TODO_TITLE_PREFIX, TODO_DESCRIPTION_PREFIX, true, page, size
-      );
+    @Order(1)
+    @DisplayName("페이징이 적용된 할 일 목록 조회")
+    @Transactional
+    @Test
+    void testGetPagedTodoListSuccess() {
+
+      // Given
+      TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(null, null, null, 1, 3);
 
       // When
-      Page<TodoDto.Response> pagedTodoList = todoService.getPagedTodoList(pageRequest);
+      Page<TodoDto.Response> pageResult = todoService.getPagedTodoList(pageRequest);
 
       // Then
-      log.debug("pagedTodoList: {}", objectMapper.writeValueAsString(pagedTodoList));
       assertAll(
-          () -> assertEquals(size, pagedTodoList.getSize()),
-          () -> assertTrue(pagedTodoList.stream().allMatch(TodoDto.Response::getCompleted))
+          () -> assertEquals(3, pageResult.getContent().size()),
+          () -> assertTrue(pageResult.getTotalElements() > 0),
+          () -> assertTrue(pageResult.getTotalPages() > 0)
       );
     }
 
     @Order(2)
-    @DisplayName("페이징 및 정렬 조건이 포함된 할 일 목록 조회 성공")
+    @DisplayName("페이징 및 정렬 조건이 포함된 할 일 목록 조회")
     @Transactional
     @Test
-    void testGetPagedTodoListWithSorting() throws Exception {
+    void testGetPagedTodoListWithSorting() {
 
       // Given
-      setUpTodoList();
-      clearPersistenceContext();
-
-      int page = 0;
-      int size = 3;
-      List<String> sorts = List.of("title,desc", "id,asc");
-      TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(
-          TODO_TITLE_PREFIX, TODO_DESCRIPTION_PREFIX, true, page, size, sorts
-      );
+      TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(null, null, true, 1, 3,
+          List.of("title,desc", "id,asc"));
 
       // When
-      Page<TodoDto.Response> pagedTodoList = todoService.getPagedTodoList(pageRequest);
+      Page<TodoDto.Response> pageResult = todoService.getPagedTodoList(pageRequest);
 
       // Then
-      log.debug("pagedTodoList: {}", objectMapper.writeValueAsString(pagedTodoList));
       assertAll(
-          () -> assertEquals(size, pagedTodoList.getSize()),
-          () -> assertTrue(pagedTodoList.stream().allMatch(TodoDto.Response::getCompleted))
+          () -> assertEquals(3, pageResult.getContent().size()),
+          () -> assertTrue(pageResult.getTotalElements() > 0),
+          () -> assertTrue(pageResult.getTotalPages() > 0),
+          () -> assertTrue(pageResult.getContent().get(0).getTitle()
+              .compareTo(pageResult.getContent().get(1).getTitle()) >= 0)
+      );
+    }
+
+    @Order(3)
+    @DisplayName("잘못된 정렬 필드 요청 시 예외 발생")
+    @Transactional
+    @Test
+    void testGetPagedTodoListWithInvalidSortField() {
+
+      // Given
+      TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(null, null, null, 1, 3,
+          List.of("invalidField,desc"));
+
+      // When
+      ApiException apiException = Assertions.assertThrows(
+          ApiException.class, () -> todoService.getPagedTodoList(pageRequest));
+
+      // Then
+      assertAll(
+          () -> assertEquals(ApiStatus.METHOD_ARGUMENT_NOT_VALID.getCode(),
+              apiException.getStatus().getCode()),
+          () -> assertEquals(ApiStatus.METHOD_ARGUMENT_NOT_VALID.getMessage(),
+              apiException.getStatus().getMessage())
       );
     }
   }
@@ -155,25 +173,27 @@ class TodoServiceTest {
     @DisplayName("특정 할 일 조회 성공")
     @Transactional
     @Test
-    void testGetTodoSuccess() throws Exception {
+    void testGetTodoSuccess() {
 
       // Given
-      Long todoId = saveTodoAndReturnId(TODO_TITLE_PREFIX, TODO_DESCRIPTION_PREFIX);
+      String uniqueId = UUID.randomUUID().toString().substring(0, 8);
+      String todoTitle = TODO_TITLE_PREFIX + uniqueId;
+      String todoDescription = TODO_DESCRIPTION_PREFIX + uniqueId;
+      long todoId = saveTodoAndReturnId(todoTitle, todoDescription);
       clearPersistenceContext();
 
       // When
       TodoDto.Response todoResponse = todoService.getTodo(todoId);
 
       // Then
-      log.debug("todoResponse: {}", objectMapper.writeValueAsString(todoResponse));
       assertAll(
-          () -> assertEquals(TODO_TITLE_PREFIX, todoResponse.getTitle()),
-          () -> assertEquals(TODO_DESCRIPTION_PREFIX, todoResponse.getDescription())
+          () -> assertEquals(todoTitle, todoResponse.getTitle()),
+          () -> assertEquals(todoDescription, todoResponse.getDescription())
       );
     }
 
     @Order(2)
-    @DisplayName("특정 할 일 조회 - 존재하지 않는 할 일 아이디로 조회 실패")
+    @DisplayName("존재하지 않는 할 일 아이디로 조회 실패")
     @Transactional
     @Test
     void testGetTodoNotFoundId() {
@@ -285,6 +305,59 @@ class TodoServiceTest {
   }
 
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+  @DisplayName("updateTodoCompleted - 할 일 완료 상태 변경")
+  @Nested
+  class TestUpdateTodoCompleted {
+
+    @Order(1)
+    @DisplayName("할 일 완료 상태 변경 성공")
+    @Transactional
+    @Test
+    void testUpdateTodoCompletedSuccess() {
+
+      // Given
+      TodoDto.Response existingTodoResponse = saveTodoAndReturnResponse(TODO_TITLE_PREFIX,
+          TODO_DESCRIPTION_PREFIX);
+      clearPersistenceContext();
+
+      TodoDto.DynamicRequest dynamicRequest = TodoDto.DynamicRequest.of(
+          existingTodoResponse.getId(), true);
+
+      // When
+      todoService.updateTodoCompleted(dynamicRequest);
+      clearPersistenceContext();
+
+      // Then
+      TodoEntity updatedTodo = todoRepository.findById(dynamicRequest.getId())
+          .orElseThrow(() -> new RuntimeException("Todo 수정 실패"));
+      assertTrue(updatedTodo.getCompleted());
+    }
+
+    @Order(2)
+    @DisplayName("존재하지 않는 할 일 ID로 완료 상태 변경 시 실패")
+    @Transactional
+    @Test
+    void testUpdateTodoCompletedNotFoundId() {
+
+      // Given
+      TodoDto.DynamicRequest dynamicRequest = TodoDto.DynamicRequest.of(0L, true);
+
+      // When
+      ApiException apiException = Assertions.assertThrows(
+          ApiException.class, () -> todoService.updateTodoCompleted(dynamicRequest)
+      );
+
+      // Then
+      assertAll(
+          () -> assertEquals(ApiStatus.TODO_NOT_FOUND.getCode(),
+              apiException.getStatus().getCode()),
+          () -> assertEquals(ApiStatus.TODO_NOT_FOUND.getMessage(),
+              apiException.getStatus().getMessage())
+      );
+    }
+  }
+
+  @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
   @DisplayName("deleteTodo - 할 일 삭제")
   @Nested
   class TestDeleteTodo {
@@ -337,8 +410,8 @@ class TodoServiceTest {
   @Disabled
   private void setUpTodoList() {
     for (int i = 1; i <= 10; i++) {
-      String title = TODO_TITLE_PREFIX + " " + i;
-      String description = TODO_DESCRIPTION_PREFIX + " " + i;
+      String title = TODO_TITLE_PREFIX + "_" + i;
+      String description = TODO_DESCRIPTION_PREFIX + "_" + i;
       boolean completed = i % 2 == 0;
       todoRepository.save(
           TodoEntity.builder()
