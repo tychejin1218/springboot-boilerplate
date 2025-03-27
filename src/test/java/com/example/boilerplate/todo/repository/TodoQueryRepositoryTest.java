@@ -225,7 +225,7 @@ class TodoQueryRepositoryTest {
 
   @Disabled
   private void setUpTodoList() {
-    for (int i = 1; i <= 10; i++) {
+    for (int i = 1; i < 10; i++) {
       String title = TODO_TITLE_PREFIX + "_" + i;
       String description = TODO_DESCRIPTION_PREFIX + "_" + i;
       boolean completed = i % 2 == 0;

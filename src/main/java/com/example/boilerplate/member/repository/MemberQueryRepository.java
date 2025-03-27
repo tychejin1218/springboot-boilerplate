@@ -6,6 +6,8 @@ import com.example.boilerplate.domain.entity.MemberEntity;
 import com.example.boilerplate.domain.entity.QMemberEntity;
 import com.example.boilerplate.domain.entity.QTodoEntity;
 import com.example.boilerplate.member.dto.MemberDto;
+import com.example.boilerplate.member.dto.MemberDto.Request;
+import com.example.boilerplate.member.dto.MemberDto.Response;
 import com.querydsl.core.BooleanBuilder;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -33,10 +35,10 @@ public class MemberQueryRepository {
   /**
    * 검색 조건에 따라 회원 목록을 조회하여 리스트로 반환
    *
-   * @param memberRequest 검색 조건이 포함된 {@link MemberDto.Request} 객체
-   * @return 회원 목록을 담은 {@link MemberDto.Response} 리스트
+   * @param memberRequest 검색 조건이 포함된 {@link Request} 객체
+   * @return 회원 목록을 담은 {@link Response} 리스트
    */
-  public List<MemberDto.Response> getMemberList(MemberDto.Request memberRequest) {
+  public List<Response> getMemberList(Request memberRequest) {
 
     QMemberEntity memberEntity = QMemberEntity.memberEntity;
     QTodoEntity todoEntity = QTodoEntity.todoEntity;

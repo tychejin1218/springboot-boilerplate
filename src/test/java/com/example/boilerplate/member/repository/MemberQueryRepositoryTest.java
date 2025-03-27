@@ -206,10 +206,9 @@ class MemberQueryRepositoryTest {
     @Test
     void testGetPagedMemberListWithSorting() {
 
-      // TODO : 정렬조건 테스트
       // Given
       MemberDto.PageRequest pageRequest = MemberDto.PageRequest.of(null, null, 1, 3,
-          List.of("name,desc"));
+          List.of("name,desc", "email,asc"));
 
       // When
       Page<MemberDto.Response> pageResult = memberQueryRepository.getPagedMemberList(pageRequest);
@@ -296,7 +295,7 @@ class MemberQueryRepositoryTest {
 
   @Disabled
   private void setUpMemberAndTodoList() {
-    for (int i = 1; i <= 10; i++) {
+    for (int i = 1; i < 10; i++) {
       String memberEmail = MEMBER_EMAIL_PREFIX + "_" + i + "@example.com";
       String memberName = MEMBER_NAME_PREFIX + "_" + i;
       memberRepository.save(MemberEntity.builder()
