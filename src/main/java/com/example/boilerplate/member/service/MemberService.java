@@ -33,7 +33,7 @@ public class MemberService {
    */
   @Transactional(readOnly = true)
   public List<MemberDto.Response> getMemberList(MemberDto.Request memberRequest) {
-    return memberQueryRepository.getMemberList(memberRequest);
+    return memberQueryRepository.selectMemberList(memberRequest);
   }
 
   /**
@@ -44,7 +44,7 @@ public class MemberService {
    */
   @Transactional(readOnly = true)
   public Page<MemberDto.Response> getPagedMemberList(MemberDto.PageRequest pageRequest) {
-    return memberQueryRepository.getPagedMemberList(pageRequest);
+    return memberQueryRepository.selectPagedMemberList(pageRequest);
   }
 
   /**

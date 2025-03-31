@@ -129,10 +129,10 @@ class TodoQueryRepositoryTest {
       // Given
       String todoTitle = TODO_TITLE_PREFIX + "_1";
       String todoDescription = TODO_DESCRIPTION_PREFIX + "_1";
-      TodoDto.Request request = TodoDto.Request.of(todoTitle, todoDescription, true);
+      TodoDto.Request todoRequest = TodoDto.Request.of(todoTitle, todoDescription, false);
 
       // When
-      List<TodoDto.Response> todoList = todoQueryRepository.selectTodoList(request);
+      List<TodoDto.Response> todoList = todoQueryRepository.selectTodoList(todoRequest);
 
       // Then
       assertFalse(todoList.isEmpty());

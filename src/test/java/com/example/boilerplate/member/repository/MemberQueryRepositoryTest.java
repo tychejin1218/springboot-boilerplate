@@ -57,9 +57,9 @@ class MemberQueryRepositoryTest {
   private EntityManager entityManager;
 
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-  @DisplayName("getMemberList - 회원 목록 조회")
+  @DisplayName("selectMemberList - 회원 목록 조회")
   @Nested
-  class TestGetMemberList {
+  class TestSelectMemberList {
 
     @BeforeEach
     void setUp() {
@@ -71,13 +71,13 @@ class MemberQueryRepositoryTest {
     @DisplayName("검색 조건 없이 회원 목록 조회")
     @Transactional
     @Test
-    void testGetMemberList() {
+    void testSelectMemberList() {
 
       // Given
       MemberDto.Request memberRequest = MemberDto.Request.builder().build();
 
       // When
-      List<MemberDto.Response> memberList = memberQueryRepository.getMemberList(memberRequest);
+      List<MemberDto.Response> memberList = memberQueryRepository.selectMemberList(memberRequest);
 
       // Then
       assertFalse(memberList.isEmpty());
@@ -87,14 +87,14 @@ class MemberQueryRepositoryTest {
     @DisplayName("이름 조건으로 회원 목록 조회")
     @Transactional
     @Test
-    void testGetMemberListByName() {
+    void testSelectMemberListByName() {
 
       // Given
       String memberName = MEMBER_NAME_PREFIX + "_1";
       MemberDto.Request memberRequest = MemberDto.Request.of(null, memberName);
 
       // When
-      List<MemberDto.Response> memberList = memberQueryRepository.getMemberList(memberRequest);
+      List<MemberDto.Response> memberList = memberQueryRepository.selectMemberList(memberRequest);
 
       // Then
       assertFalse(memberList.isEmpty());
@@ -104,14 +104,14 @@ class MemberQueryRepositoryTest {
     @DisplayName("이메일 조건으로 회원 목록 조회")
     @Transactional
     @Test
-    void testGetMemberListByEmail() {
+    void testSelectMemberListByEmail() {
 
       // Given
       String memberEmail = MEMBER_EMAIL_PREFIX + "_1";
       MemberDto.Request memberRequest = MemberDto.Request.of(memberEmail, null);
 
       // When
-      List<MemberDto.Response> memberList = memberQueryRepository.getMemberList(memberRequest);
+      List<MemberDto.Response> memberList = memberQueryRepository.selectMemberList(memberRequest);
 
       // Then
       assertFalse(memberList.isEmpty());
@@ -121,7 +121,7 @@ class MemberQueryRepositoryTest {
     @DisplayName("이름과 이메일 조건으로 회원 목록 조회")
     @Transactional
     @Test
-    void testGetMemberListByNameAndEmail() {
+    void testSelectMemberListByNameAndEmail() {
 
       // Given
       String memberEmail = MEMBER_EMAIL_PREFIX + "_1";
@@ -129,7 +129,7 @@ class MemberQueryRepositoryTest {
       MemberDto.Request memberRequest = MemberDto.Request.of(memberEmail, memberName);
 
       // When
-      List<MemberDto.Response> memberList = memberQueryRepository.getMemberList(memberRequest);
+      List<MemberDto.Response> memberList = memberQueryRepository.selectMemberList(memberRequest);
 
       // Then
       assertFalse(memberList.isEmpty());
@@ -139,13 +139,13 @@ class MemberQueryRepositoryTest {
     @DisplayName("존재하지 않는 이름으로 회원 목록 조회 시 빈 리스트 반환")
     @Transactional
     @Test
-    void testGetMemberListWithNonExistentName() {
+    void testSelectMemberListWithNonExistentName() {
 
       // Given
       MemberDto.Request memberRequest = MemberDto.Request.of(null, NON_EXISTENT_MEMBER_NAME);
 
       // When
-      List<MemberDto.Response> memberList = memberQueryRepository.getMemberList(memberRequest);
+      List<MemberDto.Response> memberList = memberQueryRepository.selectMemberList(memberRequest);
 
       // Then
       assertTrue(memberList.isEmpty());
@@ -155,13 +155,13 @@ class MemberQueryRepositoryTest {
     @DisplayName("존재하지 않는 이메일로 회원 목록 조회 시 빈 리스트 반환")
     @Transactional
     @Test
-    void testGetMemberListWithNonExistentEmail() {
+    void testSelectMemberListWithNonExistentEmail() {
 
       // Given
       MemberDto.Request memberRequest = MemberDto.Request.of(NON_EXISTENT_MEMBER_EMAIL, null);
 
       // When
-      List<MemberDto.Response> memberList = memberQueryRepository.getMemberList(memberRequest);
+      List<MemberDto.Response> memberList = memberQueryRepository.selectMemberList(memberRequest);
 
       // Then
       assertTrue(memberList.isEmpty());
@@ -169,9 +169,9 @@ class MemberQueryRepositoryTest {
   }
 
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-  @DisplayName("getPagedMemberList - 페이징이 적용된 회원 목록 조회")
+  @DisplayName("selectPagedMemberList - 페이징이 적용된 회원 목록 조회")
   @Nested
-  class TestGetPagedMemberList {
+  class TestSelectPagedMemberList {
 
     @BeforeEach
     void setUp() {
@@ -184,13 +184,14 @@ class MemberQueryRepositoryTest {
     @Transactional
     @Rollback()
     @Test
-    void testGetPagedMemberList() {
+    void testSelectPagedMemberList() {
 
       // Given
       MemberDto.PageRequest pageRequest = MemberDto.PageRequest.of(null, null, 0, 3, null);
 
       // When
-      Page<MemberDto.Response> pageResult = memberQueryRepository.getPagedMemberList(pageRequest);
+      Page<MemberDto.Response> pageResult = memberQueryRepository.selectPagedMemberList(
+          pageRequest);
 
       // Then
       assertAll(
@@ -204,14 +205,15 @@ class MemberQueryRepositoryTest {
     @DisplayName("페이징 및 정렬 조건이 적용된 회원 목록 조회")
     @Transactional
     @Test
-    void testGetPagedMemberListWithSorting() {
+    void testSelectPagedMemberListWithSorting() {
 
       // Given
       MemberDto.PageRequest pageRequest = MemberDto.PageRequest.of(null, null, 1, 3,
           List.of("name,desc", "email,asc"));
 
       // When
-      Page<MemberDto.Response> pageResult = memberQueryRepository.getPagedMemberList(pageRequest);
+      Page<MemberDto.Response> pageResult = memberQueryRepository.selectPagedMemberList(
+          pageRequest);
 
       // Then
       assertAll(
@@ -225,7 +227,7 @@ class MemberQueryRepositoryTest {
     @DisplayName("이름, 이메일 조건과 페이징 및 정렬이 적용된 포함된 회원 목록 조회")
     @Transactional
     @Test
-    void testGetPagedMemberListByNameAndEmailWithSorting() {
+    void testSelectPagedMemberListByNameAndEmailWithSorting() {
 
       // Given
       String memberEmail = MEMBER_EMAIL_PREFIX + "_1";
@@ -234,7 +236,8 @@ class MemberQueryRepositoryTest {
           .of(memberEmail, memberName, 1, 3, null);
 
       // When
-      Page<MemberDto.Response> pageResult = memberQueryRepository.getPagedMemberList(pageRequest);
+      Page<MemberDto.Response> pageResult = memberQueryRepository.selectPagedMemberList(
+          pageRequest);
 
       // Then
       assertAll(
@@ -248,13 +251,14 @@ class MemberQueryRepositoryTest {
     @DisplayName("존재하지 않는 페이지 요청 시 빈 페이지 반환")
     @Transactional
     @Test
-    void testGetPagedMemberListWithOutOfRangePage() {
+    void testSelectPagedMemberListWithOutOfRangePage() {
 
       // Given
       MemberDto.PageRequest pageRequest = MemberDto.PageRequest.of(null, null, 999, 3, null);
 
       // When
-      Page<MemberDto.Response> pageResult = memberQueryRepository.getPagedMemberList(pageRequest);
+      Page<MemberDto.Response> pageResult = memberQueryRepository.selectPagedMemberList(
+          pageRequest);
 
       // Then
       assertAll(
@@ -267,7 +271,7 @@ class MemberQueryRepositoryTest {
     @DisplayName("잘못된 정렬 필드 요청 시 예외 발생")
     @Transactional
     @Test
-    void testGetPagedMemberListWithInvalidSortField() {
+    void testSelectPagedMemberListWithInvalidSortField() {
 
       // Given
       MemberDto.PageRequest pageRequest = MemberDto.PageRequest.of(null, null, 1, 3,
@@ -275,7 +279,7 @@ class MemberQueryRepositoryTest {
 
       // When
       ApiException apiException = Assertions.assertThrows(
-          ApiException.class, () -> memberQueryRepository.getPagedMemberList(pageRequest));
+          ApiException.class, () -> memberQueryRepository.selectPagedMemberList(pageRequest));
 
       // Then
       assertAll(

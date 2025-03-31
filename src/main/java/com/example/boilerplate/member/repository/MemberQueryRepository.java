@@ -1,5 +1,6 @@
 package com.example.boilerplate.member.repository;
 
+import com.example.boilerplate.common.constants.Constants;
 import com.example.boilerplate.common.exception.ApiException;
 import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.domain.entity.MemberEntity;
@@ -38,7 +39,7 @@ public class MemberQueryRepository {
    * @param memberRequest 검색 조건이 포함된 {@link Request} 객체
    * @return 회원 목록을 담은 {@link Response} 리스트
    */
-  public List<Response> getMemberList(Request memberRequest) {
+  public List<Response> selectMemberList(Request memberRequest) {
 
     QMemberEntity memberEntity = QMemberEntity.memberEntity;
     QTodoEntity todoEntity = QTodoEntity.todoEntity;
@@ -59,6 +60,7 @@ public class MemberQueryRepository {
         .on(memberEntity.id.eq(todoEntity.memberId))
         .where(builder)
         .orderBy(memberEntity.id.desc())
+        .setHint(Constants.HIBERNATE_SQL_COMMENT, "MemberQueryRepository.getMemberList")
         .fetch();
 
     // Entity -> DTO 변환
@@ -71,7 +73,7 @@ public class MemberQueryRepository {
    * @param pageRequest 검색 조건 및 페이징 조건이 포함된 {@link MemberDto.PageRequest} 객체
    * @return 페이징 처리된 {@link MemberDto.Response}의 {@link Page} 객체
    */
-  public Page<MemberDto.Response> getPagedMemberList(MemberDto.PageRequest pageRequest) {
+  public Page<MemberDto.Response> selectPagedMemberList(MemberDto.PageRequest pageRequest) {
 
     QMemberEntity memberEntity = QMemberEntity.memberEntity;
     QTodoEntity todoEntity = QTodoEntity.todoEntity;
@@ -94,6 +96,7 @@ public class MemberQueryRepository {
         .offset(pageRequest.pageRequest().getOffset())
         .limit(pageRequest.pageRequest().getPageSize())
         .orderBy(toOrderSpecifiers(pageRequest, memberEntity))
+        .setHint(Constants.HIBERNATE_SQL_COMMENT, "MemberQueryRepository.getPagedMemberList")
         .fetch();
 
     // 총 개수 조회
@@ -103,6 +106,7 @@ public class MemberQueryRepository {
         .leftJoin(todoEntity)
         .on(memberEntity.id.eq(todoEntity.memberId))
         .where(builder)
+        .setHint(Constants.HIBERNATE_SQL_COMMENT, "MemberQueryRepository.getPagedMemberCount")
         .fetchOne();
 
     // Entity -> DTO 변환

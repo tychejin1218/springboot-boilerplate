@@ -82,7 +82,7 @@
   <springProfile name="logging-level-local">
     <!-- local 환경에서의 로그 레벨 설정 -->
     <property name="LOG_LEVEL_root" value="DEBUG"/>
-    <property name="LOG_LEVEL_com.daekyo.dl" value="DEBUG"/>
+    <property name="LOG_LEVEL_com.example.boilerplate" value="DEBUG"/>
     <property name="LOG_LEVEL_org.springframework" value="DEBUG"/>
     <property name="LOG_LEVEL_com.zaxxer.hikari" value="DEBUG"/>
     <property name="LOG_LEVEL_org.hibernate" value="DEBUG"/>
@@ -92,7 +92,7 @@
   <springProfile name="logging-level-dev">
     <!-- dev 환경에서의 로그 레벨 설정 -->
     <property name="LOG_LEVEL_root" value="DEBUG"/>
-    <property name="LOG_LEVEL_com.daekyo.dl" value="DEBUG"/>
+    <property name="LOG_LEVEL_com.example.boilerplate" value="DEBUG"/>
     <property name="LOG_LEVEL_org.springframework" value="DEBUG"/>
     <property name="LOG_LEVEL_com.zaxxer.hikari" value="INFO"/>
     <property name="LOG_LEVEL_org.hibernate" value="DEBUG"/>
@@ -102,7 +102,7 @@
   <springProfile name="logging-level-stg">
     <!-- stg 환경에서의 로그 레벨 설정 -->
     <property name="LOG_LEVEL_root" value="WARN"/>
-    <property name="LOG_LEVEL_com.daekyo.dl" value="INFO"/>
+    <property name="LOG_LEVEL_com.example.boilerplate" value="INFO"/>
     <property name="LOG_LEVEL_org.springframework" value="WARN"/>
     <property name="LOG_LEVEL_com.zaxxer.hikari" value="WARN"/>
     <property name="LOG_LEVEL_org.hibernate" value="WARN"/>
@@ -112,7 +112,7 @@
   <springProfile name="logging-level-prd">
     <!-- prd 환경에서의 로그 레벨 설정 -->
     <property name="LOG_LEVEL_root" value="INFO"/>
-    <property name="LOG_LEVEL_com.daekyo.dl" value="INFO"/>
+    <property name="LOG_LEVEL_com.example.boilerplate" value="INFO"/>
     <property name="LOG_LEVEL_org.springframework" value="INFO"/>
     <property name="LOG_LEVEL_com.zaxxer.hikari" value="ERROR"/>
     <property name="LOG_LEVEL_org.hibernate" value="ERROR"/>

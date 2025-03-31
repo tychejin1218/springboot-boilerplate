@@ -198,7 +198,7 @@ public class MainDataSourceConfig {
    */
   @Primary
   @Bean(DATASOURCE_PREFIX + "JpaProperties")
-  @ConfigurationProperties(prefix = DATASOURCE_PROPERTY_PREFIX + "jpa")
+  @ConfigurationProperties(prefix = DATASOURCE_PREFIX + ".jpa")
   public JpaProperties jpaProperties() {
     return new JpaProperties();
   }
