@@ -1,5 +1,6 @@
 package com.example.boilerplate.todo.repository;
 
+import com.example.boilerplate.common.constants.Constants;
 import com.example.boilerplate.common.exception.ApiException;
 import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.domain.entity.QMemberEntity;
@@ -36,7 +37,7 @@ public class TodoQueryRepository {
    * @param todoRequest 검색 조건이 포함된 {@link TodoDto.Request} 객체
    * @return 할 일 목록을 담은 {@link TodoDto.Response} 리스트
    */
-  public List<TodoDto.Response> getTodoList(TodoDto.Request todoRequest) {
+  public List<TodoDto.Response> selectTodoList(TodoDto.Request todoRequest) {
 
     QTodoEntity todoEntity = QTodoEntity.todoEntity;
     QMemberEntity memberEntity = QMemberEntity.memberEntity;
@@ -60,6 +61,7 @@ public class TodoQueryRepository {
         .on(todoEntity.memberId.eq(memberEntity.id))
         .where(builder)
         .orderBy(todoEntity.id.desc())
+        .setHint(Constants.HIBERNATE_SQL_COMMENT, "TodoQueryRepository.selectTodoList")
         .fetch();
 
     // Entity -> DTO 변환
@@ -72,7 +74,7 @@ public class TodoQueryRepository {
    * @param pageRequest 검색 조건 및 페이징 조건이 포함된 {@link TodoDto.PageRequest} 객체
    * @return 페이징 처리된 {@link TodoDto.Response}의 {@link Page} 객체
    */
-  public Page<TodoDto.Response> getPagedTodoList(TodoDto.PageRequest pageRequest) {
+  public Page<TodoDto.Response> selectPagedTodoList(TodoDto.PageRequest pageRequest) {
 
     QTodoEntity todoEntity = QTodoEntity.todoEntity;
     QMemberEntity memberEntity = QMemberEntity.memberEntity;
@@ -98,6 +100,7 @@ public class TodoQueryRepository {
         .offset(pageRequest.pageRequest().getOffset())
         .limit(pageRequest.pageRequest().getPageSize())
         .orderBy(toOrderSpecifiers(pageRequest, todoEntity))
+        .setHint(Constants.HIBERNATE_SQL_COMMENT, "TodoQueryRepository.selectPagedTodoList")
         .fetch();
 
     // 총 개수 조회
@@ -107,6 +110,7 @@ public class TodoQueryRepository {
         .leftJoin(memberEntity)
         .on(todoEntity.memberId.eq(memberEntity.id))
         .where(builder)
+        .setHint(Constants.HIBERNATE_SQL_COMMENT, "TodoQueryRepository.selectPagedTodoCount")
         .fetchOne();
 
     // Entity -> DTO 변환

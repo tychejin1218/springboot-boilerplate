@@ -45,4 +45,9 @@ public final class Constants {
    * 캐시 키 Prefix 값
    */
   public static final String BP_CACHE_PREFIX = "BP:";
+
+  /**
+   * Hibernate에서 SQL 쿼리에 주석을 추가하기 위해 사용되는 주석 키
+   */
+  public static final String HIBERNATE_SQL_COMMENT = "org.hibernate.comment";
 }

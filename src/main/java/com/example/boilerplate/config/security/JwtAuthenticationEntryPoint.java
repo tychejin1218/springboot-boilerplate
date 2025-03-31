@@ -16,6 +16,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
+  /**
+   * 인증 실패 시 호출되는 메서드
+   *
+   * @param request HttpServletRequest 객체
+   * @param response HttpServletResponse 객체
+   * @param authException 인증 예외 객체
+   * @throws IOException 입출력 예외
+   */
   @Override
   public void commence(
       HttpServletRequest request,

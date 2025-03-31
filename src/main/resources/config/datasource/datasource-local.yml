@@ -20,10 +20,9 @@ main:
     database-platform: org.hibernate.dialect.MySQL8Dialect
     properties:
       hibernate:
-        show-sql: true
-        format-sql: true
-        highlight-sql: true
-        use-sql-comments: true
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
 
 # Redis 설정
 redis:

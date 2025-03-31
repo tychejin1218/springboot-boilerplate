@@ -39,7 +39,7 @@ public class TodoService {
    */
   @Transactional(readOnly = true)
   public List<TodoDto.Response> getTodoList(TodoDto.Request todoRequest) {
-    return todoQueryRepository.getTodoList(todoRequest);
+    return todoQueryRepository.selectTodoList(todoRequest);
   }
 
   /**
@@ -50,7 +50,7 @@ public class TodoService {
    */
   @Transactional(readOnly = true)
   public Page<TodoDto.Response> getPagedTodoList(TodoDto.PageRequest pageRequest) {
-    return todoQueryRepository.getPagedTodoList(pageRequest);
+    return todoQueryRepository.selectPagedTodoList(pageRequest);
   }
 
   /**

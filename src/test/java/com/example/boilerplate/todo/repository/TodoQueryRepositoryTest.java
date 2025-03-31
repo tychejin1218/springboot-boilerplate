@@ -44,9 +44,9 @@ class TodoQueryRepositoryTest {
   private EntityManager entityManager;
 
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-  @DisplayName("getTodoList - 할 일 목록 조회")
+  @DisplayName("selectTodoList - 할 일 목록 조회")
   @Nested
-  class TestGetTodoList {
+  class TestSelectTodoList {
 
     @BeforeEach
     void setUp() {
@@ -58,13 +58,13 @@ class TodoQueryRepositoryTest {
     @DisplayName("검색 조건 없이 할 일 목록 조회")
     @Transactional
     @Test
-    void testGetTodoList() {
+    void testSelectTodoList() {
 
       // Given
       TodoDto.Request request = TodoDto.Request.builder().build();
 
       // When
-      List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(request);
+      List<TodoDto.Response> todoList = todoQueryRepository.selectTodoList(request);
 
       // Then
       assertFalse(todoList.isEmpty());
@@ -74,14 +74,14 @@ class TodoQueryRepositoryTest {
     @DisplayName("제목 조건으로 조회")
     @Transactional
     @Test
-    void testGetTodoListByTitle() {
+    void testSelectTodoListByTitle() {
 
       // Given
       String todoTitle = TODO_TITLE_PREFIX + "_1";
       TodoDto.Request todoRequest = TodoDto.Request.of(todoTitle, null, null);
 
       // When
-      List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(todoRequest);
+      List<TodoDto.Response> todoList = todoQueryRepository.selectTodoList(todoRequest);
 
       // Then
       assertFalse(todoList.isEmpty());
@@ -91,14 +91,14 @@ class TodoQueryRepositoryTest {
     @DisplayName("내용 조건으로 조회")
     @Transactional
     @Test
-    void testGetTodoListByDescription() {
+    void testSelectTodoListByDescription() {
 
       // Given
       String todoDescription = TODO_DESCRIPTION_PREFIX + "_1";
       TodoDto.Request todoRequest = TodoDto.Request.of(null, todoDescription, null);
 
       // When
-      List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(todoRequest);
+      List<TodoDto.Response> todoList = todoQueryRepository.selectTodoList(todoRequest);
 
       // Then
       assertFalse(todoList.isEmpty());
@@ -108,13 +108,13 @@ class TodoQueryRepositoryTest {
     @DisplayName("완료 여부 조건으로 조회")
     @Transactional
     @Test
-    void testGetTodoListByCompleted() {
+    void testSelectTodoListByCompleted() {
 
       // Given
       TodoDto.Request todoRequest = TodoDto.Request.of(null, null, true);
 
       // When
-      List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(todoRequest);
+      List<TodoDto.Response> todoList = todoQueryRepository.selectTodoList(todoRequest);
 
       // Then
       assertFalse(todoList.isEmpty());
@@ -124,7 +124,7 @@ class TodoQueryRepositoryTest {
     @DisplayName("제목, 설명, 완료 여부로 조회")
     @Transactional
     @Test
-    void testGetTodoListByTitleAndDescriptionAndCompleted() {
+    void testSelectTodoListByTitleAndDescriptionAndCompleted() {
 
       // Given
       String todoTitle = TODO_TITLE_PREFIX + "_1";
@@ -132,7 +132,7 @@ class TodoQueryRepositoryTest {
       TodoDto.Request request = TodoDto.Request.of(todoTitle, todoDescription, true);
 
       // When
-      List<TodoDto.Response> todoList = todoQueryRepository.getTodoList(request);
+      List<TodoDto.Response> todoList = todoQueryRepository.selectTodoList(request);
 
       // Then
       assertFalse(todoList.isEmpty());
@@ -140,9 +140,9 @@ class TodoQueryRepositoryTest {
   }
 
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-  @DisplayName("getPagedTodoList - 페이징이 적용된 할 일 목록 조회")
+  @DisplayName("selectPagedTodoList - 페이징이 적용된 할 일 목록 조회")
   @Nested
-  class TestGetPagedTodoList {
+  class TestSelectPagedTodoList {
 
     @BeforeEach
     void setUp() {
@@ -154,13 +154,13 @@ class TodoQueryRepositoryTest {
     @DisplayName("페이징이 적용된 할 일 목록 조회")
     @Transactional
     @Test
-    void testGetPagedTodoList() {
+    void testSelectPagedTodoList() {
 
       // Given
       TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(null, null, null, 1, 3, null);
 
       // When
-      Page<Response> pageResult = todoQueryRepository.getPagedTodoList(pageRequest);
+      Page<Response> pageResult = todoQueryRepository.selectPagedTodoList(pageRequest);
 
       // Then
       assertAll(
@@ -174,14 +174,14 @@ class TodoQueryRepositoryTest {
     @DisplayName("페이징 및 정렬 조건이 적용된 할 일 목록 조회")
     @Transactional
     @Test
-    void testGetPagedTodoListWithSorting() {
+    void testSelectPagedTodoListWithSorting() {
 
       // Given
       TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(null, null, null, 1, 3,
           List.of("title,desc", "id,asc"));
 
       // When
-      Page<TodoDto.Response> pageResult = todoQueryRepository.getPagedTodoList(pageRequest);
+      Page<TodoDto.Response> pageResult = todoQueryRepository.selectPagedTodoList(pageRequest);
 
       // Then
       assertAll(
@@ -197,7 +197,7 @@ class TodoQueryRepositoryTest {
     @DisplayName("잘못된 정렬 필드 요청 시 예외 발생")
     @Transactional
     @Test
-    void testGetPagedTodoListWithInvalidSortField() {
+    void testSelectPagedTodoListWithInvalidSortField() {
 
       // Given
       TodoDto.PageRequest pageRequest = TodoDto.PageRequest.of(null, null, null, 1, 3,
@@ -205,7 +205,7 @@ class TodoQueryRepositoryTest {
 
       // When
       ApiException apiException = Assertions.assertThrows(
-          ApiException.class, () -> todoQueryRepository.getPagedTodoList(pageRequest));
+          ApiException.class, () -> todoQueryRepository.selectPagedTodoList(pageRequest));
 
       // Then
       assertAll(

@@ -16,6 +16,14 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class JwtAccessDeniedHandler implements AccessDeniedHandler {
 
+  /**
+   * 권한 거부 시 호출되는 메서드
+   *
+   * @param request HttpServletRequest 객체
+   * @param response HttpServletResponse 객체
+   * @param accessDeniedException 권한 거부 예외 객체
+   * @throws IOException 입출력 예외
+   */
   @Override
   public void handle(
       HttpServletRequest request,
