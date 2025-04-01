@@ -86,9 +86,10 @@ class TodoControllerTest {
   }
 
   private String getToken() {
-    SignDto.Response signResponse = signService.signIn(
-        SignDto.Request.of(MEMBER_EMAIL, MEMBER_PASSWORD));
-    return signResponse.getToken();
+    SignDto.SignInResponse signInResponse = signService.signIn(
+        SignDto.SignInRequest.of(MEMBER_EMAIL, MEMBER_PASSWORD)
+    );
+    return signInResponse.getToken();
   }
 
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

@@ -5,13 +5,12 @@ import com.example.boilerplate.common.type.ApiStatus;
 import com.example.boilerplate.config.security.JwtTokenProvider;
 import com.example.boilerplate.domain.entity.MemberEntity;
 import com.example.boilerplate.domain.repository.MemberRepository;
-import com.example.boilerplate.member.dto.MemberDto;
 import com.example.boilerplate.sign.dto.SignDto;
-import com.example.boilerplate.sign.dto.SignDto.Response;
 import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -28,38 +27,38 @@ public class SignService {
   /**
    * 회원가입
    *
-   * @param memberRequest 회원 요청 정보가 포함된 MemberDto.Request 객체
-   * @return MemberDto.Response 회원 응답 정보가 포함된 객체
+   * @param signUpRequest 회원가입 요청 정보 (이메일, 이름, 비밀번호)
+   * @return 회원 정보를 반환
    */
-  public MemberDto.Response signUp(MemberDto.Request memberRequest) {
+  public SignDto.SignUpResponse signUp(SignDto.SignUpRequest signUpRequest) {
 
-    if (memberRepository.findByEmail(memberRequest.getEmail()).isPresent()) {
+    if (memberRepository.findByEmail(signUpRequest.getEmail()).isPresent()) {
       throw new ApiException(ApiStatus.ALREADY_EXISTS_EMAIL);
     }
 
-    MemberEntity memberEntity = modelMapper.map(memberRequest, MemberEntity.class);
-    memberEntity.setPassword(passwordEncoder.encode(memberRequest.getPassword()));
+    MemberEntity memberEntity = modelMapper.map(signUpRequest, MemberEntity.class);
+    memberEntity.setPassword(passwordEncoder.encode(signUpRequest.getPassword()));
     memberEntity.setRole("ROLE_USER");
 
-    return modelMapper.map(memberRepository.save(memberEntity), MemberDto.Response.class);
+    return modelMapper.map(memberRepository.save(memberEntity), SignDto.SignUpResponse.class);
   }
 
   /**
    * 로그인
    *
-   * @param signRequest 로그인 요청 정보가 포함된 SignDto.Request 객체
-   * @return SignDto.Response 로그인 응답 정보가 포함된 객체
+   * @param signInRequest 로그인 요청 정보 (이메일, 비밀번호)
+   * @return JWT 인증 토큰을 반환
    */
-  public SignDto.Response signIn(SignDto.Request signRequest) {
+  public SignDto.SignInResponse signIn(SignDto.SignInRequest signInRequest) {
 
-    MemberEntity member = memberRepository.findByEmail(signRequest.getEmail())
-        .orElseThrow(() -> new ApiException(ApiStatus.INVALID_REQUEST));
+    MemberEntity member = memberRepository.findByEmail(signInRequest.getEmail())
+        .orElseThrow(() -> new ApiException(HttpStatus.NOT_FOUND, ApiStatus.MEMBER_NOT_FOUND));
 
-    if (!passwordEncoder.matches(signRequest.getPassword(), member.getPassword())) {
-      throw new ApiException(ApiStatus.INVALID_REQUEST);
+    if (!passwordEncoder.matches(signInRequest.getPassword(), member.getPassword())) {
+      throw new ApiException(HttpStatus.BAD_REQUEST, ApiStatus.INVALID_REQUEST);
     }
 
-    return Response.builder()
+    return SignDto.SignInResponse.builder()
         .token(jwtTokenProvider.createToken(
             member.getEmail(),
             Arrays.stream(member.getRole().split(",")).toList()))

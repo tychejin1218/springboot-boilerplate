@@ -64,6 +64,7 @@ class MemberControllerTest {
   private static final String PATH_DATA_ID = "$.data.id";
   private static final String PATH_DATA_EMAIL = "$.data.email";
   private static final String PATH_DATA_NAME = "$.data.name";
+  private static final String PATH_DATA_ROLE = "$.data.role";
 
   @Autowired
   private MockMvc mockMvc;
@@ -88,10 +89,10 @@ class MemberControllerTest {
   }
 
   private String getToken() {
-    SignDto.Response signResponse = signService.signIn(
-        SignDto.Request.of(MEMBER_EMAIL_ADMIN, MEMBER_PASSWORD_ADMIN)
+    SignDto.SignInResponse signInResponse = signService.signIn(
+        SignDto.SignInRequest.of(MEMBER_EMAIL_ADMIN, MEMBER_PASSWORD_ADMIN)
     );
-    return signResponse.getToken();
+    return signInResponse.getToken();
   }
 
   @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
